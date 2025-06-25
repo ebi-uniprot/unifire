@@ -46,7 +46,6 @@ public class UniFireApp {
     private static final InputType DEFAULT_INPUT_TYPE = InputType.INTERPROSCAN_XML;
     private static final OutputFormat DEFAULT_OUTPUT_FORMAT = OutputFormat.ANNOTATION_TSV;
     private static final Integer DEFAULT_CHUNK_SIZE = 1000;
-    private static final Integer DEFAULT_MAX_MEMORY = 4096;
     private static final String USAGE_SEPARATOR = StringUtils.repeat("-", 44);
 
     public static void main(String[] args) throws Exception {

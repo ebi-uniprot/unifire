@@ -72,7 +72,7 @@ class UniFireAppFailureCasesIntegrationTests {
         String expectedSystemOut =
                 "--------------------------------------------\n" +
                 "usage: unifire -i <INPUT_FILE> -o <OUTPUT_FILE> -r <RULE_URML_FILE> [-f <OUTPUT_FORMAT>] [-n\n" +
-                "       <INPUT_CHUNK_SIZE>] [-s <INPUT_SOURCE>] [-t <TEMPLATE_FACTS>] [-m <MAX_MEMORY>] [-h]\n" +
+                "       <INPUT_CHUNK_SIZE>] [-s <INPUT_SOURCE>] [-t <TEMPLATE_FACTS>] [-h]\n" +
                 "--------------------------------------------\n" +
                 "     -i,--input <INPUT_FILE>                Input file (path) containing the proteins to annotate\n" +
                 "                                            and required data, in the format specified by the -s\n" +
@@ -95,8 +95,6 @@ class UniFireAppFailureCasesIntegrationTests {
                 "                                            (default: InterProScan).\n" +
                 "     -t,--templates <TEMPLATE_FACTS>        UniRule template sequence matches, provided by UniProt\n" +
                 "                                            (format: Fact Model XML).\n" +
-                "     -m <MAX_MEMORY>                        Max size of the memory allocation pool in MB (JVM -Xmx)\n" +
-                "                                            (default: 4096 MB).\n" +
                 "     -h,--help                              Print this usage.\n" +
                 "--------------------------------------------";
         assertThat(outputStreamCaptor.toString().trim(), containsString(expectedSystemOut));
