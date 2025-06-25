@@ -36,4 +36,4 @@ RUN /opt/scripts/bin/download-unifire.sh
 RUN mkdir /volume
 VOLUME /volume
 
-CMD /opt/scripts/bin/unifire-workflow.sh
+ENTRYPOINT ["/opt/scripts/bin/unifire-workflow.sh"]
