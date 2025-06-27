@@ -32,7 +32,7 @@ git clone https://gitlab.ebi.ac.uk/uniprot-public/unifire.git
 
 ### Prerequisites
 #### Hardware
-A machine with at least 4 GB of memory (8 GB or more recommended) and ~100 GB of available disk space.
+A machine with at least 8 GB of memory (16 GB or more recommended) and ~100 GB of available disk space.
 
 #### Operating system support
 The Docker image is expected to run on any operating system 
@@ -63,6 +63,16 @@ The only input data that need to be provided are the protein sequence data in mu
     * OG=`{gene location(s), comma-separated if multiple}` ([cf. organelle ontology](https://www.ebi.ac.uk/ena/WebFeat/qualifiers/organelle.html))
 
 ### Usage
+Running UniFIRE can de done either by using the provided script `run_unifire_docker.sh` or by using the
+ command line interface of Docker directly. The script is a wrapper around the Docker command line interface and
+  provides some additional features like automatic cleanup of temporary files.
+
+**Warning:** The first time this command is run, it will download the ~25 GB large UniFIRE Docker image from the
+docker container registry and extract it on the local machine. Depending on the speed of your network and your CPU
+this can take a few hours.
+
+**A) Using the wrapper script:**
+
 ```
 usage: ./docker/bin/run_unifire_docker.sh -i <INPUT_FILE> -o <OUTPUT_FOLDER> [-t <FILE_TYPE>] [-v <VERSION>] [-w <WORKING_FOLDER] [-c]
           [-s docker|singularity|podman]
@@ -87,11 +97,32 @@ usage: ./docker/bin/run_unifire_docker.sh -i <INPUT_FILE> -o <OUTPUT_FOLDER> [-t
         podman: Use Podman to run UniFIRE Docker image
 ```
 
-### Example
+**B) Using the container command directly:**
 
-**Warning:** The first time this command is run, it will download the ~25 GB large UniFIRE Docker image from the
-docker container registry and extract it on the local machine. Depending on the speed of your network and your CPU
-this can take a few hours.
+Directly run the UniFIRE Docker image entrypoint script, with any provided arguments.
+```
+Usage: unifire-workflow.sh [options]
+Options:
+  -i FILE       Input FASTA or InterProScan XML file (required)
+  -t TYPE       Input type: options are fasta or iprscanxml (required)
+                Default to fasta if input file name ends with '.fasta' or '.fa', and to iprscanxml if it ends with '.xml'.
+                When none of -i and -t are provided, the script will look for following file names in the output directory:
+                - proteins-ipr.xml: if exists, then it is used as input and type is set to iprscanxml.
+                - proteins.fasta:   if exists, then it is used as input and type is set to fasta.
+  -s SYSTEM     AA system to run predictions for: options [unirule,arba,pirsr] (default is all systems).
+                Multiple systems can be selected using comma to separate them (e.g., -s unirule,arba).
+  -n N          Proteins chunk size (default: 500)
+  -o DIR        Output directory (required) - default is "/volume"
+  -h            Show this help
+Examples:
+  unifire-workflow.sh -i proteins.fasta -t fasta -n 500 -o /volume
+  unifire-workflow.sh -i proteins-ipr.xml -t iprscanxml -s unirule,arba -n 1000 -o /volume
+  unifire-workflow.sh (without options) - will look for default files in the /volume output directory and run all systems.
+
+Note that input and output directories must be mounted in the container.
+```
+
+### Example
 
 ### 1) Fasta input file:
 
@@ -111,15 +142,21 @@ predictions_unirule-pirsr.out
 predictions_arba.out
 ```
 
+_To run directly with docker, you can use the following command:_
+
+```bash
+docker run --rm --mount type=bind,source=$(pwd)/samples,target=/volume dockerhub.ebi.ac.uk/uniprot-public/unifire:<version> -i /volume/proteins.fasta -o /volume
+```
+
 ### 2) InterProScan input file:
 
 This is a simple example, which shows how to use the UniFIRE Docker image to run UniFIRE workflow on some
 sample interproscan xml data.
 
 ```bash
-./docker/bin/run_unifire_docker.sh -i samples/input_ipr.fasta.xml -t iprscanxml -o .
+./docker/bin/run_unifire_docker.sh -i samples/input_ipr.xml -t iprscanxml -o .
 ```
-This command will use as input the file samples/input_ipr.fasta.xml which is in InterProScan xml format with the xref 
+This command will use as input the file samples/input_ipr.xml which is in InterProScan xml format with the xref 
 name attribute in the format as described above (same fasta header format). It will skip the interproscan step (as it is already given as input) and
 run the remaining UniFIRE workflow to predict functional annotations from UniRule and ARBA rules. The resulting 
 functional predictions will be written into these files in the current working directory:
@@ -127,6 +164,12 @@ functional predictions will be written into these files in the current working d
 predictions_unirule.out
 predictions_unirule-pirsr.out
 predictions_arba.out
+```
+
+_To run directly with docker, you can use the following command:_
+
+```bash
+docker run --rm --mount type=bind,source=$(pwd)/samples,target=/volume dockerhub.ebi.ac.uk/uniprot-public/unifire:<version> -i /volume/input_ipr.xml -t iprscanxml -o /volume
 ```
 
 ### Runtime
@@ -186,7 +229,7 @@ predictions_arba.out
 
 #### Hardware
 
-A machine with at least 4 GB of memory (8 GB or more recommended).
+A machine with at least 8 GB of memory (16 GB or more recommended).
 
 #### Operating system support
 
@@ -221,7 +264,7 @@ We provide some sample files in the [sample](samples) folder to test the softwar
 
 **Example with UniRule rules & InterProScan XML input:**
 ``` bash
-./distribution/bin/unifire.sh -r samples/unirule-urml-latest.xml -i samples/input_ipr.fasta.xml -t samples/unirule-templates-latest.xml -o output_unirule_annotations.csv
+./distribution/bin/unifire.sh -r samples/unirule-urml-latest.xml -i samples/input_ipr.xml -t samples/unirule-templates-latest.xml -o output_unirule_annotations.csv
 ```
 
 *Note: To be able to predict the UniRule positional annotations, a template file is provided (`samples/unirule-templates-2018_05.xml`) (optional.)*
@@ -263,7 +306,7 @@ _Note_: With all rule systems, it is possible that a protein gets the exact same
 
 ```
 usage: unifire -i <INPUT_FILE> -o <OUTPUT_FILE> -r <RULE_URML_FILE> [-f <OUTPUT_FORMAT>] [-n
-       <INPUT_CHUNK_SIZE>] [-s <INPUT_SOURCE>] [-t <TEMPLATE_FACTS>] [-m <MAX_MEMORY>] [-h]
+       <INPUT_CHUNK_SIZE>] [-s <INPUT_SOURCE>] [-t <TEMPLATE_FACTS>] [-h]
 --------------------------------------------
      -i,--input <INPUT_FILE>                Input file (path) containing the proteins to annotate
                                             and required data, in the format specified by the -s
@@ -286,8 +329,6 @@ usage: unifire -i <INPUT_FILE> -o <OUTPUT_FILE> -r <RULE_URML_FILE> [-f <OUTPUT_
                                             (default: InterProScan).
      -t,--templates <TEMPLATE_FACTS>        UniRule template sequence matches, provided by UniProt
                                             (format: Fact Model XML).
-     -m <MAX_MEMORY>                        Max size of the memory allocation pool in MB (JVM -Xmx)
-                                            (default: 4096 MB).
      -h,--help                              Print this usage.
 ```
 
@@ -402,6 +443,7 @@ Command:
 * PIRSF
 * PANTHER
 * SUPERFAMILY
+* FunFam
 
 It is possible to include/exclude some of the analyses by modifying the `--appl` option in the above command. UniFIRE will still be able to process the data. 
 By excluding some of those analyses, some rules might not be triggered as a result.
@@ -474,7 +516,7 @@ This tool translates the URML rules into the Drools language, converts the input
 A minimum of 8 GB of memory is recommended for this software to run. By default, the JVM max heap space is configured to use 75% of the available memory. 
 For a large number of protein to process, it is advised to split them into chunks of approx. 500 proteins per rule evaluation to keep the memory usage low.
 This is automatically handled by the `-n / --chunksize` option of UniFIRE (by default 500).  
-In case you face OOM heap space memory errors, try to manually split the input file into smaller chunks, or use a machine with more memory.
+In case you face OOM heap space memory errors, try to either use a smaller chunksize (-n option) or manually split the input file into smaller chunks.
 
 ### Java 9 / 10 issues
 
