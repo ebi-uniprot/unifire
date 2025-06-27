@@ -32,7 +32,10 @@ git clone https://gitlab.ebi.ac.uk/uniprot-public/unifire.git
 
 ### Prerequisites
 #### Hardware
-A machine with at least 8 GB of memory (16 GB or more recommended) and ~100 GB of available disk space.
+A machine with 24 GB or more and ~100 GB of available disk space is recommended.
+
+> **Note:** Starting from UniFIRE version 2025.3, minimum memory requirement has increased to about 24 GB, because of the large increase in the number of ARBA rules.
+> Using older versions of UniFIRE requires less memory.
 
 #### Operating system support
 The Docker image is expected to run on any operating system 
@@ -229,7 +232,7 @@ predictions_arba.out
 
 #### Hardware
 
-A machine with at least 8 GB of memory (16 GB or more recommended).
+A machine with 24 GB or more is recommended.
 
 #### Operating system support
 
@@ -513,7 +516,7 @@ This tool translates the URML rules into the Drools language, converts the input
 ## Limitations
 
 ### Memory
-A minimum of 8 GB of memory is recommended for this software to run. By default, the JVM max heap space is configured to use 75% of the available memory. 
+A minimum of 24 GB of memory is recommended for this software to run. By default, the JVM max heap space is configured to use 75% of the available memory. 
 For a large number of protein to process, it is advised to split them into chunks of approx. 500 proteins per rule evaluation to keep the memory usage low.
 This is automatically handled by the `-n / --chunksize` option of UniFIRE (by default 500).  
 In case you face OOM heap space memory errors, try to either use a smaller chunksize (-n option) or manually split the input file into smaller chunks.
