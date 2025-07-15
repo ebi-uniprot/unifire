@@ -217,7 +217,6 @@ function run_workflow() {
   fi
 
   # UniFIRE on ARBA rules
-  # UniFIRE on ARBA rules
   if [[ -v input_systems_map["arba"] ]]; then
     echo "Running rules inference on ARBA..."
     ${UNIFIRE_SCRIPT} -n ${CHUNK_SIZE} -r ${ARBA_RULES} -i ${IPRSCAN_LINEAGE_FILE} -o ${ARBA_OUT_FILE}
