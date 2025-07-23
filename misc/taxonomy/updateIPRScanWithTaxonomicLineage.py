@@ -26,10 +26,7 @@ class TaxonomyEnricher:
     REGEX_OX = re.compile(r'(OX=)(\d+)')
 
     def __init__(self, taxadb=None):
-        if taxadb is None:
-            self.ncbi = NCBITaxa()
-        else:
-            self.ncbi = NCBITaxa(dbfile=arguments.taxadb)
+        self.ncbi = NCBITaxa(dbfile=taxadb)
 
         # Cache for tax_id to lineage lookups
         self.taxId_to_lineage = {}

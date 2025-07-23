@@ -46,7 +46,6 @@ public class UniFireApp {
     private static final InputType DEFAULT_INPUT_TYPE = InputType.INTERPROSCAN_XML;
     private static final OutputFormat DEFAULT_OUTPUT_FORMAT = OutputFormat.ANNOTATION_TSV;
     private static final Integer DEFAULT_CHUNK_SIZE = 1000;
-    private static final Integer DEFAULT_MAX_MEMORY = 4096;
     private static final String USAGE_SEPARATOR = StringUtils.repeat("-", 44);
 
     public static void main(String[] args) throws Exception {
@@ -61,7 +60,6 @@ public class UniFireApp {
         Option outputFormatOption = Option.builder("f").longOpt("output-format").hasArg().argName("OUTPUT_FORMAT").desc("Output file format. Supported formats are:\n" + prettyPrint(OutputFormat.values(), DEFAULT_OUTPUT_FORMAT) + ".").type(String.class).build();
         Option templateFileOption = Option.builder("t").longOpt("templates").hasArg().argName("TEMPLATE_FACTS").desc("UniRule template sequence matches, provided by UniProt (format: Fact Model XML).").type(File.class).build();
         Option inputChunkSizeOption = Option.builder("n").longOpt("chunksize").hasArg().argName("INPUT_CHUNK_SIZE").desc("Chunk size (number of proteins) to be batch processed simultaneously \n(default: " + DEFAULT_CHUNK_SIZE + ").").type(Integer.class).build();
-        Option memoryOption = Option.builder("m").hasArg().argName("MAX_MEMORY").desc("Max size of the memory allocation pool in MB (JVM -Xmx) \n(default: " + DEFAULT_MAX_MEMORY + " MB).").type(Integer.class).build();
         Option helpOption = Option.builder("h").longOpt("help").desc("Print this usage.").build();
 
         options.addOption(ruleFileOption);
@@ -71,7 +69,6 @@ public class UniFireApp {
         options.addOption(outputFormatOption);
         options.addOption(templateFileOption);
         options.addOption(inputChunkSizeOption);
-        options.addOption(memoryOption);
         options.addOption(helpOption);
 
         UniFireRunner uniFireRunner;
