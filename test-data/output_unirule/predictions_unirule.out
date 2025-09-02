@@ -1,0 +1,30 @@
+Evidence	ProteinId	AnnotationType	Value	Start	End
+UR000084156	A0A009EAR0	comment.catalytic_activity	Reaction=(S)-4-amino-5-oxopentanoate = 5-aminolevulinate; Xref=Rhea:RHEA:14265, ChEBI:CHEBI:57501, ChEBI:CHEBI:356416; EC=5.4.3.8;		
+UR000084156	A0A009EAR0	comment.cofactor	Name=pyridoxal 5'-phosphate; Xref=ChEBI:CHEBI:597326		
+UR000000539	A0A009EAR0	comment.similarity	Belongs to the class-III pyridoxal-phosphate-dependent aminotransferase family		
+UR000084156	A0A009EAR0	comment.similarity	Belongs to the class-III pyridoxal-phosphate-dependent aminotransferase family. HemL subfamily		
+UR000084156	A0A009EAR0	comment.subcellular_location	Cytoplasm		
+UR000084156	A0A009EAR0	comment.subunit	Homodimer		
+UR000084156	A0A009EAR0	gene.name.primary	hemL		
+UR000084156	A0A009EAR0	keyword	Cytoplasm		
+UR000084156	A0A009EAR0	keyword	Isomerase		
+UR000084156	A0A009EAR0	keyword	Porphyrin biosynthesis		
+UR000084156	A0A009EAR0	keyword	Pyridoxal phosphate		
+UR000000539	A0A009EAR0	keyword	Pyridoxal phosphate		
+UR000084156	A0A009EAR0	protein.alternativeName.fullName	Glutamate-1-semialdehyde aminotransferase		
+UR000084156	A0A009EAR0	protein.alternativeName.shortName	GSA-AT		
+UR000084156	A0A009EAR0	protein.recommendedName.ecNumber	5.4.3.8		
+UR001995901	A0A009EAR0	protein.recommendedName.ecNumber	5.4.3.8		
+UR000084156	A0A009EAR0	protein.recommendedName.fullName	Glutamate-1-semialdehyde 2,1-aminomutase		
+UR001995901	A0A009EAR0	protein.recommendedName.fullName	Glutamate-1-semialdehyde 2,1-aminomutase		
+UR000084156	A0A009EAR0	protein.recommendedName.shortName	GSA		
+UR000084156	A0A009EAR0	xref.GO	GO:0005737		
+UR001995901	A0A009EAR0	xref.GO	GO:0005737		
+UR001995901	A0A009EAR0	xref.GO	GO:0006779		
+UR000084156	A0A009EAR0	xref.GO	GO:0006782		
+UR001995901	A0A009EAR0	xref.GO	GO:0042286		
+UR000084156	A0A009EAR0	xref.GO	GO:0042286		
+UR000084156	A0A009EAR0	feature.MOD_RES	N6-(pyridoxal phosphate)lysine	270	270
+UR000413283	J0U7L2	keyword	Heme		
+UR000413283	J0U7L2	keyword	Iron		
+UR000413283	J0U7L2	keyword	Metal-binding		

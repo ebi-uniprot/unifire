@@ -1,0 +1,15 @@
+Evidence	ProteinId	AnnotationType	Value	Start	End
+ARBA00023444	A0A009EAR0	comment.pathway	Porphyrin-containing compound metabolism		
+ARBA00004819	A0A009EAR0	comment.pathway	Porphyrin-containing compound metabolism; protoporphyrin-IX biosynthesis; 5-aminolevulinate from L-glutamyl-tRNA(Glu): step 2/2		
+ARBA00008981	A0A009EAR0	comment.similarity	Belongs to the class-III pyridoxal-phosphate-dependent aminotransferase family. HemL subfamily		
+ARBA00023235	A0A009EAR0	keyword	Isomerase		
+ARBA00023244	A0A009EAR0	keyword	Porphyrin biosynthesis		
+ARBA00022898	A0A009EAR0	keyword	Pyridoxal phosphate		
+ARBA00012143	A0A009EAR0	protein.recommendedName.ecNumber	5.4.3.8		
+ARBA00004196	J0U7L2	comment.subcellular_location	Cell envelope		
+ARBA00004418	J0U7L2	comment.subcellular_location	Periplasm		
+ARBA00022982	J0U7L2	keyword	Electron transport		
+ARBA00022617	J0U7L2	keyword	Heme		
+ARBA00023004	J0U7L2	keyword	Iron		
+ARBA00022723	J0U7L2	keyword	Metal-binding		
+ARBA00022764	J0U7L2	keyword	Periplasm		
