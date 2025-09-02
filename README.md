@@ -70,8 +70,8 @@ Running UniFIRE can de done either by using the provided script `run_unifire_doc
  command line interface of Docker directly. The script is a wrapper around the Docker command line interface and
   provides some additional features like automatic cleanup of temporary files.
 
-**Warning:** The first time this command is run, it will download the ~25 GB large UniFIRE Docker image from the
-docker container registry and extract it on the local machine. Depending on the speed of your network and your CPU
+**Warning:** The first time this command is run, the ~25 GB large UniFIRE Docker image will be downloaded from the
+docker container registry and extracted on the local machine. Depending on the speed of your network and your CPU
 this can take a few hours.
 
 **A) Using the wrapper script:**
@@ -159,8 +159,8 @@ sample interproscan xml data.
 ```bash
 ./docker/bin/run_unifire_docker.sh -i samples/input_ipr.xml -t iprscanxml -o .
 ```
-This command will use as input the file samples/input_ipr.xml which is in InterProScan xml format with the xref 
-name attribute in the format as described above (same fasta header format). It will skip the interproscan step (as it is already given as input) and
+This command will use as input the file samples/input_ipr.xml which is in InterProScan xml format with the **xref element 
+name attribute** in the format as described above (same fasta header format). It will skip the interproscan step (as it is already given as input) and
 run the remaining UniFIRE workflow to predict functional annotations from UniRule and ARBA rules. The resulting 
 functional predictions will be written into these files in the current working directory:
 ```
@@ -400,7 +400,7 @@ From the previously described header format, you can use the following script to
 
 * python [./misc/taxonomy/updateIPRScanWithTaxonomicLineage.py](misc/taxonomy/fetchLineageLocal.py) `-i <input>` `-o <output>`
 
-The script will simply replace the OX={taxId} by OX={fullLineage} in the xref name attribute.
+The script will simply replace the OX={taxId} by OX={fullLineage} in the **xref element name attribute**.
 
 Having the full lineage is necessary for the majority of the rules to be executed.
 
