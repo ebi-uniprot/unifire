@@ -8,10 +8,19 @@ variables:
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: ""
 
-before_script:
-  - echo "Building UniFire docker image"
-  - export UNIFIRE_IMAGE_TAG=$(grep -E "^UNIFIRE_DOCKER_IMAGE_VERSION=" "${IMAGE_TAG_FILE}" | cut -d '=' -f 2)
-  - echo "UniFire image tag will be = ${UNIFIRE_IMAGE_TAG}"
+.docker_image:
+  image: docker:23.0.6
+  tags:
+    - dind
+  services:
+    - docker:dind
+  before_script:
+    - echo "Building UniFire docker image"
+    - docker --version
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin
+    - export UNIFIRE_IMAGE_TAG=$(grep -E "^UNIFIRE_DOCKER_IMAGE_VERSION=" "${IMAGE_TAG_FILE}" | cut -d '=' -f 2)
+    - echo "UniFire image tag will be = ${UNIFIRE_IMAGE_TAG}"
+    - CONTAINER_IMAGE=${CI_REGISTRY_IMAGE}:${UNIFIRE_IMAGE_TAG}
 
 .mvn:
   image: maven:3.8.2-openjdk-17-slim
@@ -37,20 +46,13 @@ python-test:
     - cd ${CI_PROJECT_DIR}/misc/taxonomy
     - python3 -m unittest discover -s tests
 
-build_docker_image:
+build_docker_image_lite:
   stage: build_docker_image
-  image: docker:23.0.6
-  tags:
-    - dind
-  services:
-    - docker:dind
+  extends: .docker_image
   script:
-    - docker --version
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin
-    - CONTAINER_IMAGE=${CI_REGISTRY_IMAGE}:${UNIFIRE_IMAGE_TAG}
+    - CONTAINER_IMAGE=${CONTAINER_IMAGE}-lite
     - echo "image name will be ${CONTAINER_IMAGE}"
-    - cd docker
-    - docker build -t ${CONTAINER_IMAGE} --no-cache .
+    - docker build --target lite -t ${CONTAINER_IMAGE} --no-cache docker
     - docker image ls
     - docker push ${CONTAINER_IMAGE}
     - docker rmi ${CONTAINER_IMAGE}
@@ -58,3 +60,18 @@ build_docker_image:
   rules:
     - if: $CI_COMMIT_BRANCH == "pre_release" && $CI_COMMIT_TITLE =~ /^Merge branch '.*' into 'pre_release'$/
       when: on_success
+
+build_docker_image_full:
+  stage: build_docker_image
+  extends: .docker_image
+  script:
+    - echo "image name will be ${CONTAINER_IMAGE}"
+    - docker build --target full -t ${CONTAINER_IMAGE} --no-cache docker
+    - docker image ls
+    - docker push ${CONTAINER_IMAGE}
+    - docker rmi ${CONTAINER_IMAGE}
+    - docker logout "$CI_REGISTRY"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "pre_release" && $CI_COMMIT_TITLE =~ /^Merge branch '.*' into 'pre_release'$/
+      when: on_success
+
