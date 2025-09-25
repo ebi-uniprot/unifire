@@ -35,6 +35,11 @@ Options:
   -n N          Proteins chunk size (default: 500)
   -o DIR        Output directory (required) - default is "/volume"
   -h            Show this help
+
+Images:
+  Full image: includes InterProScan. Accepts FASTA (will run InterProScan) or InterProScan XML.
+  Lite image: does NOT include InterProScan. Accepts only InterProScan XML as input.
+
 Examples:
   $(basename "$0") -i proteins.fasta -t fasta -n 500 -o /volume
   $(basename "$0") -i proteins-ipr.xml -t iprscanxml -s unirule,arba -n 1000 -o /volume
@@ -80,6 +85,13 @@ done
 
 # for user input systems
 declare -A input_systems_map
+
+# Detect InterProScan availability early so validations can use it
+if [[ -x "${INTERPROSCAN_SCRIPT}" ]]; then
+    HAS_INTERPROSCAN=true
+else
+    HAS_INTERPROSCAN=false
+fi
 
 # --- Parse args ---
 while getopts ":i:t:s:n:o:h" opt; do
@@ -159,6 +171,16 @@ function validate_input_file() {
   fi
 }
 
+# Validate that interproscan is present if fasta input was requested
+function validate_interproscan_availability() {
+    if [[ "$INPUT_TYPE" == "fasta" && "${HAS_INTERPROSCAN}" != "true" ]]; then
+        echo "Error: InterProScan is not available in this image (lite image)."
+        echo "  - Use the full image which includes InterProScan to provide FASTA input"
+        echo "  - Or provide an InterProScan XML file as input (-t iprscanxml)"
+        usage_exit
+    fi
+}
+
 function validate_chunk() {
   if [[ "$CHUNK_SIZE" -le 0 ]]; then echo "Error: Chunk size must be greater than zero." && usage_exit; fi
 }
@@ -196,10 +218,15 @@ function check_iprscan_version() {
 function run_workflow() {
   # Conditionally run or skip interproscan
   if [[ "$INPUT_TYPE" == "fasta" ]]; then
+    if [[ "${HAS_INTERPROSCAN}" == "true" ]]; then
       echo "Running interproscan on input fasta file ${INPUT_FILE}..."
       ${INTERPROSCAN_SCRIPT} -f xml -dp -i ${INPUT_FILE} \
           --appl "Hamap,ProSiteProfiles,ProSitePatterns,Pfam,NCBIFAM,SMART,PRINTS,SFLD,CDD,Gene3D,PIRSF,PANTHER,SUPERFAMILY,FunFam" \
           -o ${IPRSCAN_FILE}
+    else
+      echo "ERROR: InterProScan not available in this image. Please provide interproscan xml input or use the full image."
+      usage_exit
+    fi
   else
       echo "Skipping interproscan and using provided file ${INPUT_FILE}..."
       check_iprscan_version
@@ -249,6 +276,7 @@ function set_output_files_permission() {
 # Run validations (needs to be called in the correct order)
 validate_input_output
 validate_input_file
+validate_interproscan_availability
 validate_system
 validate_chunk
 validate_out_dir
