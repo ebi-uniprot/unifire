@@ -25,10 +25,13 @@ git clone https://gitlab.ebi.ac.uk/uniprot-public/unifire.git
 There are two Docker image variants provided:
 
 **1. Full image**  
-This image includes all required data and dependencies, including InterProScan tool and data which accounts for most of the size of the image. Therefore, it has a large image size (~25G). This image accepts either a FASTA file (to run InterProScan) or a precomputed InterProScan XML file.
+This image includes all required data and dependencies, including InterProScan tool and data which accounts for most 
+of the size of the image. Therefore, it has a large image size (~60G). This image accepts either a FASTA file (to 
+run InterProScan) or a precomputed InterProScan XML file.
 
 **2. Lite image**  
-This image does not include InterProScan. Therefore, it has much smaller size (~3G). This image accepts only InterProScan XML input files. Users can use the lite image to save download and image storage if they already have InterProScan XML inputs or run InterProScan separately. The image will have '-lite' suffix in its tag, e.g. `unifire:<version>-lite`.
+This image does not include InterProScan. Therefore, it has much smaller size (~4G). This image accepts only 
+InterProScan XML input files. Users can use the lite image to save download and image storage if they already have InterProScan XML inputs or run InterProScan separately. The image will have '-lite' suffix in its tag, e.g. `unifire:<version>-lite`.
 
 ### Prerequisites
 
