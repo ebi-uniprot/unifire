@@ -14,7 +14,7 @@
 #    limitations under the License.
 ############################################################################
 
-FROM ubuntu:24.04
+FROM ubuntu:24.04 AS base
 
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 
@@ -30,10 +30,17 @@ COPY versions.properties /opt/scripts/bin
 RUN chmod 775 /opt/scripts/bin/*.sh
 
 RUN /opt/scripts/bin/update-taxonomy-cache.sh
-RUN /opt/scripts/bin/download-interproscan.sh
 RUN /opt/scripts/bin/download-unifire.sh
 
 RUN mkdir /volume
 VOLUME /volume
+
+# --- Lite image (no InterProScan) ---
+FROM base AS lite
+ENTRYPOINT ["/opt/scripts/bin/unifire-workflow.sh"]
+
+# --- Full image with InterProScan ---
+FROM base AS full
+RUN /opt/scripts/bin/download-interproscan.sh
 
 ENTRYPOINT ["/opt/scripts/bin/unifire-workflow.sh"]

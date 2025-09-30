@@ -8,11 +8,6 @@ variables:
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: ""
 
-before_script:
-  - echo "Building UniFire docker image"
-  - export UNIFIRE_IMAGE_TAG=$(grep -E "^UNIFIRE_DOCKER_IMAGE_VERSION=" "${IMAGE_TAG_FILE}" | cut -d '=' -f 2)
-  - echo "UniFire image tag will be = ${UNIFIRE_IMAGE_TAG}"
-
 .mvn:
   image: maven:3.8.2-openjdk-17-slim
   before_script:
@@ -37,24 +32,44 @@ python-test:
     - cd ${CI_PROJECT_DIR}/misc/taxonomy
     - python3 -m unittest discover -s tests
 
-build_docker_image:
-  stage: build_docker_image
+
+.docker_image:
   image: docker:23.0.6
   tags:
     - dind
   services:
     - docker:dind
-  script:
+  before_script:
+    - echo "Building UniFire docker image"
     - docker --version
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin
+    - export UNIFIRE_IMAGE_TAG=$(grep -E "^UNIFIRE_DOCKER_IMAGE_VERSION=" "${IMAGE_TAG_FILE}" | cut -d '=' -f 2)
+    - echo "UniFire image tag will be = ${UNIFIRE_IMAGE_TAG}"
+
+.build_docker_image_template:
+  stage: build_docker_image
+  extends: .docker_image
+  script:
     - CONTAINER_IMAGE=${CI_REGISTRY_IMAGE}:${UNIFIRE_IMAGE_TAG}
-    - echo "image name will be ${CONTAINER_IMAGE}"
-    - cd docker
-    - docker build -t ${CONTAINER_IMAGE} --no-cache .
+    - export IMAGE_NAME=${CONTAINER_IMAGE}${IMAGE_SUFFIX}
+    - echo "Building image ${IMAGE_NAME}"
+    - docker build --target ${DOCKER_TARGET} --tag ${IMAGE_NAME} --no-cache docker
     - docker image ls
-    - docker push ${CONTAINER_IMAGE}
-    - docker rmi ${CONTAINER_IMAGE}
+    - docker push ${IMAGE_NAME}
+    - docker rmi ${IMAGE_NAME}
     - docker logout "$CI_REGISTRY"
   rules:
     - if: $CI_COMMIT_BRANCH == "pre_release" && $CI_COMMIT_TITLE =~ /^Merge branch '.*' into 'pre_release'$/
       when: on_success
+
+build_docker_image_lite:
+  extends: .build_docker_image_template
+  variables:
+    DOCKER_TARGET: lite
+    IMAGE_SUFFIX: -lite
+
+build_docker_image_full:
+  extends: .build_docker_image_template
+  variables:
+    DOCKER_TARGET: full
+    IMAGE_SUFFIX: ""

@@ -1,53 +1,79 @@
 # UniFIRE Project
 
-UniFIRE (The UniProt Functional annotation Inference Rule Engine) is an engine to execute rules in the UniProt Rule
- Markup Language (URML) format. It can be used to execute the UniProt annotation rules (UniRule and ARBA).
+The UniProt Functional annotation Inference Rule Engine (UniFIRE) is a rule execution platform that processes rules, written in the UniProt Rule Markup Language (URML), to generate automatic annotations for protein sequences by applying UniProt annotation rules (UniRule and ARBA).
+
+The **aim** of UniFIRE is to enable users to apply UniProt's standard annotation processes to their own private protein 
+sequences, making large-scale, private annotation possible on the user's side.
 
 This project is a work in progress, open for collaboration.
 
 Introducing presentation: [UniFIRE-URML.pptx](misc/media/UniFIRE-URML.pptx)
 
-There are two different ways to run UniFIRE:
-1. **Downloading and running the UniFIRE *Docker* image**<br/> The UniFIRE Docker image allows to run the whole UniFIRE
- workflow including all dependencies like InterProScan and HMMER with a single command. The only necessary
-  software dependency is an installation of Docker.
- Therefore we recommend this way of running UniFIRE to new users.
- Because the large InterProScan package and its dependencies are included in the Docker image, a user
-  needs to download ~25 GB and allow ~100 GB disk space on the system. <br/><br/> 
-2. **Running UniFIRE after building it from its source**<br/>
- This way requires more manual interaction of the user. Each step of a UniFIRE workflow has to
- be executed separately or combined by a script. Also some steps require external software like InterProScan or HMMER,
- which may need to be installed by the user separately or started through a web-interface. Therefore we recommend this
- approach to advanced users who would like to create a particular workflow, e.g. who would like to run the heavy
- InterProScan within a separate procedure.
+There are two primary ways to run UniFIRE:
+1. **Downloading and running the UniFIRE *Docker* image**<br/>
+The UniFIRE pre-built Docker image allows you to run the entire UniFIRE workflow, including all dependencies like 
+   InterProScan and HMMER, with a single command.  The only necessary software dependency is an installation of 
+   Docker. <br/>
+Therefore, we recommend this method for new users.
+
+2. **Running UniFIRE After Building from the Source Code**<br/> 
+This way requires more manual interaction from the user. Each step of a UniFIRE workflow must be executed separately 
+   or combined by a script. Also, some steps require external software like InterProScan or HMMER, which needs to 
+   be installed by the user separately or accessed through a web interface. 
+Therefore, we recommend this approach to advanced users who wish to create a particular workflow, e.g. who 
+   need to run the heavy InterProScan within a separate procedure.
  
-This documentation uses scripts and sample data which are provided by the UniFIRE Gitlab repository. Therefore please
- make sure you have checked out a local copy of UniFIRE Gitlab repository. This is done by the
- command below, which requires git to be installed on your system:
+This documentation uses scripts and sample data provided by the UniFIRE GitLab repository. Please
+ make sure you have checked out a local copy of UniFIRE Gitlab repository using the
+ command below, which requires Git to be installed on your system:
 ```
 git clone https://gitlab.ebi.ac.uk/uniprot-public/unifire.git
 ```
 
 ## 1. Using the Docker image
 
-### Prerequisites
-#### Hardware
-A machine with 24 GB or more and ~100 GB of available disk space is recommended.
+There are two Docker image variants provided to suit different user needs and environments::
 
-> **Note:** Starting from UniFIRE version 2025.3, minimum memory requirement has increased to about 24 GB, because of the large increase in the number of ARBA rules.
-> Using older versions of UniFIRE requires less memory.
+**1. Full image**  
+This image includes all required data and dependencies, notably the InterProScan tool and its substantial datasets, which account for most of its size.
+
+ - Size: Large (~60 GB)
+
+ - Input: Accepts either a FASTA file (to run InterProScan automatically) or a precomputed InterProScan XML file.
+
+ - Benefit: Provides a complete, "all-in-one" workflow with zero manual dependency setup.
+
+**2. Lite image**  
+This image excludes InterProScan, resulting in a significantly smaller size.
+
+ - Size: Much smaller (~4 GB)
+
+ - Input: Accepts only a precomputed InterProScan XML file.
+
+ - Benefit: Recommended for users who already have InterProScan XML inputs or prefer to run InterProScan separately. 
+   It saves significant download time and image storage space.
+
+The Lite image is identified by the -lite suffix in its tag (e.g., unifire:<version>-lite).
+### Prerequisites
+
+#### Hardware
+
+A machine with 24 GB or more is recommended. Please allow enough free disk space based on the image type being used (full/lite).
+
+> **Note:** Starting from UniFIRE version 2025.3, minimum memory requirement has increased to about 24 GB, because of the large increase >in the number of ARBA rules.
 
 #### Operating system support
+
 The Docker image is expected to run on any operating system 
 
 #### Software
-A recent version of Docker is necessary to start the UniFIRE docker image as a new container. It has been tested
- successfully on Ubuntu 24.04 and Docker version 23.0.6.
+
+A recent version of Docker is necessary to start the UniFIRE docker image as a new container. It has been tested  successfully on Ubuntu 24.04 and Docker version 23.0.6.
 
 ### Data preparation
-The only input data that need to be provided are the protein sequence data in multi-FASTA format for which 
- functional predictions should be created. The FASTA header needs to follow the UniProtKB conventions 
- ([https://www.uniprot.org/help/fasta-headers](https://www.uniprot.org/help/fasta-headers))
+
+**1. Fasta input type:**  
+The only input data that need to be provided are the protein sequence data in multi-FASTA format for which functional predictions should be created. The FASTA header needs to follow the UniProtKB conventions ([https://www.uniprot.org/help/fasta-headers](https://www.uniprot.org/help/fasta-headers))
  
  The minimal structure of the header is:
 ```
@@ -65,14 +91,21 @@ The only input data that need to be provided are the protein sequence data in mu
     * GL=`{recommended ordered locus name (OLN) or Open Reading Frame (OLN) name}`
     * OG=`{gene location(s), comma-separated if multiple}` ([cf. organelle ontology](https://www.ebi.ac.uk/ena/WebFeat/qualifiers/organelle.html))
 
+
+**2. InterProScan XML input type:**  
+The only input data that need to be provided is the InterProScan XML file for which functional predictions should be created.   
+Each protein in the InterProScan XML file should have at least one xref element with 'name' attribute containing OX=<taxid> in the same format as described above for the fasta header, as shown in the following example.
+```
+<xref id="tr|J0U7L2|J0U7L2_9BURK" name="tr|J0U7L2|J0U7L2_9BURK Cytochrome c553 OS=Acidovorax sp. CF316 OX=1144317 GN=PMI14_03334"/>
+```
+
 ### Usage
 Running UniFIRE can de done either by using the provided script `run_unifire_docker.sh` or by using the
  command line interface of Docker directly. The script is a wrapper around the Docker command line interface and
   provides some additional features like automatic cleanup of temporary files.
 
-**Warning:** The first time this command is run, the ~25 GB large UniFIRE Docker image will be downloaded from the
-docker container registry and extracted on the local machine. Depending on the speed of your network and your CPU
-this can take a few hours.
+**Warning:** The first time this command is run, the UniFIRE Docker image will be downloaded from the
+docker container registry and extracted on the local machine. 
 
 **A) Using the wrapper script:**
 
@@ -117,6 +150,11 @@ Options:
   -n N          Proteins chunk size (default: 500)
   -o DIR        Output directory (required) - default is "/volume"
   -h            Show this help
+
+Images:
+  Full image: includes InterProScan. Accepts FASTA (will run InterProScan) or InterProScan XML.
+  Lite image: does NOT include InterProScan. Accepts only InterProScan XML as input.
+
 Examples:
   unifire-workflow.sh -i proteins.fasta -t fasta -n 500 -o /volume
   unifire-workflow.sh -i proteins-ipr.xml -t iprscanxml -s unirule,arba -n 1000 -o /volume
@@ -145,7 +183,7 @@ predictions_unirule-pirsr.out
 predictions_arba.out
 ```
 
-_To run directly with docker, you can use the following command:_
+_Alternatively, to run directly with docker, you can use the following command:_
 
 ```bash
 docker run --rm --mount type=bind,source=$(pwd)/samples,target=/volume dockerhub.ebi.ac.uk/uniprot-public/unifire:<version> -i /volume/proteins.fasta -o /volume
@@ -160,7 +198,7 @@ sample interproscan xml data.
 ./docker/bin/run_unifire_docker.sh -i samples/input_ipr.xml -t iprscanxml -o .
 ```
 This command will use as input the file samples/input_ipr.xml which is in InterProScan xml format with the **xref element 
-name attribute** in the format as described above (same fasta header format). It will skip the interproscan step (as it is already given as input) and
+name attribute** in the format as described above. It will skip the interproscan step (as it is already given as input) and
 run the remaining UniFIRE workflow to predict functional annotations from UniRule and ARBA rules. The resulting 
 functional predictions will be written into these files in the current working directory:
 ```
@@ -169,10 +207,10 @@ predictions_unirule-pirsr.out
 predictions_arba.out
 ```
 
-_To run directly with docker, you can use the following command:_
+_Alternatively, to run directly with docker (using lite version), you can use the following command:_
 
 ```bash
-docker run --rm --mount type=bind,source=$(pwd)/samples,target=/volume dockerhub.ebi.ac.uk/uniprot-public/unifire:<version> -i /volume/input_ipr.xml -t iprscanxml -o /volume
+docker run --rm --mount type=bind,source=$(pwd)/samples,target=/volume dockerhub.ebi.ac.uk/uniprot-public/unifire:<version>-lite -i /volume/input_ipr.xml -t iprscanxml -o /volume
 ```
 
 ### Runtime
