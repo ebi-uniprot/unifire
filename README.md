@@ -14,7 +14,7 @@ There are two primary ways to run UniFIRE:
 The UniFIRE pre-built Docker image allows you to run the entire UniFIRE workflow, including all dependencies like 
    InterProScan and HMMER, with a single command.  The only necessary software dependency is an installation of 
    Docker. <br/>
-Therefore, we recommend this method for new users or those with limited Docker knowledge.
+Therefore, we recommend this method for new users.
 
 2. **Running UniFIRE After Building from the Source Code**<br/> 
 This way requires more manual interaction from the user. Each step of a UniFIRE workflow must be executed separately 
