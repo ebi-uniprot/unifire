@@ -34,11 +34,11 @@ python-test:
 
 
 .docker_image:
-  image: docker:23.0.6
+  image: docker:24.0.5
   tags:
     - dind
   services:
-    - docker:dind
+    - docker:24.0.5-dind
   before_script:
     - echo "Building UniFire docker image"
     - docker --version
