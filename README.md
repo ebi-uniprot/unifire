@@ -294,13 +294,14 @@ please execute below command.
 Depending on the speed of your internet connection, it will take a few minutes to download all dependencies through 
 maven. You will require in total ~500 MB disk space in UniFIRE folder and in your local maven cache. The script also 
 downloads the latest UniRule, UniRule-PIRSR and ARBA rules in URML format and UniRule template
-alignments in fact XML format from EBI FTP into samples/ folder. Additionally it downloads data neccassary to run
+alignments in fact XML format from EBI FTP into samples/ folder. Additionally, it downloads data necessary to run
 UniRule-PIRSR rules from https://proteininformationresource.org/pirsr/pirsr_data_latest.tar.gz and places them
-underneath the folder samples/pirsr_data. 
+under the folder samples/pirsr_data. 
    
 ### Usage
 
-We provide some sample files in the [sample](samples) folder to test the software.
+We provide some sample files in the [sample](samples) folder to test the software.<br/>
+**build.sh MUST be executed** before trying out the command below using sample files provided
 <br/>
 
 **Example with UniRule rules & InterProScan XML input:**
@@ -308,7 +309,7 @@ We provide some sample files in the [sample](samples) folder to test the softwar
 ./distribution/bin/unifire.sh -r samples/unirule-urml-latest.xml -i samples/input_ipr.xml -t samples/unirule-templates-latest.xml -o output_unirule_annotations.csv
 ```
 
-*Note: To be able to predict the UniRule positional annotations, a template file is provided (`samples/unirule-templates-2018_05.xml`) (optional.)*
+*Note: To be able to predict the UniRule positional annotations, a template file is provided (`samples/unirule-templates-latest.xml`) (optional.)*
 <br/>
 
 **Example with ARBA rules & Fact XML input:**
@@ -506,7 +507,7 @@ The fact model is automatically created from the following XML Schema: [urml-fac
 
 The corresponding Java classes are built in the [core](core) module under the package `org.uniprot.urml.facts`, after building the project with Maven (or using the `./build.sh` script).
 
-You can use theses classes (described in the UML diagram below) and the container `org.uniprot.urml.facts.FactSet` to load your own data directly into objects (via an ORM or a custom parser).
+You can use these classes (described in the UML diagram below) and the container `org.uniprot.urml.facts.FactSet` to load your own data directly into objects (via an ORM or a custom parser).
 
 ### Fact Model Diagram
 
