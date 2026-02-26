@@ -62,6 +62,7 @@ public class ResidueNameAtPosPlaceholderResolver extends ResidueNameAtPositionRe
         }
         PositionalMapping validPositionalMapping = null;
         for (PositionalMapping positionalMapping : positionalMappings) {
+            if (positionalMapping.getTemplateMatch() == null) continue;
             String templateProteinId = positionalMapping.getTemplateMatch().getProtein().getId();
             String signatureName = positionalMapping.getTargetMatch().getSignature().getValue();
             if (templateSignature.contains(templateProteinId+signatureName)){
