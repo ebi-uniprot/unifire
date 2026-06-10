@@ -1,18 +1,54 @@
+# You can override the included template(s) by including variable overrides
+# SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
+# Secret Detection customization: https://docs.gitlab.com/user/application_security/secret_detection/pipeline/configure
+# Dependency Scanning customization: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/#customizing-the-dependency-scanning-settings
+# Container Scanning customization: https://docs.gitlab.com/ee/user/application_security/container_scanning/#customizing-the-container-scanning-settings
+# Note that environment variables can be set in several places
+# See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
 stages:
+  - build_dependency
   - test
   - build_docker_image
 
+include:
+  - template: Jobs/SAST.gitlab-ci.yml
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+  # - template: Security/Dependency-Scanning.gitlab-ci.yml
+  - template: Jobs/Dependency-Scanning.latest.gitlab-ci.yml
+
+
 variables:
-  IMAGE_TAG_FILE: ${CI_PROJECT_DIR}/docker/versions.properties
+  IMAGE_TAG_FILE: "${CI_PROJECT_DIR}/docker/versions.properties"
   DOCKER_HOST: tcp://docker:2375
   DOCKER_DRIVER: overlay2
-  DOCKER_TLS_CERTDIR: ""
+  DOCKER_TLS_CERTDIR: ''
+  GITLAB_ADVANCED_SAST_ENABLED: 'true'
+  DS_ENFORCE_NEW_ANALYZER: 'true'
+  DS_MAX_DEPTH: "-1"
+  GIT_DEPTH: "0"
+  SECRET_DETECTION_HISTORIC_SCAN: "true"
+
 
 .mvn:
   image: maven:3.8.2-openjdk-17-slim
   before_script:
     - java --version
     - mvn --version
+
+build:
+  extends: .mvn
+  # Running in the build stage ensures that the dependency-scanning job
+  # receives the maven.graph.json artifacts.
+  stage: build_dependency
+  script:
+    - mvn install
+    - mvn org.apache.maven.plugins:maven-dependency-plugin:3.8.1:tree -DoutputType=json -DoutputFile=maven.graph.json
+  # Collect all maven.graph.json artifacts and pass them onto jobs
+  # in sequential stages.
+  artifacts:
+    paths:
+      - "**/*.jar"
+      - "**/maven.graph.json"
 
 test:
   extends: .mvn
@@ -31,7 +67,6 @@ python-test:
   script:
     - cd ${CI_PROJECT_DIR}/misc/taxonomy
     - python3 -m unittest discover -s tests
-
 
 .docker_image:
   image: docker:24.0.5
