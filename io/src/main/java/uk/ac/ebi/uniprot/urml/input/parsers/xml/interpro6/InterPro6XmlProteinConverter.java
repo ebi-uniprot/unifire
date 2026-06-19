@@ -22,8 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.uniprot.urml.facts.*;
 import org.uniprot.urml.facts.Signature;
-import uk.ac.ebi.uniprot.aa.interpro.scan.model.*;
-import uk.ac.ebi.uniprot.aa.interpro.scan.model.Protein;
+import uk.ac.ebi.uniprot.aa.interproscan6.model.*;
+import uk.ac.ebi.uniprot.aa.interproscan6.model.Protein;
 import uk.ac.ebi.uniprot.urml.input.parsers.fasta.header.FastaHeaderData;
 import uk.ac.ebi.uniprot.urml.input.parsers.fasta.header.FastaHeaderParser;
 

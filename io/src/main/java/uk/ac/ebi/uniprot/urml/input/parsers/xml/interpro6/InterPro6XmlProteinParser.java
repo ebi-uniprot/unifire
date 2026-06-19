@@ -17,7 +17,7 @@
 package uk.ac.ebi.uniprot.urml.input.parsers.xml.interpro6;
 
 import org.uniprot.urml.facts.FactSet;
-import uk.ac.ebi.uniprot.aa.interpro.scan.model.ProteinMatchesHolder;
+import uk.ac.ebi.uniprot.aa.interproscan6.model.ProteinMatchesHolder;
 import uk.ac.ebi.uniprot.urml.input.parsers.FactSetParser;
 
 import javax.xml.bind.JAXBException;

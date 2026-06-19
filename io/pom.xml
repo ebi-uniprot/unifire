@@ -35,9 +35,8 @@
             <artifactId>unifire-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>uk.ac.ebi.uniprot.aa.interpro.scan</groupId>
-            <artifactId>interproscan-model</artifactId>
-            <version>5.77-108.0</version>
+            <groupId>uk.ac.ebi.uniprot.aa</groupId>
+            <artifactId>unifire-interproscan6-model</artifactId>
         </dependency>
         <dependency>
             <groupId>uk.ac.ebi.interpro.scan</groupId>

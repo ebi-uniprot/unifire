@@ -16,7 +16,7 @@
 
 package uk.ac.ebi.uniprot.urml.input.parsers.xml.interpro6;
 
-import uk.ac.ebi.uniprot.aa.interpro.scan.model.ProteinMatchesHolder;
+import uk.ac.ebi.uniprot.aa.interproscan6.model.ProteinMatchesHolder;
 import uk.ac.ebi.uniprot.urml.core.xml.schema.JAXBContextInitializationException;
 
 import javax.xml.bind.JAXBContext;
