@@ -366,6 +366,7 @@ usage: unifire -i <INPUT_FILE> -o <OUTPUT_FILE> -r <RULE_URML_FILE> [-f <OUTPUT_
                                             (default: 1000).
      -s,--input-source <INPUT_SOURCE>       Input source type. Supported input sources are:
                                             - InterProScan (InterProScan Output XML)
+                                            - InterProScan6 (InterProScan6 Output XML)
                                             - UniParc (UniParc XML)
                                             - XML (Input Fact XML)
                                             (default: InterProScan).
