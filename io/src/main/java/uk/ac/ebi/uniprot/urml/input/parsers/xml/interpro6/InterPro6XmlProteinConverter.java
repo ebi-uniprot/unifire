@@ -17,6 +17,7 @@
 package uk.ac.ebi.uniprot.urml.input.parsers.xml.interpro6;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.uniprot.urml.facts.*;
@@ -138,7 +139,9 @@ public class InterPro6XmlProteinConverter implements Iterator<FactSet> {
                 pSignatureBuilder
                         .withAlignment()
                         .withValue(alignment);
-            } else {
+            }
+
+            if (o.getStart() != null && o.getEnd() != null) {
                 pSignatureBuilder
                         .withPositionStart(o.getStart().intValue())
                         .withPositionEnd(o.getEnd().intValue());
@@ -164,7 +167,11 @@ public class InterPro6XmlProteinConverter implements Iterator<FactSet> {
     private void buildProtein(org.uniprot.urml.facts.Protein.Builder proteinBuilder, FastaHeaderData fastaHeaderData,
                               ProteinResultType ipsProtein) {
         var sequence = Optional.ofNullable(ipsProtein.getSequence()).map(SequenceType::getValue).orElse(null);
-        var sequenceLength = Optional.ofNullable(sequence).map(String::length).orElse(0);
+        if (StringUtils.isEmpty(sequence)) {
+            throw new IllegalStateException("Protein sequence was NULL");
+        }
+
+        var sequenceLength = sequence.length();
         proteinBuilder.withId(fastaHeaderData.getIdentifier());
         proteinBuilder.withSequence()
                 .withValue(sequence)
@@ -208,7 +215,7 @@ public class InterPro6XmlProteinConverter implements Iterator<FactSet> {
         var signatureValue = matchType.getSignature().getAc();
         return switch (signatureType) {
             case GENE_3_D, FUNFAM -> signatureValue.replace("G3DSA:", "");
-            case PANTHER -> matchType.getModelAc();
+            case PANTHER -> StringUtils.isNotEmpty(matchType.getModelAc()) ? matchType.getModelAc() : signatureValue;
             default -> signatureValue;
         };
     }
