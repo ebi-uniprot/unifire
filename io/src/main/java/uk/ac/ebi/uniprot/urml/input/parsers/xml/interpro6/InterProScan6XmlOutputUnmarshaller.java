@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2018 European Molecular Biology Laboratory
+ *  Copyright (c) 2026 European Molecular Biology Laboratory
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Unmarshalls the InterProScan output XML using the interpro schema model (cf. {@link uk.ac.ebi.uniprot.aa.interpro.scan.model})
+ * Unmarshalls the InterProScan output XML using the interpro schema model (cf. {@link uk.ac.ebi.uniprot.aa.interproscan6.model.generated})
  *
- * @author Alexandre Renaux
+ * @author Alexandre Renaux modified for InterProScan 6 by Muhammad Hilmy
  */
 public class InterProScan6XmlOutputUnmarshaller {
 
