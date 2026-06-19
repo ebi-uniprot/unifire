@@ -35,10 +35,6 @@
             <artifactId>unifire-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>uk.ac.ebi.uniprot.aa</groupId>
-            <artifactId>unifire-interproscan6-model</artifactId>
-        </dependency>
-        <dependency>
             <groupId>uk.ac.ebi.interpro.scan</groupId>
             <artifactId>interproscan-model</artifactId>
             <exclusions>
@@ -104,6 +100,31 @@
                                 <arg>-XtoString</arg>
                                 <arg>-Xequals</arg>
                                 <arg>-XhashCode</arg>
+                            </args>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>interproscan6-model-xjc</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <schemaDirectory>${project.basedir}/src/main/resources/interproscan6</schemaDirectory>
+                            <generatePackage>uk.ac.ebi.uniprot.aa.interproscan6.model.generated</generatePackage>
+                            <cleanPackageDirectories>false</cleanPackageDirectories>
+                            <generateDirectory>${project.build.directory}/generated-sources/xjc-interproscan6-model</generateDirectory>
+                            <extension>true</extension>
+                            <plugins>
+                                <plugin>
+                                    <groupId>org.jvnet.jaxb</groupId>
+                                    <artifactId>jaxb2-basics</artifactId>
+                                </plugin>
+                            </plugins>
+                            <args>
+                                <arg>-XtoString</arg>
+                                <arg>-Xequals</arg>
+                                <arg>-XhashCode</arg>
+                                <arg>-XautoNameResolution</arg>
                             </args>
                         </configuration>
                     </execution>

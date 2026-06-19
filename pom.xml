@@ -31,7 +31,6 @@
         <module>distribution</module>
         <module>procedures</module>
         <module>io</module>
-        <module>interproscan6-model</module>
     </modules>
 
     <properties>
@@ -159,11 +158,6 @@
             <dependency>
                 <groupId>uk.ac.ebi.uniprot.aa</groupId>
                 <artifactId>unifire-distribution</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>uk.ac.ebi.uniprot.aa</groupId>
-                <artifactId>unifire-interproscan6-model</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

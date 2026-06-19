@@ -1,7 +1,7 @@
 package uk.ac.ebi.uniprot.urml.input.parsers.xml.interpro6;
 
 import org.uniprot.urml.facts.FactSet;
-import uk.ac.ebi.uniprot.aa.interproscan6.model.Protein;
+import uk.ac.ebi.uniprot.aa.interproscan6.model.generated.ProteinResultType;
 import uk.ac.ebi.uniprot.urml.input.parsers.xml.AbstractXmlFactSetChunkParser;
 
 import java.io.IOException;
@@ -9,7 +9,7 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Iterator;
 
-public class InterPro6XmlFactSetChunkParser extends AbstractXmlFactSetChunkParser<Protein> {
+public class InterPro6XmlFactSetChunkParser extends AbstractXmlFactSetChunkParser<ProteinResultType> {
 
     private static final Integer DEFAULT_CHUNKSIZE = 1000;
 
@@ -24,7 +24,7 @@ public class InterPro6XmlFactSetChunkParser extends AbstractXmlFactSetChunkParse
 
 
     @Override
-    protected Iterator<FactSet> convertToFactSet(Collection<Protein> xmlEntities) {
+    protected Iterator<FactSet> convertToFactSet(Collection<ProteinResultType> xmlEntities) {
         return new InterPro6XmlProteinConverter(xmlEntities);
     }
 }

@@ -16,7 +16,7 @@
 
 package uk.ac.ebi.uniprot.urml.input.parsers.xml.interpro6;
 
-import uk.ac.ebi.uniprot.aa.interproscan6.model.ProteinMatchesHolder;
+import uk.ac.ebi.uniprot.aa.interproscan6.model.generated.InterproscanType;
 import uk.ac.ebi.uniprot.urml.core.xml.schema.JAXBContextInitializationException;
 
 import javax.xml.bind.JAXBContext;
@@ -36,18 +36,18 @@ public class InterProScan6XmlOutputUnmarshaller {
 
     public InterProScan6XmlOutputUnmarshaller() {
         try {
-            JAXBContext context = JAXBContext.newInstance(ProteinMatchesHolder.class);
+            JAXBContext context = JAXBContext.newInstance(InterproscanType.Results.class);
             unmarshaller = context.createUnmarshaller();
-        } catch (JAXBException e){
-            throw new JAXBContextInitializationException("Cannot initialize "+this.getClass().getSimpleName(), e);
+        } catch (JAXBException e) {
+            throw new JAXBContextInitializationException("Cannot initialize " + this.getClass().getSimpleName(), e);
         }
     }
 
-    public ProteinMatchesHolder read(InputStream inputStream) throws JAXBException, IOException {
-        if (inputStream == null){
+    public InterproscanType.Results read(InputStream inputStream) throws JAXBException, IOException {
+        if (inputStream == null) {
             throw new IOException("Null input stream");
         }
-        return ((ProteinMatchesHolder) unmarshaller.unmarshal(inputStream));
+        return ((InterproscanType.Results) unmarshaller.unmarshal(inputStream));
     }
 
 

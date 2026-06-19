@@ -17,38 +17,37 @@
 package uk.ac.ebi.uniprot.urml.input.parsers.xml.interpro6;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.uniprot.urml.facts.*;
-import org.uniprot.urml.facts.Signature;
-import uk.ac.ebi.uniprot.aa.interproscan6.model.*;
-import uk.ac.ebi.uniprot.aa.interproscan6.model.Protein;
+import org.uniprot.urml.facts.SignatureType;
+import uk.ac.ebi.uniprot.aa.interproscan6.model.generated.*;
 import uk.ac.ebi.uniprot.urml.input.parsers.fasta.header.FastaHeaderData;
 import uk.ac.ebi.uniprot.urml.input.parsers.fasta.header.FastaHeaderParser;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
- * Iterates over {@link Protein} and convert them to {@link FactSet}.
+ * Iterates over {@link ProteinResultType} and convert them to {@link FactSet}.
  *
  * @author Alexandre Renaux
  */
-public class InterPro6XmlProteinConverter implements Iterator<FactSet>{
+public class InterPro6XmlProteinConverter implements Iterator<FactSet> {
 
     private static final Logger logger = LoggerFactory.getLogger(InterPro6XmlProteinConverter.class);
 
-    private final Iterator<Protein> sourceIterator;
+    private final Iterator<ProteinResultType> sourceIterator;
     private final Map<String, Organism> organismMap;
     private final FastaHeaderParser uniProtFastaHeaderParser;
     private final Queue<FactSet> factSetQueue;
 
 
-    public InterPro6XmlProteinConverter(ProteinMatchesHolder proteinMatches){
-        this(proteinMatches.getProteins());
+    public InterPro6XmlProteinConverter(InterproscanType.Results proteinMatches) {
+        this(proteinMatches.getResult().stream().map(ResultType::getProteinResult).collect(Collectors.toList()));
     }
 
-    public InterPro6XmlProteinConverter(Collection<Protein> proteins) {
+    public InterPro6XmlProteinConverter(Collection<ProteinResultType> proteins) {
         this.sourceIterator = proteins.iterator();
         this.organismMap = new HashMap<>();
         this.uniProtFastaHeaderParser = new FastaHeaderParser();
@@ -62,7 +61,7 @@ public class InterPro6XmlProteinConverter implements Iterator<FactSet>{
 
     @Override
     public FactSet next() {
-        if (factSetQueue.isEmpty() && !sourceIterator.hasNext()){
+        if (factSetQueue.isEmpty() && !sourceIterator.hasNext()) {
             throw new NoSuchElementException();
         } else {
             if (factSetQueue.isEmpty()) {
@@ -72,10 +71,10 @@ public class InterPro6XmlProteinConverter implements Iterator<FactSet>{
         }
     }
 
-    private void convertProteinMatches(Protein ipsProtein){
+    private void convertProteinMatches(ProteinResultType ipsProtein) {
 
-        if (!ipsProtein.getCrossReferences().isEmpty()) {
-            for (ProteinXref proteinXref : ipsProtein.getCrossReferences()) {
+        if (!ipsProtein.getXref().getXref().isEmpty()) {
+            for (XrefType proteinXref : ipsProtein.getXref().getXref()) {
                 FastaHeaderData fastaHeaderData = uniProtFastaHeaderParser.parse(proteinXref.getName());
                 FactSet.Builder<Void> factSetBuilder = FactSet.builder();
 
@@ -88,7 +87,7 @@ public class InterPro6XmlProteinConverter implements Iterator<FactSet>{
                 org.uniprot.urml.facts.Protein protein = proteinBuilder.build();
                 factSetBuilder.addFact(protein);
 
-                for (Match match : ipsProtein.getMatches()) {
+                for (MatchType match : ipsProtein.getMatches().getMatch()) {
                     buildProteinSignature(factSetBuilder, protein, match);
                 }
 
@@ -101,44 +100,54 @@ public class InterPro6XmlProteinConverter implements Iterator<FactSet>{
 
     }
 
-    private void buildProteinSignature(FactSet.Builder<Void> factSetBuilder, org.uniprot.urml.facts.Protein protein,
-                                       Match match) {
-        SignatureLibrary library = match.getSignature().getSignatureLibraryRelease().getLibrary();
-        SignatureType signatureType = getSignatureType(library);
-        if (signatureType == null){
-            logger.warn("Ignored signature type {}", library.getName());
+    private void buildProteinSignature(FactSet.Builder<Void> factSetBuilder, org.uniprot.urml.facts.Protein protein, MatchType match) {
+        SignatureLibraryReleaseType libraryRelease = match.getSignature().getSignatureLibraryRelease();
+        SignatureType signatureType = getSignatureType(libraryRelease);
+
+        if (signatureType == null) {
+            logger.warn("Ignored signature type {}", libraryRelease.getLibrary());
             return;
         }
 
-        String accession = match.getSignature().getAccession();
-        if (match instanceof PantherMatch) {
-            //Panther subfamily accession is under model-ac element
-            accession = StringUtils.isNotBlank(match.getSignatureModels()) ? match.getSignatureModels() : accession;
-        }
-        accession = getSignatureValue(accession, signatureType);
-        Signature libSignature = Signature.builder().withType(signatureType).withValue(accession).build();
+        String accession = getSignatureValue(match, signatureType);
+
+        Signature libSignature = Signature.builder()
+                .withType(signatureType)
+                .withValue(accession)
+                .build();
 
         Signature ipSignature = null;
         if (match.getSignature().getEntry() != null) {
             String ipsAccession = match.getSignature().getEntry().getAccession();
-            ipSignature = Signature.builder().withType(SignatureType.INTER_PRO).withValue(ipsAccession).build();
+            ipSignature = Signature.builder()
+                    .withType(SignatureType.INTER_PRO)
+                    .withValue(ipsAccession)
+                    .build();
         }
 
-        for (Object o : match.getLocations()) {
-            PositionalProteinSignature.Builder<Void> pSignatureBuilder = PositionalProteinSignature.builder();
-            pSignatureBuilder.withProtein(protein);
-            pSignatureBuilder.withFrequency(match.getLocations().size());
-            if (o instanceof ProfileScanMatch.ProfileScanLocation profileScanLocation) {
-                String alignment = profileScanLocation.getAlignment();
-                pSignatureBuilder.withAlignment().withValue(alignment).end();
+        var locations = match.getLocations().getLocation();
+        for (LocationType o : locations) {
+            PositionalProteinSignature.Builder<Void> pSignatureBuilder = PositionalProteinSignature.builder()
+                    .withProtein(protein)
+                    .withFrequency(locations.size());
+
+            if (!o.getAlignment().isNil()) {
+                String alignment = o.getAlignment().getValue();
+                pSignatureBuilder
+                        .withAlignment()
+                        .withValue(alignment);
+            } else {
+                pSignatureBuilder
+                        .withPositionStart(o.getStart().intValue())
+                        .withPositionEnd(o.getEnd().intValue());
             }
-            if (o instanceof Location location) {
-                pSignatureBuilder.withPositionStart(location.getStart());
-                pSignatureBuilder.withPositionEnd(location.getEnd());
-            }
-            factSetBuilder.addFact(pSignatureBuilder.withSignature(libSignature).build());
+
+            var signature = pSignatureBuilder.withSignature(libSignature).build();
+            factSetBuilder.addFact(signature);
+
             if (ipSignature != null) {
-                factSetBuilder.addFact(pSignatureBuilder.withSignature(ipSignature).build());
+                var signatureWithIpSignature = pSignatureBuilder.withSignature(ipSignature).build();
+                factSetBuilder.addFact(signatureWithIpSignature);
             }
         }
     }
@@ -151,35 +160,40 @@ public class InterPro6XmlProteinConverter implements Iterator<FactSet>{
     }
 
     private void buildProtein(org.uniprot.urml.facts.Protein.Builder proteinBuilder, FastaHeaderData fastaHeaderData,
-                              Protein ipsProtein) {
+                              ProteinResultType ipsProtein) {
+        var sequence = ipsProtein.getSequence();
+        var sequenceLength = Optional.ofNullable(sequence).map(String::length).orElse(0);
         proteinBuilder.withId(fastaHeaderData.getIdentifier());
-        proteinBuilder.withSequence().withValue(ipsProtein.getSequence())
-                .withLength(ipsProtein.getSequenceLength()).withIsFragment(fastaHeaderData.isFragment()).end();
+        proteinBuilder.withSequence()
+                .withValue(sequence)
+                .withLength(sequenceLength)
+                .withIsFragment(fastaHeaderData.isFragment())
+                .end();
     }
 
     private void buildGeneInformation(org.uniprot.urml.facts.Protein.Builder proteinBuilder,
                                       FastaHeaderData fastaHeaderData) {
         GeneInformation.Builder geneBuilder = proteinBuilder.withGene();
 
-        if(fastaHeaderData.getRecommendedGeneName() != null){
+        if (fastaHeaderData.getRecommendedGeneName() != null) {
             geneBuilder.withNames(fastaHeaderData.getRecommendedGeneName());
         }
-        if (fastaHeaderData.getRecommendedOlnOrOrf() != null){
+        if (fastaHeaderData.getRecommendedOlnOrOrf() != null) {
             geneBuilder.withOrfOrOlnNames(fastaHeaderData.getRecommendedOlnOrOrf());
         }
-        if (!CollectionUtils.isEmpty(fastaHeaderData.getGeneLocationOrganelles())){
+        if (!CollectionUtils.isEmpty(fastaHeaderData.getGeneLocationOrganelles())) {
             geneBuilder.withOrganelleLocations(fastaHeaderData.getGeneLocationOrganelles());
         }
     }
 
-    private Organism createOrGetOrganism(String scientificName, List<Integer> taxIdLineage){
-        String key = "organism_"+taxIdLineage.get(taxIdLineage.size() - 1).toString();
-        if (organismMap.containsKey(key)){
+    private Organism createOrGetOrganism(String scientificName, List<Integer> taxIdLineage) {
+        String key = "organism_" + taxIdLineage.get(taxIdLineage.size() - 1).toString();
+        if (organismMap.containsKey(key)) {
             return organismMap.get(key);
         } else {
             Organism.Builder<Void> organismBuilder = Organism.builder();
             organismBuilder.withId(key).withLineage().withIds(taxIdLineage).end();
-            if (scientificName != null){
+            if (scientificName != null) {
                 organismBuilder.withScientificName(scientificName);
             }
             Organism organism = organismBuilder.build();
@@ -188,46 +202,41 @@ public class InterPro6XmlProteinConverter implements Iterator<FactSet>{
         }
     }
 
-    private String getSignatureValue(String value, SignatureType signatureType){
+    private String getSignatureValue(MatchType matchType, SignatureType signatureType) {
+        var signatureValue = matchType.getSignature().getAccession();
+        return switch (signatureType) {
+            case GENE_3_D, FUNFAM -> signatureValue.replace("G3DSA:", "");
+            case PANTHER -> matchType.getModelAc();
+            default -> signatureValue;
+        };
+    }
+
+    private String getSignatureValue(String value, SignatureType signatureType) {
         if (signatureType.equals(SignatureType.GENE_3_D) || signatureType.equals(SignatureType.FUNFAM)) {
             return value.replace("G3DSA:", "");
+        } else if (signatureType.equals(SignatureType.PANTHER)) {
+
         }
         return value;
     }
 
-    private SignatureType getSignatureType(SignatureLibrary signatureLibrary) {
-        switch (signatureLibrary){
-            case CDD:
-                return SignatureType.CDD;
-            case PFAM:
-                return SignatureType.PFAM;
-            case SFLD:
-                return SignatureType.SFLD;
-            case GENE3D:
-                return SignatureType.GENE_3_D;
-            case HAMAP:
-                return SignatureType.HAMAP;
-            case PANTHER:
-                return SignatureType.PANTHER;
-            case PIRSF:
-                return SignatureType.PIR_SUPERFAMILY;
-            case PRINTS:
-                return SignatureType.PRINTS;
-            case PRODOM:
-                return SignatureType.PRO_DOM;
-            case SMART:
-                return SignatureType.SMART;
-            case TIGRFAM, NCBIFAM:
-                return SignatureType.NCBIFAM;
-            case SUPERFAMILY:
-                return SignatureType.SCOP_SUPERFAMILY;
-            case PROSITE_PATTERNS, PROSITE_PROFILES:
-                return SignatureType.PROSITE;
-            case FUNFAM:
-                return SignatureType.FUNFAM;
-            default:
-                return null;
-        }
+    private SignatureType getSignatureType(SignatureLibraryReleaseType signatureLibrary) {
+        return switch (signatureLibrary.getLibrary()) {
+            case "CDD" -> SignatureType.CDD;
+            case "PFAM" -> SignatureType.PFAM;
+            case "SFLD" -> SignatureType.SFLD;
+            case "GENE3D" -> SignatureType.GENE_3_D;
+            case "HAMAP" -> SignatureType.HAMAP;
+            case "PANTHER" -> SignatureType.PANTHER;
+            case "PIRSF" -> SignatureType.PIR_SUPERFAMILY;
+            case "PRINTS" -> SignatureType.PRINTS;
+            case "PRODOM" -> SignatureType.PRO_DOM;
+            case "SMART" -> SignatureType.SMART;
+            case "TIGRFAM", "NCBIFAM" -> SignatureType.NCBIFAM;
+            case "SUPERFAMILY" -> SignatureType.SCOP_SUPERFAMILY;
+            case "PROSITE_PATTERNS", "PROSITE_PROFILES" -> SignatureType.PROSITE;
+            case "FUNFAM" -> SignatureType.FUNFAM;
+            default -> null;
+        };
     }
-
 }
