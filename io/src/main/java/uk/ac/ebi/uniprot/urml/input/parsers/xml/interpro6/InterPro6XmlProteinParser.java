@@ -17,7 +17,7 @@
 package uk.ac.ebi.uniprot.urml.input.parsers.xml.interpro6;
 
 import org.uniprot.urml.facts.FactSet;
-import uk.ac.ebi.uniprot.aa.interproscan6.model.generated.InterproscanType;
+import uk.ac.ebi.uniprot.aa.interproscan6.model.generated.ResultsType;
 import uk.ac.ebi.uniprot.urml.input.parsers.FactSetParser;
 
 import javax.xml.bind.JAXBException;
@@ -39,14 +39,14 @@ public class InterPro6XmlProteinParser implements FactSetParser {
     }
 
     public Iterator<FactSet> parse(InputStream inputStream) throws IOException {
-        InterproscanType.Results proteinMatches;
+        ResultsType resultsType;
         try {
-            proteinMatches = interProXMLUnmarshaller.read(inputStream);
+            resultsType = interProXMLUnmarshaller.read(inputStream);
         } catch (JAXBException e) {
             throw new IOException("Cannot parse the input source", e);
         }
 
-        return new InterPro6XmlProteinConverter(proteinMatches);
+        return new InterPro6XmlProteinConverter(resultsType);
     }
 
 }
