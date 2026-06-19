@@ -24,3 +24,7 @@
 .venv
 
 __pycache__/
+work/
+.nextflow/
+.nextflow.*
+data/
