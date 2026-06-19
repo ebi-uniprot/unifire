@@ -54,13 +54,7 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="xref">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="xref" type="xrefType" minOccurs="0" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
+      <xs:element name="xref" maxOccurs="unbounded" type="xrefType" />
     </xs:sequence>
   </xs:complexType>
 
@@ -95,10 +89,8 @@
   </xs:complexType>
 
   <xs:complexType name="xrefType">
-    <xs:sequence>
-      <xs:element name="name" type="xs:string"/>
-      <xs:element name="id" type="xs:string"/>
-    </xs:sequence>
+      <xs:attribute name="name" type="xs:string"/>
+      <xs:attribute name="id" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="matchType">
@@ -136,16 +128,14 @@
       <xs:element name="name" type="xs:string" nillable="true"/>
       <xs:element name="description" type="xs:string" nillable="true"/>
       <xs:element name="type" type="xs:string"/>
-      <xs:element name="signatureLibraryRelease" type="signatureLibraryReleaseType"/>
+      <xs:element name="signature-library-release" type="signatureLibraryReleaseType"/>
       <xs:element name="entry" type="entryType" nillable="true"/>
     </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="signatureLibraryReleaseType">
-    <xs:sequence>
-      <xs:element name="library" type="xs:string"/>
-      <xs:element name="version" type="xs:string"/>
-    </xs:sequence>
+    <xs:attribute name="library" type="xs:string"/>
+    <xs:attribute name="version" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="entryType">

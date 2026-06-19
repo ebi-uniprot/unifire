@@ -17,9 +17,11 @@
 package uk.ac.ebi.uniprot.urml.input.parsers.xml.interpro6;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.uniprot.urml.facts.*;
+import org.uniprot.urml.facts.Signature;
 import org.uniprot.urml.facts.SignatureType;
 import uk.ac.ebi.uniprot.aa.interproscan6.model.generated.*;
 import uk.ac.ebi.uniprot.urml.input.parsers.fasta.header.FastaHeaderData;
@@ -72,9 +74,8 @@ public class InterPro6XmlProteinConverter implements Iterator<FactSet> {
     }
 
     private void convertProteinMatches(ProteinResultType ipsProtein) {
-
-        if (!ipsProtein.getXref().getXref().isEmpty()) {
-            for (XrefType proteinXref : ipsProtein.getXref().getXref()) {
+        if (!ipsProtein.getXref().isEmpty()) {
+            for (XrefType proteinXref : ipsProtein.getXref()) {
                 FastaHeaderData fastaHeaderData = uniProtFastaHeaderParser.parse(proteinXref.getName());
                 FactSet.Builder<Void> factSetBuilder = FactSet.builder();
 
@@ -95,7 +96,7 @@ public class InterPro6XmlProteinConverter implements Iterator<FactSet> {
             }
         } else {
             throw new InterProScan6XmlFormatException(
-                    String.format("Missing xref tag for ipsProtein md5=%s", ipsProtein.getMd5()));
+                    String.format("Missing xref tag for ipsProtein sequence=%s", ipsProtein.getSequence()));
         }
 
     }
@@ -131,7 +132,7 @@ public class InterPro6XmlProteinConverter implements Iterator<FactSet> {
                     .withProtein(protein)
                     .withFrequency(locations.size());
 
-            if (!o.getAlignment().isNil()) {
+            if (o.getAlignment() != null && o.getAlignment().getValue() != null) {
                 String alignment = o.getAlignment().getValue();
                 pSignatureBuilder
                         .withAlignment()
@@ -221,7 +222,10 @@ public class InterPro6XmlProteinConverter implements Iterator<FactSet> {
     }
 
     private SignatureType getSignatureType(SignatureLibraryReleaseType signatureLibrary) {
-        return switch (signatureLibrary.getLibrary()) {
+        var library = Optional.ofNullable(signatureLibrary).map(SignatureLibraryReleaseType::getLibrary).orElse(null);
+        if (library == null) return null;
+
+        return switch (library) {
             case "CDD" -> SignatureType.CDD;
             case "PFAM" -> SignatureType.PFAM;
             case "SFLD" -> SignatureType.SFLD;
