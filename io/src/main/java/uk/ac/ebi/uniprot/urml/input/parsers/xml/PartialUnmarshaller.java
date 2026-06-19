@@ -81,7 +81,6 @@ public class PartialUnmarshaller<T> implements Closeable {
             throw new NoSuchElementException();
 
         T value = unmarshaller.unmarshal(reader, clazz).getValue();
-        logger.info("Unmarshalled value: {}", value);
 
         skipElements(CHARACTERS, END_ELEMENT);
         return value;
