@@ -19,6 +19,7 @@ package uk.ac.ebi.uniprot.urml.input.parsers;
 import uk.ac.ebi.uniprot.urml.input.InputType;
 import uk.ac.ebi.uniprot.urml.input.parsers.xml.facts.FactXmlParser;
 import uk.ac.ebi.uniprot.urml.input.parsers.xml.interpro.InterProXmlProteinParser;
+import uk.ac.ebi.uniprot.urml.input.parsers.xml.interpro6.InterPro6XmlProteinParser;
 import uk.ac.ebi.uniprot.urml.input.parsers.xml.uniparc.UniParcXmlParser;
 
 import java.io.IOException;
@@ -46,6 +47,8 @@ public interface FactSetParser {
                 return new FactXmlParser();
             case INTERPROSCAN_XML:
                 return new InterProXmlProteinParser();
+            case INTERPROSCAN6_XML:
+                return new InterPro6XmlProteinParser();
             case UNIPARC_XML:
                 return new UniParcXmlParser();
             default:

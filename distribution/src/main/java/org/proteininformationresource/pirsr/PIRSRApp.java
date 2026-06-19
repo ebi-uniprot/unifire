@@ -152,6 +152,9 @@ public class PIRSRApp {
 			if ( type == null || type.equals("InterProScan") ) {
 				return InputType.INTERPROSCAN_XML;
 			}
+			else if (type.equals("InterProScan6") ) {
+				return InputType.INTERPROSCAN6_XML;
+			}
 			else if (type.equals("XML")) {
 				return InputType.FACT_XML;
 			}
