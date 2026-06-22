@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<results interproscan-version="5.66" interpro-version="98.0">
+  <protein>
+    <sequence md5="1cd6abff79ad3633e17582eb0e576539">MADSNGTITVEELKKLLEQWNLVIGFLFLTWICLLQFAYANRNRFLYIIKLIFLWLLWPVTLACFVLAAVYRINWITGGIAIAMACLVGLMWLSYFIASFRLFARTRSMWSFNPETNILLNVPLHGTILTRPLLESELVIGAVILRGHLRIAGHHLGRCDIKDLPKEITVATSRTLSYYKLGASQRVAGDSGFAAYSRYRIGNYKLNTDHSSSSDNIALLVQ</sequence>
+    <xref id="tr|A0A6B9WDM2|A0A6B9WDM2_SARS2" name="tr|A0A6B9WDM2|A0A6B9WDM2_SARS2 Membrane protein OS=Severe acute respiratory syndrome coronavirus 2 OX=1,10239,2559587,76804,2499399,11118,2501931,694002,2509511,694009,2697049 GN=M PE=2 SV=1" />
+    <xref id="tr|A0A6C0TBF5|A0A6C0TBF5_SARS2" name="tr|A0A6C0TBF5|A0A6C0TBF5_SARS2 Membrane glycoprotein OS=Severe acute respiratory syndrome coronavirus 2 OX=1,10239,2559587,76804,2499399,11118,2501931,694002,2509511,694009,2697049 GN=M PE=2 SV=1" />
+    <matches>
+      <match evalue="1.3E-95" score="319.0" source="Pfam">
+        <signature ac="PF01635" desc="Coronavirus M matrix/glycoprotein" name="Corona_M">
+          <signature-library-release library="Pfam" version="32.0" />
+          <entry ac="IPR002574" desc="Coronavirus M matrix/glycoprotein" name="Corona_M" type="Family">
+            <go-xref category="BIOLOGICAL_PROCESS" db="GO" id="GO:0019058" name="viral life cycle" />
+          </entry>
+        </signature>
+        <model-ac>PF01635</model-ac>
+        <locations>
+          <location env-end="221" env-start="4" score="318.8" evalue="1.4E-95" hmm-start="1" hmm-end="220" hmm-length="220" hmm-bounds="COMPLETE" start="4" end="221">
+            <location-fragments>
+              <fragment start="4" end="221" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match source="HAMAP">
+        <signature ac="MF_04202" desc="Membrane protein [M]." name="BETA_CORONA_M">
+          <signature-library-release library="HAMAP" version="2020_01" />
+          <entry ac="IPR002574" desc="Coronavirus M matrix/glycoprotein" name="Corona_M" type="Family">
+            <go-xref category="BIOLOGICAL_PROCESS" db="GO" id="GO:0019058" name="viral life cycle" />
+          </entry>
+        </signature>
+        <model-ac>MF_04202</model-ac>
+        <locations>
+          <location score="43.942" start="1" end="222">
+            <location-fragments>
+              <fragment start="1" end="222" dc-status="CONTINUOUS" />
+            </location-fragments>
+            <alignment>MADSNgTITVEELKKLLEQWNLVIGFLFLTWICLLQFAYANRNRFLYIIKLIFLWLLWPVTLACFVLAAVYRINWITGGIAIAMACLVGLMWLSYFIASFRLFARTRSMWSFNPETNILLNVPLHGTILTRPLLESELVIGAVILRGHLRIAGHHLGRCDIKDLPKEITVATSRTLSYYKLGASQRVAGDSGFAAYSRYRIGNYKLNTdHSSSSDNIALLVQ</alignment>
+          </location>
+        </locations>
+      </match>
+    </matches>
+  </protein>
+</results>

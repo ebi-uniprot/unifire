@@ -1,0 +1,72 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<results interproscan-version="5.66" interpro-version="98.0">
+  <protein>
+    <sequence md5="82f974fae7f693c70f18a909e65fd848">MVLAMTSLDLASPIFIAGHRGMVGGALVRALRGKGHQKILTGGRSELDLVNQASVESWFATHRPEVVVVAAAKVGGIHANNTYPADFLYDNLMIASNCVHAAFKNGVKRLLFLGSSCIYPRLAPQPMPEDSLLTGPLELTNEAYAVAKIAGLKLCQHYRAQHGVLFHSAMPTNLYGPGDNYHPENSHVIPALLRRFHEAKLKRLPEVVVWGTGTPRREFLHVDDLADGCLHLLESENPPDWVNIGCGDDITIRALAELVKSVVGYEGELVFDTTKPDGTPRKLMDVSRMSALGWGPKVGMKEGLEKAYADFQIAYEAHSVREG</sequence>
+    <xref id="ABIZv1_0003|Mystery" name="ABIZv1_0003|Mystery sequence OS=Verrucomicrobium spinosum DSM 4136 OX=1,131567,2,1783257,74201,203494,48461,203557,2735,2736,240016 GN=fcl" />
+    <matches>
+      <match evalue="5.7E-70" score="235.4" source="Pfam">
+        <signature ac="PF01370" desc="NAD dependent epimerase/dehydratase family" name="Epimerase">
+          <signature-library-release library="Pfam" version="31.0" />
+          <entry ac="IPR001509" desc="NAD-dependent epimerase/dehydratase" name="Epimerase_deHydtase" type="Domain">
+            <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0050662" name="coenzyme binding" />
+            <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0003824" name="catalytic activity" />
+          </entry>
+        </signature>
+        <model-ac>PF01370</model-ac>
+        <locations>
+          <location env-end="245" env-start="14" score="235.2" evalue="6.8E-70" hmm-start="1" hmm-end="241" hmm-length="241" hmm-bounds="COMPLETE" start="14" end="245" />
+        </locations>
+      </match>
+      <match evalue="1.5E-139" score="467.0" source="PANTHER">
+        <signature ac="PTHR43238:SF3" name="GDP-L-FUCOSE SYNTHASE 1-RELATED">
+          <signature-library-release library="PANTHER" version="12.0" />
+        </signature>
+        <model-ac>PTHR43238:SF3</model-ac>
+        <locations>
+          <location env-start="3" env-end="317" hmm-start="18" hmm-end="316" hmm-length="325" hmm-bounds="INCOMPLETE" start="11" end="309" />
+        </locations>
+      </match>
+      <match evalue="1.5E-139" score="467.0" source="PANTHER">
+        <signature ac="PTHR43238" name="FAMILY NOT NAMED">
+          <signature-library-release library="PANTHER" version="12.0" />
+        </signature>
+        <model-ac>PTHR43238</model-ac>
+        <locations>
+          <location env-start="3" env-end="317" hmm-start="18" hmm-end="316" hmm-length="325" hmm-bounds="INCOMPLETE" start="11" end="309" />
+        </locations>
+      </match>
+      <match source="HAMAP">
+        <signature ac="MF_00956" desc="GDP-L-fucose synthase [fcl]." name="GDP_fucose_synth">
+          <signature-library-release library="HAMAP" version="2017_10" />
+          <entry ac="IPR028614" desc="GDP-L-fucose synthase/GDP-L-colitose synthase" name="GDP_fucose/colitose_synth" type="Family">
+            <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0016491" name="oxidoreductase activity" />
+            <go-xref category="BIOLOGICAL_PROCESS" db="GO" id="GO:0009226" name="nucleotide-sugar biosynthetic process" />
+            <pathway-xref db="KEGG" id="00520+1.1.1.271" name="Amino sugar and nucleotide sugar metabolism" />
+            <pathway-xref db="MetaCyc" id="PWY-66" name="GDP-L-fucose biosynthesis I (from GDP-D-mannose)" />
+            <pathway-xref db="Reactome" id="R-HSA-6787639" name="GDP-fucose biosynthesis" />
+            <pathway-xref db="KEGG" id="00051+1.1.1.271" name="Fructose and mannose metabolism" />
+          </entry>
+        </signature>
+        <model-ac>MF_00956</model-ac>
+        <locations>
+          <location score="48.269" start="11" end="313">
+            <alignment>ASPIFIAGHRGMVGGALVRALRGKGHQKILTGGRSELDLVNQASVESWFATHRPEVVVVAAAKVGGIHANNTYPADFLYDNLMIASNCVHAAFKNGVKRLLFLGSSCIYPRLAPQPMPEDSLLTGPLELTNEAYAVAKIAGLKLCQHYRAQHGVLFHSAMPTNLYGPGDNYHPENSHVIPALLRRFHEAKLKRLPEVVVWGTGTPRREFLHVDDLADGCLHLLES-ENPPDWVNIGCGDDITIRALAELVKSVVGYEGELVFDTTKPDGTPRKLMDVSRMSALGWGPKVGMKEGLEKAYADFQI</alignment>
+          </location>
+        </locations>
+      </match>
+      <match evalue="3.9E-101" score="338.4" source="FUNFAM">
+        <signature ac="G3DSA:3.40.309.10:FF:000001" desc="Mitochondrial aldehyde dehydrogenase 2">
+          <signature-library-release library="CATH-FunFam" version="4.3.0" />
+        </signature>
+        <model-ac>3.40.309.10-FF-000001</model-ac>
+        <locations>
+          <location env-end="387" env-start="199" score="337.2" evalue="9.0E-101" hmm-start="1" hmm-end="185" hmm-length="190" hmm-bounds="COMPLETE" start="199" end="387" representative="false">
+            <location-fragments>
+              <fragment start="199" end="387" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+    </matches>
+  </protein>
+</results>

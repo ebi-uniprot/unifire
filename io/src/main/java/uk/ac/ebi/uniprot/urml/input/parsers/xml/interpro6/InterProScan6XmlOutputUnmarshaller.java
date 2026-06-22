@@ -22,6 +22,7 @@ import uk.ac.ebi.uniprot.urml.core.xml.schema.JAXBContextInitializationException
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -47,7 +48,7 @@ public class InterProScan6XmlOutputUnmarshaller {
         if (inputStream == null) {
             throw new IOException("Null input stream");
         }
-        return ((ResultsType) unmarshaller.unmarshal(inputStream));
+        return unmarshaller.unmarshal(new StreamSource(inputStream), ResultsType.class).getValue();
     }
 
 
