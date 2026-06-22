@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 /**
  * Iterates over {@link ProteinResultType} and convert them to {@link FactSet}.
  *
- * @author Alexandre Renaux
+ * @author Alexandre Renaux, modified for InterProScan 6 by Muhammad Hilmy
  */
 public class InterPro6XmlProteinConverter implements Iterator<FactSet> {
 
@@ -119,15 +119,6 @@ public class InterPro6XmlProteinConverter implements Iterator<FactSet> {
                 .withValue(accession)
                 .build();
 
-        Signature ipSignature = null;
-        if (match.getSignature().getEntry() != null) {
-            String ipsAccession = match.getSignature().getEntry().getAc();
-            ipSignature = Signature.builder()
-                    .withType(SignatureType.INTER_PRO)
-                    .withValue(ipsAccession)
-                    .build();
-        }
-
         var locations = match.getLocations().getLocation();
         for (LocationType o : locations) {
             PositionalProteinSignature.Builder<Void> pSignatureBuilder = PositionalProteinSignature.builder()
@@ -150,9 +141,13 @@ public class InterPro6XmlProteinConverter implements Iterator<FactSet> {
             var signature = pSignatureBuilder.withSignature(libSignature).build();
             factSetBuilder.addFact(signature);
 
-            if (ipSignature != null) {
-                var signatureWithIpSignature = pSignatureBuilder.withSignature(ipSignature).build();
-                factSetBuilder.addFact(signatureWithIpSignature);
+            if (match.getSignature().getEntry() != null) {
+                String ipsAccession = match.getSignature().getEntry().getAc();
+                Signature ipSignature = Signature.builder()
+                        .withType(SignatureType.INTER_PRO)
+                        .withValue(ipsAccession)
+                        .build();
+                factSetBuilder.addFact(pSignatureBuilder.withSignature(ipSignature).build());
             }
         }
     }
@@ -215,7 +210,7 @@ public class InterPro6XmlProteinConverter implements Iterator<FactSet> {
         var signatureValue = matchType.getSignature().getAc();
         return switch (signatureType) {
             case GENE_3_D, FUNFAM -> signatureValue.replace("G3DSA:", "");
-            case PANTHER -> StringUtils.isNotEmpty(matchType.getModelAc()) ? matchType.getModelAc() : signatureValue;
+            case PANTHER -> StringUtils.isNotBlank(matchType.getModelAc()) ? matchType.getModelAc() : signatureValue;
             default -> signatureValue;
         };
     }
