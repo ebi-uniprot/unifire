@@ -223,7 +223,7 @@ public class InterPro6XmlProteinConverter implements Iterator<FactSet> {
     private SignatureType getSignatureType(SignatureLibraryReleaseType signatureLibrary) {
         var library = Optional.ofNullable(signatureLibrary)
                 .map(SignatureLibraryReleaseType::getLibrary)
-                .map(InterPro6SignatureLibrary::fromName)
+                .map(InterPro6SignatureLibrary::fromKey)
                 .orElse(null);
 
         if (library == null) return null;
