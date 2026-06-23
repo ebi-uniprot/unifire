@@ -1,15 +1,10 @@
-include {fetch_unirule_urml} from './modules/unirule'
-include {fetch_pirsr_data} from './modules/pirsr'
-include {build_unifire} from './build_unifire'
+include { buildMaven } from './modules/maven'
+include { fetchData } from './data.nf'
 
 workflow {
-    main:
-    println params.uniprotRelease
+    println("Using UniProt release: $params.uniprotRelease")
 
-    build_unifire()
-
-    def urmlDir = "$workDir/data/urml"
-    def pirsrDir = "$workDir/data/pirsr"
-//    fetch_unirule_urml(params.uniprotRelease, urmlDir)
-//    fetch_pirsr_data(pirsrDir)
+    fetchData(params.dataPath)
+    def outArtifacts = buildMaven(file("${projectDir}/../"))
+    println(outArtifacts.path)
 }

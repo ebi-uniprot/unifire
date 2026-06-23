@@ -1,7 +1,3 @@
-workflow build_unifire {
-    outArtifacts = buildMaven(file("$projectDir/../"))
-}
-
 process buildMaven {
     container 'maven:latest'
 
@@ -19,7 +15,7 @@ process buildMaven {
 
     for folder in core distribution engine io procedures pom.xml;
     do
-        cp -r $sourceDir/\$folder tmpwdir/
+        cp -r ${sourceDir}/\$folder tmpwdir/
     done
 
     cd tmpwdir
