@@ -7,6 +7,7 @@ process downloadRemoteFile {
     script:
     """
     wget "${remoteUri}" -O ${outputDir}/${fileName}
+    echo "${outputDir}/${fileName}"
     """
 }
 
@@ -20,5 +21,6 @@ process downloadAndUntarRemoteFile {
     wget "${remoteUri}" -O tmp.tar.gz
     tar -zxf tmp.tar.gz -C ${outputDir}
     rm tmp.tar.gz
+    echo "$outputDir"
     """
 }
