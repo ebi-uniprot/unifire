@@ -2,10 +2,9 @@ process runUnifirePipeline {
     container "unifire/unifire-pipeline:${params.unifireVersion}"
 
     input:
-    path dataPath
-    val urmlRulesXmlFileName
-    val iprscanXmlFileName
-    val urmlTemplatesXmlFileName
+    path urmlRulesXmlFilePath
+    path iprscanXmlFilePath
+    path urmlTemplatesXmlFilePath
     path outputDirPath
     val fileName
     val inputType
@@ -28,6 +27,6 @@ process runUnifirePipeline {
       -XshowSettings:vm "\${MIN_HEAP_MEM_OPTION}" "\${MAX_HEAP_MEM_OPTION}" \
       -cp /opt/code/distribution/target/*:/opt/code/distribution/target/dependency/* \
       uk.ac.ebi.uniprot.unifire.UniFireApp \
-       -r ${dataPath}/${urmlRulesXmlFileName} -i ${dataPath}/${iprscanXmlFileName} -t ${dataPath}/${urmlTemplatesXmlFileName} -s ${inputType} -o ${outputDirPath}/${fileName}
+       -r ${urmlRulesXmlFilePath} -i ${iprscanXmlFilePath} -t ${urmlTemplatesXmlFilePath} -s ${inputType} -o ${outputDirPath}/${fileName}
     """
 }

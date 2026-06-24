@@ -1,4 +1,4 @@
-FROM maven:latest
+FROM maven:3.8.3-openjdk-17
 
 ADD core /opt/code/core
 ADD distribution /opt/code/distribution

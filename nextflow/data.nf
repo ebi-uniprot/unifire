@@ -16,8 +16,8 @@ workflow fetchData {
     pirsrBasePath.mkdirs()
 
     urmlTemplatesFilePath = urmlBasePath.resolve("unirule-templates.xml")
-    urmlFilePath = urmlBasePath.resolve("unirule-urml.xml")
-    arbaFilePath = urmlBasePath.resolve("arba-urml.xml")
+    uniruleUrmlFilePath = urmlBasePath.resolve("unirule-urml.xml")
+    arbaUrmlFilePath = urmlBasePath.resolve("arba-urml.xml")
     pirsrUrmlFilePath = urmlBasePath.resolve("unirule.pirsr-urml.xml")
     pirsrDir = pirsrBasePath
 
@@ -37,12 +37,12 @@ workflow fetchData {
 
         if (params.useUrml) {
             def urmlUri = "ftp://ftp.ebi.ac.uk/pub/contrib/UniProt/UniFIRE/rules/unirule-urml-${params.uniprotRelease}.xml"
-            urmlFilePath = downloadUrml(urmlUri, urmlBasePath, "unirule-urml.xml")
+            uniruleUrmlFilePath = downloadUrml(urmlUri, urmlBasePath, "unirule-urml.xml")
         }
 
         if (params.useArba) {
             def urmlUri = "ftp://ftp.ebi.ac.uk/pub/contrib/UniProt/UniFIRE/rules/arba-urml-${params.uniprotRelease}.xml"
-            arbaFilePath = downloadArba(urmlUri, urmlBasePath, "arba-urml.xml")
+            arbaUrmlFilePath = downloadArba(urmlUri, urmlBasePath, "arba-urml.xml")
         }
 
         if (params.usePirsr) {
@@ -57,8 +57,8 @@ workflow fetchData {
     emit:
     dataPath
     urmlTemplatesFilePath
-    urmlFilePath
-    arbaFilePath
+    uniruleUrmlFilePath
+    arbaUrmlFilePath
     pirsrUrmlFilePath
     pirsrDir
 }

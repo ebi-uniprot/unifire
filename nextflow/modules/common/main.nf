@@ -5,7 +5,7 @@ process downloadRemoteFile {
     val fileName
 
     output:
-    val fileName
+    path "${outputDir}/${fileName}"
 
     script:
     """

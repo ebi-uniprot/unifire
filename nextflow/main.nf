@@ -12,10 +12,6 @@ workflow {
 
     // Define pipeline inputs
     def iprscanXmlPath = file(params.input)
-    def dataPath = dataPaths.dataPath
-    def urmlRulesXmlPath = dataPaths.urmlFilePath
-    def urmlTemplatesXmlPath = dataPaths.urmlTemplatesFilePath
-    def arbaRulesXmlPath = dataPaths.arbaFilePath
     def pirsrDir = dataPaths.pirsrDir
     def pirsrTemplatesXmlPath = dataPaths.pirsrUrmlFilePath
 
@@ -42,13 +38,11 @@ workflow {
     def taxonomyLineageXmlPath = generateTaxonomyLineage(iprscanXmlPath)
 
     if (params.useUrml) {
-        def outPath = runUrmlPipeline(dataPath, urmlRulesXmlPath, taxonomyLineageXmlPath, urmlTemplatesXmlPath, outputDir, "predictions_unirule.out", inputType)
-        println("URML finished: ${outPath}")
+        runUrmlPipeline(dataPaths.uniruleUrmlFilePath, taxonomyLineageXmlPath, dataPaths.urmlTemplatesFilePath, outputDir, "predictions_unirule.out", inputType)
     }
 
     if (params.useArba) {
-        def outPath = runArbaPipeline(dataPath, arbaRulesXmlPath, taxonomyLineageXmlPath, urmlTemplatesXmlPath, outputDir, "predictions_arba.out", inputType)
-        println("ARBA finished: ${outPath}")
+        runArbaPipeline(dataPaths.arbaUrmlFilePath, taxonomyLineageXmlPath, dataPaths.urmlTemplatesFilePath, outputDir, "predictions_arba.out", inputType)
     }
 
     if (params.usePirsr) {
