@@ -37,12 +37,12 @@ workflow {
     // Run taxonomy lineage script
     def taxonomyLineageXmlPath = generateTaxonomyLineage(iprscanXmlPath)
 
-    if (params.useUrml) {
-        runUrmlPipeline(dataPaths.uniruleUrmlFilePath, taxonomyLineageXmlPath, dataPaths.urmlTemplatesFilePath, outputDir, "predictions_unirule.out", inputType)
+    if (params.useUrml != "false") {
+        runUrmlPipeline(params.chunkSize, dataPaths.uniruleUrmlFilePath, taxonomyLineageXmlPath, dataPaths.urmlTemplatesFilePath, outputDir, "predictions_unirule.out", inputType)
     }
 
-    if (params.useArba) {
-        runArbaPipeline(dataPaths.arbaUrmlFilePath, taxonomyLineageXmlPath, dataPaths.urmlTemplatesFilePath, outputDir, "predictions_arba.out", inputType)
+    if (params.useArba != "false") {
+        runArbaPipeline(params.chunkSize, dataPaths.arbaUrmlFilePath, taxonomyLineageXmlPath, dataPaths.urmlTemplatesFilePath, outputDir, "predictions_arba.out", inputType)
     }
 
     if (params.usePirsr) {

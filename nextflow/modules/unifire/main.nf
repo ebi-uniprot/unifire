@@ -2,6 +2,7 @@ process runUnifirePipeline {
     container "unifire/unifire-pipeline:${params.unifireVersion}"
 
     input:
+    val chunkSize
     path urmlRulesXmlFilePath
     path iprscanXmlFilePath
     path urmlTemplatesXmlFilePath
@@ -27,6 +28,6 @@ process runUnifirePipeline {
       -XshowSettings:vm "\${MIN_HEAP_MEM_OPTION}" "\${MAX_HEAP_MEM_OPTION}" \
       -cp /opt/code/distribution/target/*:/opt/code/distribution/target/dependency/* \
       uk.ac.ebi.uniprot.unifire.UniFireApp \
-       -r ${urmlRulesXmlFilePath} -i ${iprscanXmlFilePath} -t ${urmlTemplatesXmlFilePath} -s ${inputType} -o ${outputDirPath}/${fileName}
+      -n ${chunkSize} -r ${urmlRulesXmlFilePath} -i ${iprscanXmlFilePath} -t ${urmlTemplatesXmlFilePath} -s ${inputType} -o ${outputDirPath}/${fileName}
     """
 }
