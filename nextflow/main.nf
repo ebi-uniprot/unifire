@@ -3,6 +3,7 @@ include { generateTaxonomyLineage } from './modules/taxonomy'
 include { runUnifirePipeline as runUrmlPipeline } from './modules/unifire'
 include { runUnifirePipeline as runArbaPipeline } from './modules/unifire'
 
+
 workflow {
     println("Using UniProt release: ${params.uniprotRelease}")
 
@@ -11,6 +12,7 @@ workflow {
 
     // Define pipeline inputs
     def iprscanXmlPath = file(params.input)
+    def dataPath = dataPaths.dataPath
     def urmlRulesXmlPath = dataPaths.urmlFilePath
     def urmlTemplatesXmlPath = dataPaths.urmlTemplatesFilePath
     def arbaRulesXmlPath = dataPaths.arbaFilePath
@@ -37,14 +39,16 @@ workflow {
     println("Running inference on input type: ${inputType}")
 
     // Run taxonomy lineage script
-    taxonomyLineageXmlPath = generateTaxonomyLineage(iprscanXmlPath)
+    def taxonomyLineageXmlPath = generateTaxonomyLineage(iprscanXmlPath)
 
     if (params.useUrml) {
-        runUrmlPipeline(urmlRulesXmlPath, taxonomyLineageXmlPath, urmlTemplatesXmlPath, outputDir, "predictions_unirule.out", inputType)
+        def outPath = runUrmlPipeline(dataPath, urmlRulesXmlPath, taxonomyLineageXmlPath, urmlTemplatesXmlPath, outputDir, "predictions_unirule.out", inputType)
+        println("URML finished: ${outPath}")
     }
 
     if (params.useArba) {
-        runArbaPipeline(arbaRulesXmlPath, taxonomyLineageXmlPath, urmlTemplatesXmlPath, outputDir, "predictions_arba.out", inputType)
+        def outPath = runArbaPipeline(dataPath, arbaRulesXmlPath, taxonomyLineageXmlPath, urmlTemplatesXmlPath, outputDir, "predictions_arba.out", inputType)
+        println("ARBA finished: ${outPath}")
     }
 
     if (params.usePirsr) {

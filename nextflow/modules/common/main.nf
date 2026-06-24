@@ -4,6 +4,9 @@ process downloadRemoteFile {
     path outputDir
     val fileName
 
+    output:
+    val fileName
+
     script:
     """
     wget "${remoteUri}" -O ${outputDir}/${fileName}
@@ -16,11 +19,14 @@ process downloadAndUntarRemoteFile {
     val remoteUri
     path outputDir
 
+    output:
+    path outputDir
+
     script:
     """
     wget "${remoteUri}" -O tmp.tar.gz
     tar -zxf tmp.tar.gz -C ${outputDir}
     rm tmp.tar.gz
-    echo "$outputDir"
+    echo "${outputDir}"
     """
 }
