@@ -37,7 +37,7 @@ workflow {
     // Run taxonomy lineage script
     def taxonomyLineageXmlPath = generateTaxonomyLineage(iprscanXmlPath)
 
-    if (params.useUrml != "false") {
+    if (params.useUnirule != "false") {
         runUrmlPipeline(params.chunkSize, dataPaths.uniruleUrmlFilePath, taxonomyLineageXmlPath, dataPaths.urmlTemplatesFilePath, outputDir, "predictions_unirule.out", inputType)
     }
 
