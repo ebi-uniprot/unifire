@@ -33,6 +33,12 @@ def printUsage() {
                                   Default: ${params.defaultUniprotRelease}
       --skipDownloads             Skip downloading remote rule files.
 
+    Container options:
+      --unifireImage IMAGE        Docker image used for UniFIRE rule inference.
+                                  Default: ${params.defaultUnifireImage}
+      --unifireVersion VERSION    Tag of the UniFIRE Docker image.
+                                  Default: ${params.defaultUnifireVersion}
+
     Resource options:
       --unifireMemory MB          Max heap memory for UniFIRE rule inference.
       --pirsrMemory MB            Max heap memory for PIRSR alignment.

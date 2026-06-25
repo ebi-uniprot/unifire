@@ -1,5 +1,5 @@
 process runUnifirePipeline {
-    container "unifire/nextflow:${params.unifireVersion}"
+    container "${params.unifireImage}:${params.unifireVersion}"
     publishDir "${params.output}", mode: 'copy'
 
     input:

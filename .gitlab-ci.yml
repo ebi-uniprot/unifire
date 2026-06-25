@@ -16,7 +16,6 @@ include:
   # - template: Security/Dependency-Scanning.gitlab-ci.yml
   - template: Jobs/Dependency-Scanning.latest.gitlab-ci.yml
 
-
 variables:
   IMAGE_TAG_FILE: "${CI_PROJECT_DIR}/docker/versions.properties"
   DOCKER_HOST: tcp://docker:2375
@@ -27,6 +26,8 @@ variables:
   DS_MAX_DEPTH: "-1"
   GIT_DEPTH: "0"
   SECRET_DETECTION_HISTORIC_SCAN: "true"
+  NEXTFLOW_DOCKERFILE: "docker/nextflow.Dockerfile"
+  NEXTFLOW_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/nextflow"
 
 
 .mvn:
@@ -108,3 +109,27 @@ build_docker_image_full:
   variables:
     DOCKER_TARGET: full
     IMAGE_SUFFIX: ""
+
+build_push_nextflow_docker_image:
+  stage: build_docker_image
+  image: docker:24.0.5
+  tags:
+    - dind
+  services:
+    - docker:24.0.5-dind
+  before_script:
+    - echo "Building UniFIRE Nextflow docker image"
+    - docker --version
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin
+    - export NEXTFLOW_IMAGE_TAG=${CI_COMMIT_TAG#v}
+    - echo "UniFIRE Nextflow image tag will be = ${NEXTFLOW_IMAGE_TAG}"
+  script:
+    - IMAGE_NAME=${NEXTFLOW_IMAGE_NAME}:${NEXTFLOW_IMAGE_TAG}
+    - echo "Building image ${IMAGE_NAME}"
+    - docker build --file ${NEXTFLOW_DOCKERFILE} --tag ${IMAGE_NAME} --no-cache .
+    - docker image ls
+    - docker push ${IMAGE_NAME}
+    - docker rmi ${IMAGE_NAME}
+    - docker logout "$CI_REGISTRY"
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v/

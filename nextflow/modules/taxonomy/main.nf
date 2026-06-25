@@ -1,5 +1,5 @@
 process generateTaxonomyLineage {
-    container "unifire/nextflow:$params.unifireVersion"
+    container "${params.unifireImage}:${params.unifireVersion}"
 
     input:
     path iprscanXmlPath

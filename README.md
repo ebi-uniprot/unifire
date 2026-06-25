@@ -104,7 +104,7 @@ The pipeline is composed of the following stages, orchestrated by `nextflow/main
    Enriches the InterProScan XML with full NCBI taxonomy lineages using the bundled `updateIPRScanWithTaxonomicLineage.py` script.
 
 4. **Rule inference** (`nextflow/modules/unifire/main.nf` and `nextflow/modules/pirsr/main.nf`)  
-   Runs UniRule, ARBA and PIRSR inference inside the `unifire/nextflow` container. PIRSR first runs `hmmalign` and then invokes UniFIRE on the generated alignment XML.
+   Runs UniRule, ARBA and PIRSR inference inside the `dockerhub.ebi.ac.uk/uniprot-public/unifire/nextflow` container. PIRSR first runs `hmmalign` and then invokes UniFIRE on the generated alignment XML.
 
 ### Pipeline parameters
 
@@ -122,6 +122,8 @@ The pipeline is composed of the following stages, orchestrated by `nextflow/main
 | `--iprscanVersion` | no | `6.0.1` | InterProScan 6 version to run when the input is FASTA. |
 | `--iprVersion` | no | `latest` | InterPro version used with InterProScan 6. |
 | `--iprscan6ProfileName` | no | `docker` | Container profile used by the InterProScan 6 sub-workflow: `docker`, `singularity` or `podman`. |
+| `--unifireImage` | no | `dockerhub.ebi.ac.uk/uniprot-public/unifire/nextflow` | Docker image used for UniFIRE rule inference. |
+| `--unifireVersion` | no | `latest` | Tag of the UniFIRE Docker image. |
 | `--unifireMemory` | no | - | Max heap memory (in MB) for UniFIRE rule inference. |
 | `--pirsrMemory` | no | - | Max heap memory (in MB) for PIRSR alignment. |
 | `--maxWorkers` | no | - | Maximum number of parallel local workers. |
