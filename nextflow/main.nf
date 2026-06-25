@@ -52,7 +52,7 @@ workflow {
     }
 
     if ("pirsr" in systems) {
-        runPirsrPipeline(chunkSize, taxonomyLineageXmlPath, dataPaths.pirsrUrmlFilePath, dataPaths.pirsrDir, outputDir, "predictions_pirsr.out", inputType)
+        runPirsrPipeline(chunkSize, taxonomyLineageXmlPath, dataPaths.pirsrUrmlFilePath, dataPaths.pirsrDir, outputDir, "predictions_unirule-pirsr.out", inputType)
     }
 }
 
