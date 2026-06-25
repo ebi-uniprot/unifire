@@ -17,7 +17,7 @@ process runIprscan6 {
     """
     mkdir -p iprscan6-data
     echo "Copying InterProScan 6 data from data dir to staging..."
-    cp -r $dataDir/* iprscan6-data
+    cp -r $dataDir/* iprscan6-data || true
     echo "Copy finish"
     nextflow run ebi-pf-team/interproscan6 \
         --applications HAMAP,PROSITE-profiles,PROSITE-patterns,Pfam,NCBIFAM,SMART,PRINTS,SFLD,CDD,CATH-Gene3D,PIRSF,PANTHER,SUPERFAMILY,CATH-FunFam \
