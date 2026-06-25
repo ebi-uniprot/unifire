@@ -264,6 +264,22 @@ predictions_unirule-pirsr.out
 predictions_arba.out
 ```
 
+### Nextflow working directory and cleanup
+
+The Nextflow pipeline writes intermediate files to a working directory. By default this is a `work/` folder inside the directory where the pipeline is launched. To specify a different location, use the Nextflow `-work-dir` option:
+
+```bash
+nextflow run nextflow/main.nf --input samples/proteins.fasta --output out --dataPath data -work-dir /path/to/workdir
+```
+
+To remove intermediate files after a successful run, use the Nextflow clean command:
+
+```bash
+nextflow clean <run_name> -f
+```
+
+The run name is printed when the pipeline starts. You can also list previous runs with `nextflow log`.
+
 ## 2. Run UniFIRE after building it from its source code
 
 ### Prerequisites

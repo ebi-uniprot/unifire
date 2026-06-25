@@ -4,8 +4,14 @@ include { generateTaxonomyLineage } from './modules/taxonomy'
 include { runUnifirePipeline as runUnirulePipeline } from './modules/unifire'
 include { runUnifirePipeline as runArbaPipeline } from './modules/unifire'
 include { runPirsrPipeline } from './modules/pirsr'
+include { printUsage } from './modules/help'
 
 workflow {
+    if (params.help) {
+        printUsage()
+        exit(0)
+    }
+
     printBanner()
 
     def systems = parseSystems(params.systems)
@@ -34,6 +40,7 @@ workflow {
 
     if (inputType == "fasta") {
         // Run InterProScan 6 pipeline
+        println("Running InterProScan 6 pipeline with iprscanVersion=${params.iprscanVersion}, iprVersion=${params.iprVersion}")
         def iprDataPath = dataPaths.dataPath.resolve("iprscan6")
         assert iprDataPath.mkdirs()
         iprscanXmlPath = runIprscan6(params.iprscanVersion, params.iprVersion, inputPath, iprDataPath)
@@ -114,12 +121,16 @@ def inferInputType(inputFile) {
     def inferredType = null
     def lowerName = inputFile.toLowerCase()
 
-    if (lowerName.endsWith('.fasta')) {
+    if (lowerName.endsWith('.fasta') || lowerName.endsWith('.fa')) {
         inferredType = 'fasta'
     } else if (lowerName.endsWith('.xml')) {
         def file = file(inputFile)
         def content = file.text
-        def matcher = content =~ /<(\w+)/
+        // Remove XML declaration and comments, then find the first root-like element
+        def cleaned = content.replaceAll(/<\?xml[^?]*\?>/, '')
+                           .replaceAll(/<!--[\s\S]*?-->/, '')
+                           .trim()
+        def matcher = cleaned =~ /<([\w-]+)/
         def rootElement = matcher ? matcher[0][1] : null
 
         if (rootElement == 'protein-matches') {
