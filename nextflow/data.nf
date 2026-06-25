@@ -11,9 +11,9 @@ workflow fetchData {
     dataPath = file(dataPath)
 
     def urmlBasePath = dataPath.resolve("urml")
-    urmlBasePath.mkdirs()
+    assert urmlBasePath.mkdirs()
     def pirsrBasePath = dataPath.resolve("pirsr")
-    pirsrBasePath.mkdirs()
+    assert pirsrBasePath.mkdirs()
 
     urmlTemplatesFilePath = urmlBasePath.resolve("unirule-templates.xml")
     uniruleUrmlFilePath = urmlBasePath.resolve("unirule-urml.xml")
@@ -27,7 +27,7 @@ workflow fetchData {
             exit(1)
         }
         else if (!dataPath.isDirectory()) {
-            dataPath.mkdirs()
+            assert dataPath.mkdirs()
         }
 
         if (params.useUrml || params.useArba) {

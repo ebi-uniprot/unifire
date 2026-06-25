@@ -2,7 +2,7 @@ include { fetchData } from './data.nf'
 include { generateTaxonomyLineage } from './modules/taxonomy'
 include { runUnifirePipeline as runUrmlPipeline } from './modules/unifire'
 include { runUnifirePipeline as runArbaPipeline } from './modules/unifire'
-
+include { runIprscan6 } from './modules/interproscan6'
 
 workflow {
     println("Using UniProt release: ${params.uniprotRelease}")
@@ -11,7 +11,8 @@ workflow {
     dataPaths = fetchData(params.dataPath)
 
     // Define pipeline inputs
-    def iprscanXmlPath = file(params.input)
+    def inputPath = file(params.input)
+    def iprscanXmlPath = inputPath
     def pirsrDir = dataPaths.pirsrDir
     def pirsrTemplatesXmlPath = dataPaths.pirsrUrmlFilePath
 
@@ -21,14 +22,16 @@ workflow {
         exit(1)
     }
     else if (!outputDir.isDirectory()) {
-        outputDir.mkdirs()
+        assert outputDir.mkdirs()
     }
 
     def inputType = params.inputType ?: inferInputType(params.input)
 
     if (inputType == "fasta") {
         // Run InterProScan 6 pipeline
-        // TODO set iprscanFilePath to the new artifact path
+        def iprDataPath = dataPaths.dataPath.resolve("iprscan6")
+        assert iprDataPath.mkdirs()
+        iprscanXmlPath = runIprscan6(params.iprscanVersion, params.iprVersion, inputPath, iprDataPath)
         inputType = "InterProScan6"
     }
 
