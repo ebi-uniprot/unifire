@@ -1,14 +1,14 @@
 include { fetchData } from './data.nf'
 include { generateTaxonomyLineage } from './modules/taxonomy'
-include { runUnifirePipeline as runUrmlPipeline } from './modules/unifire'
+include { runUnifirePipeline as runUnirulePipeline } from './modules/unifire'
 include { runUnifirePipeline as runArbaPipeline } from './modules/unifire'
 include { runIprscan6 } from './modules/interproscan6'
 
 workflow {
-    println("Using UniProt release: ${params.uniprotRelease}")
-
     // Fetch required data
-    dataPaths = fetchData(params.dataPath)
+    def systems = params.systems.tokenize(",")
+    println("Using UniProt release: ${params.uniprotRelease}, systems: ${systems}")
+    dataPaths = fetchData(params.dataPath, systems)
 
     // Define pipeline inputs
     def inputPath = file(params.input)
@@ -40,15 +40,15 @@ workflow {
     // Run taxonomy lineage script
     def taxonomyLineageXmlPath = generateTaxonomyLineage(iprscanXmlPath)
 
-    if (params.useUnirule != "false") {
-        runUrmlPipeline(params.chunkSize, dataPaths.uniruleUrmlFilePath, taxonomyLineageXmlPath, dataPaths.urmlTemplatesFilePath, outputDir, "predictions_unirule.out", inputType)
+    if ("unirule" in systems) {
+        runUnirulePipeline(params.chunkSize, dataPaths.uniruleUrmlFilePath, taxonomyLineageXmlPath, dataPaths.urmlTemplatesFilePath, outputDir, "predictions_unirule.out", inputType)
     }
 
-    if (params.useArba != "false") {
+    if ("arba" in systems) {
         runArbaPipeline(params.chunkSize, dataPaths.arbaUrmlFilePath, taxonomyLineageXmlPath, dataPaths.urmlTemplatesFilePath, outputDir, "predictions_arba.out", inputType)
     }
 
-    if (params.usePirsr) {
+    if ("pirsr" in systems) {
         // TODO run pirsr
         def pirsr = ""
     }

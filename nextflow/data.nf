@@ -6,6 +6,7 @@ include { downloadRemoteFile as downloadPirsrUrml } from './modules/common'
 workflow fetchData {
     take:
     dataPath
+    systems
 
     main:
     dataPath = file(dataPath)
@@ -21,6 +22,10 @@ workflow fetchData {
     pirsrUrmlFilePath = urmlBasePath.resolve("unirule.pirsr-urml.xml")
     pirsrDir = pirsrBasePath
 
+    def uniruleEnabled = 'unirule' in systems
+    def arbaEnabled = 'arba' in systems
+    def pirsrEnabled = 'pirsr' in systems
+
     if (!params.skipDownloads) {
         if (dataPath.isFile()) {
             log.error("'--dataPath <DATA-DIR>' is required and cannot be an existing file.")
@@ -30,22 +35,22 @@ workflow fetchData {
             assert dataPath.mkdirs()
         }
 
-        if (params.useUrml || params.useArba) {
+        if (uniruleEnabled || arbaEnabled) {
             def urmlTemplatesUri = "ftp://ftp.ebi.ac.uk/pub/contrib/UniProt/UniFIRE/rules/unirule-templates-${params.uniprotRelease}.xml"
             urmlTemplatesFilePath = downloadUrmlTemplates(urmlTemplatesUri, urmlBasePath, "unirule-templates.xml")
         }
 
-        if (params.useUrml) {
-            def urmlUri = "ftp://ftp.ebi.ac.uk/pub/contrib/UniProt/UniFIRE/rules/unirule-urml-${params.uniprotRelease}.xml"
-            uniruleUrmlFilePath = downloadUrml(urmlUri, urmlBasePath, "unirule-urml.xml")
+        if (uniruleEnabled) {
+            def uri = "ftp://ftp.ebi.ac.uk/pub/contrib/UniProt/UniFIRE/rules/unirule-urml-${params.uniprotRelease}.xml"
+            uniruleUrmlFilePath = downloadUrml(uri, urmlBasePath, "unirule-urml.xml")
         }
 
-        if (params.useArba) {
-            def urmlUri = "ftp://ftp.ebi.ac.uk/pub/contrib/UniProt/UniFIRE/rules/arba-urml-${params.uniprotRelease}.xml"
-            arbaUrmlFilePath = downloadArba(urmlUri, urmlBasePath, "arba-urml.xml")
+        if (arbaEnabled) {
+            def uri = "ftp://ftp.ebi.ac.uk/pub/contrib/UniProt/UniFIRE/rules/arba-urml-${params.uniprotRelease}.xml"
+            arbaUrmlFilePath = downloadArba(uri, urmlBasePath, "arba-urml.xml")
         }
 
-        if (params.usePirsr) {
+        if (pirsrEnabled) {
             def urmlUri = "ftp://ftp.ebi.ac.uk/pub/contrib/UniProt/UniFIRE/rules/unirule.pirsr-urml-${params.uniprotRelease}.xml"
             pirsrUrmlFilePath = downloadPirsrUrml(urmlUri, urmlBasePath, "unirule.pirsr-urml.xml")
 

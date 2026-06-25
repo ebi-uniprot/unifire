@@ -1,6 +1,4 @@
 process runIprscan6 {
-    tag "iprscan6"
-
     input:
     val iprscanVersion
     val iprVersion
