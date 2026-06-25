@@ -1,5 +1,5 @@
 process generateTaxonomyLineage {
-    container "unifire/unifire-taxonomy:$params.unifireVersion"
+    container "unifire/nextflow:$params.unifireVersion"
 
     input:
     path iprscanXmlPath
@@ -9,7 +9,6 @@ process generateTaxonomyLineage {
 
     script:
     """
-    python3 /opt/code/update-taxonomy-cache.py
-    python3 /opt/code/updateIPRScanWithTaxonomicLineage.py -i ${iprscanXmlPath} -o taxonomy-lineage.xml -t /opt/taxa.sqlite
+    python3 /opt/misc/taxonomy/updateIPRScanWithTaxonomicLineage.py -i ${iprscanXmlPath} -o taxonomy-lineage.xml -t /opt/ete4/taxa.sqlite
     """
 }

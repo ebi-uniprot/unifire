@@ -1,4 +1,4 @@
-process runUnifirePipeline {
+process runPirsrPipeline {
     container "unifire/nextflow:${params.unifireVersion}"
 
     input:
@@ -6,6 +6,8 @@ process runUnifirePipeline {
     path urmlRulesXmlFilePath
     path iprscanXmlFilePath
     path urmlTemplatesXmlFilePath
+    path pirsrUrmlRuleFilePath
+    path pirsrDir
     path outputDirPath
     val fileName
     val inputType
@@ -15,6 +17,9 @@ process runUnifirePipeline {
 
     script:
     """
-    /opt/code/distribution/bin/unifire.sh -n ${chunkSize} -r ${urmlRulesXmlFilePath} -i ${iprscanXmlFilePath} -t ${urmlTemplatesXmlFilePath} -s ${inputType} -o ${outputDirPath}/${fileName}
+    echo "Running PIRSR hmmalign..."
+    /opt/code/distribution/bin/pirsr.sh -i ${iprscanXmlFilePath} -o ${outputDirPath}/${fileName} -a /usr/bin/hmmalign -d ${pirsrDir}
+
+    ls -lah
     """
 }
