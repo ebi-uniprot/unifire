@@ -6,8 +6,9 @@ include { runUnifirePipeline as runArbaPipeline } from './modules/unifire'
 include { runPirsrPipeline } from './modules/pirsr'
 
 workflow {
-    // Fetch required data
-    def systems = params.systems.tokenize(",")
+    printBanner()
+
+    def systems = parseSystems(params.systems)
     println("Using UniProt release: ${params.uniprotRelease}, systems: ${systems}")
     dataPaths = fetchData(params.dataPath, systems)
 
@@ -24,8 +25,10 @@ workflow {
         assert outputDir.mkdirs()
     }
 
-    def inputType = params.inputType ?: inferInputType(params.input)
+    def inputType = params.inputType ? parseInputType(params.inputType) : inferInputType(params.input)
     println("Inferred input type: ${inputType}")
+
+    def chunkSize = parseChunkSize(params.chunkSize)
 
     if (inputType == "fasta") {
         // Run InterProScan 6 pipeline
@@ -41,16 +44,51 @@ workflow {
     def taxonomyLineageXmlPath = generateTaxonomyLineage(iprscanXmlPath)
 
     if ("unirule" in systems) {
-        runUnirulePipeline(params.chunkSize, dataPaths.uniruleUrmlFilePath, taxonomyLineageXmlPath, dataPaths.urmlTemplatesFilePath, outputDir, "predictions_unirule.out", inputType)
+        runUnirulePipeline(chunkSize, dataPaths.uniruleUrmlFilePath, taxonomyLineageXmlPath, dataPaths.urmlTemplatesFilePath, outputDir, "predictions_unirule.out", inputType)
     }
 
     if ("arba" in systems) {
-        runArbaPipeline(params.chunkSize, dataPaths.arbaUrmlFilePath, taxonomyLineageXmlPath, dataPaths.urmlTemplatesFilePath, outputDir, "predictions_arba.out", inputType)
+        runArbaPipeline(chunkSize, dataPaths.arbaUrmlFilePath, taxonomyLineageXmlPath, dataPaths.urmlTemplatesFilePath, outputDir, "predictions_arba.out", inputType)
     }
 
     if ("pirsr" in systems) {
-        runPirsrPipeline(params.chunkSize, taxonomyLineageXmlPath, dataPaths.pirsrUrmlFilePath, dataPaths.pirsrDir, outputDir, "predictions_pirsr.out", inputType)
+        runPirsrPipeline(chunkSize, taxonomyLineageXmlPath, dataPaths.pirsrUrmlFilePath, dataPaths.pirsrDir, outputDir, "predictions_pirsr.out", inputType)
     }
+}
+
+def printBanner() {
+    log.info """
+    UniFIRE - UniProt Functional-Annotation Inference Rule Engine
+    Copyright (c) 2026 European Molecular Biology Laboratory
+    """.stripIndent()
+}
+
+def parseSystems(systemsParam) {
+    def validSystems = ['unirule', 'arba', 'pirsr']
+    def systems = systemsParam.tokenize(",")
+    def invalidSystems = systems - validSystems
+    if (invalidSystems) {
+        log.error("Invalid system(s): ${invalidSystems}. '--systems' must be a comma-separated list of: ${validSystems.join(', ')}")
+        exit(1)
+    }
+    return systems
+}
+
+def parseInputType(inputTypeParam) {
+    def validInputTypes = ['fasta', 'InterProScan', 'InterProScan6']
+    if (!(inputTypeParam in validInputTypes)) {
+        log.error("Invalid input type: ${inputTypeParam}. '--inputType' must be one of: ${validInputTypes.join(', ')}")
+        exit(1)
+    }
+    return inputTypeParam
+}
+
+def parseChunkSize(chunkSizeParam) {
+    if (chunkSizeParam <= 0) {
+        log.error("Invalid chunk size: ${chunkSizeParam}. '--chunkSize' must be greater than 0.")
+        exit(1)
+    }
+    return chunkSizeParam
 }
 
 def inferInputType(inputFile) {
