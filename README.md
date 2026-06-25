@@ -9,20 +9,27 @@ This project is a work in progress, open for collaboration.
 
 Introducing presentation: [UniFIRE-URML.pptx](misc/media/UniFIRE-URML.pptx)
 
-There are two primary ways to run UniFIRE:
-1. **Downloading and running the UniFIRE *Docker* image**<br/>
-The UniFIRE pre-built Docker image allows you to run the entire UniFIRE workflow, including all dependencies like 
-   InterProScan and HMMER, with a single command.  The only necessary software dependency is an installation of 
-   Docker. <br/>
-Therefore, we recommend this method for new users.
+There are three primary ways to run UniFIRE:
 
-2. **Running UniFIRE After Building from the Source Code**<br/> 
-This way requires more manual interaction from the user. Each step of a UniFIRE workflow must be executed separately 
-   or combined by a script. Also, some steps require external software like InterProScan or HMMER, which needs to 
-   be installed by the user separately or accessed through a web interface. 
-Therefore, we recommend this approach to advanced users who wish to create a particular workflow, e.g. who 
+1. **Running the UniFIRE *Nextflow* pipeline** (recommended)<br/>
+The Nextflow workflow automates data download, optional InterProScan 6 execution, taxonomy lineage generation and
+   rule inference in a containerised, reproducible pipeline. It requires Nextflow and a container engine
+   (Docker, Singularity or Podman). <br/>
+This is the preferred way to run UniFIRE.
+
+2. **Downloading and running the UniFIRE *Docker* image** (legacy)<br/>
+The UniFIRE pre-built Docker image allows you to run the entire UniFIRE workflow, including all dependencies like
+   InterProScan and HMMER, with a single command.  The only necessary software dependency is an installation of
+   Docker. <br/>
+This method is kept for backward compatibility but is no longer the recommended way to run UniFIRE.
+
+3. **Running UniFIRE After Building from the Source Code**<br/>
+This way requires more manual interaction from the user. Each step of a UniFIRE workflow must be executed separately
+   or combined by a script. Also, some steps require external software like InterProScan or HMMER, which needs to
+   be installed by the user separately or accessed through a web interface.
+Therefore, we recommend this approach to advanced users who wish to create a particular workflow, e.g. who
    need to run the heavy InterProScan within a separate procedure.
- 
+
 This documentation uses scripts and sample data provided by the UniFIRE GitLab repository. Please
  make sure you have checked out a local copy of UniFIRE Gitlab repository using the
  command below, which requires Git to be installed on your system:
@@ -30,7 +37,149 @@ This documentation uses scripts and sample data provided by the UniFIRE GitLab r
 git clone https://gitlab.ebi.ac.uk/uniprot-public/unifire.git
 ```
 
-## 1. Using the Docker image
+## 1. Using the Nextflow pipeline
+
+UniFIRE provides a Nextflow pipeline (`nextflow/main.nf`) that automates the full annotation workflow, including data download, optional InterProScan 6 execution, taxonomy lineage generation, and rule inference for UniRule, ARBA and PIRSR. The pipeline is containerised and is the recommended way to run UniFIRE.
+
+### Prerequisites
+
+#### Hardware
+
+A machine with 24 GB or more is recommended. Enough free disk space is needed for the downloaded rule data and for the Nextflow `work/` directory.
+
+#### Software
+
+- [Nextflow](https://www.nextflow.io/) (recent version, DSL2 compatible)
+- A container engine: **Docker** (default), **Singularity** or **Podman**
+- Internet access to download rule files from EBI FTP and PIRSR data files
+
+### Examples
+
+Run the full workflow from a FASTA file using Docker:
+
+```bash
+nextflow run nextflow/main.nf \
+  --input samples/proteins.fasta \
+  --output out \
+  --dataPath data
+```
+
+Run only UniRule and ARBA from a precomputed InterProScan 6 XML file:
+
+```bash
+nextflow run nextflow/main.nf \
+  --input samples/input_ipr6.xml \
+  --output out \
+  --dataPath data \
+  --systems unirule,arba \
+  --skipDownloads
+```
+
+Run with Singularity and a custom working directory:
+
+```bash
+nextflow run nextflow/main.nf -profile singularity \
+  --input samples/proteins.fasta \
+  --output out \
+  --dataPath data \
+  -work-dir /path/to/workdir
+```
+
+### Pipeline overview
+
+The pipeline is composed of the following stages, orchestrated by `nextflow/main.nf`:
+
+1. **Data fetching** (`nextflow/data.nf`)
+   Downloads the selected rule sets and templates into `--dataPath`:
+   - `unirule-urml.xml` and `unirule-templates.xml` from EBI FTP
+   - `arba-urml.xml` from EBI FTP
+   - `unirule.pirsr-urml.xml` from EBI FTP
+   - `pirsr_data_latest.tar.gz` from the Protein Information Resource
+   Use `--skipDownloads` to reuse previously downloaded files.
+
+2. **InterProScan 6** (`nextflow/modules/interproscan6/main.nf`)  
+   Runs only when the input is a FASTA file. It executes the [ebi-pf-team/interproscan6](https://github.com/ebi-pf-team/interproscan6) Nextflow workflow using the configured container profile (`docker`, `singularity` or `podman`).
+
+3. **Taxonomy lineage** (`nextflow/modules/taxonomy/main.nf`)  
+   Enriches the InterProScan XML with full NCBI taxonomy lineages using the bundled `updateIPRScanWithTaxonomicLineage.py` script.
+
+4. **Rule inference** (`nextflow/modules/unifire/main.nf` and `nextflow/modules/pirsr/main.nf`)  
+   Runs UniRule, ARBA and PIRSR inference inside the `unifire/nextflow` container. PIRSR first runs `hmmalign` and then invokes UniFIRE on the generated alignment XML.
+
+### Pipeline parameters
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| `--input` | yes | - | Path to the input file (multi-FASTA or InterProScan XML). |
+| `--output` | yes | - | Output directory where prediction files are published. |
+| `--dataPath` | yes | - | Directory where rule files and PIRSR data are downloaded/cached. |
+| `--inputType` | no | inferred | Input type: `fasta`, `InterProScan` or `InterProScan6`. Inferred from the file extension and XML root element when omitted. |
+| `--systems` | no | `unirule,arba,pirsr` | Comma-separated list of systems to run: `unirule`, `arba`, `pirsr`. |
+| `--outputFormat` | no | `TSV` | Prediction output format: `TSV` or `XML`. |
+| `--chunkSize` | no | `500` | Number of proteins processed per chunk. |
+| `--uniprotRelease` | no | `latest` | UniProt release used to download rule files. |
+| `--skipDownloads` | no | `false` | Skip downloading remote rule files (requires valid files already present in `--dataPath`). |
+| `--iprscanVersion` | no | `6.0.1` | InterProScan 6 version to run when the input is FASTA. |
+| `--iprVersion` | no | `latest` | InterPro version used with InterProScan 6. |
+| `--iprscan6ProfileName` | no | `docker` | Container profile used by the InterProScan 6 sub-workflow: `docker`, `singularity` or `podman`. |
+| `--unifireMemory` | no | - | Max heap memory (in MB) for UniFIRE rule inference. |
+| `--pirsrMemory` | no | - | Max heap memory (in MB) for PIRSR alignment. |
+| `--maxWorkers` | no | - | Maximum number of parallel local workers. |
+| `--help` | no | `false` | Print usage and exit. |
+
+### Container profiles
+
+The pipeline supports three container engines via Nextflow profiles:
+
+- **Docker** (default): `nextflow run nextflow/main.nf -profile docker ...`
+- **Singularity**: `nextflow run nextflow/main.nf -profile singularity ...`
+- **Podman**: `nextflow run nextflow/main.nf -profile podman ...`
+
+The chosen profile is also propagated to the InterProScan 6 sub-workflow through `--iprscan6ProfileName`.
+
+### Input types
+
+The pipeline accepts three input types:
+
+- **FASTA** (`fasta`): protein sequences in multi-FASTA format with UniProt-style headers containing at least `OX=<taxid>`. InterProScan 6 is executed automatically.
+- **InterProScan XML** (`InterProScan`): output from the classic InterProScan (`<protein-matches>` root element).
+- **InterProScan 6 XML** (`InterProScan6`): output from InterProScan 6 (`<results>` root element).
+
+If `--inputType` is omitted, the pipeline infers the type from the file extension (`.fasta`/`.fa` → `fasta`, `.xml` → `InterProScan` or `InterProScan6` based on the root element).
+
+### Output files
+
+The following prediction files are published in the directory specified by `--output`:
+
+```
+predictions_unirule.out
+predictions_arba.out
+predictions_unirule-pirsr.out
+```
+
+The format of these files is controlled by `--outputFormat` (`TSV` or `XML`).
+
+### Working directory and cleanup
+
+The pipeline writes intermediate files to a `work/` folder in the launch directory by default. Use the Nextflow `-work-dir` option to change the location:
+
+```bash
+nextflow run nextflow/main.nf --input samples/proteins.fasta --output out --dataPath data -work-dir /path/to/workdir
+```
+
+To remove intermediate files after a successful run, use:
+
+```bash
+nextflow clean <run_name> -f
+```
+
+The run name is printed when the pipeline starts. You can list previous runs with `nextflow log`.
+
+***
+
+## 2. Using the Docker image (legacy)
+
+> **Note:** The Docker image workflow is considered legacy. The [Nextflow pipeline](#1-using-the-nextflow-pipeline) is the recommended way to run UniFIRE.
 
 There are two Docker image variants provided to suit different user needs and environments::
 
@@ -264,23 +413,7 @@ predictions_unirule-pirsr.out
 predictions_arba.out
 ```
 
-### Nextflow working directory and cleanup
-
-The Nextflow pipeline writes intermediate files to a working directory. By default this is a `work/` folder inside the directory where the pipeline is launched. To specify a different location, use the Nextflow `-work-dir` option:
-
-```bash
-nextflow run nextflow/main.nf --input samples/proteins.fasta --output out --dataPath data -work-dir /path/to/workdir
-```
-
-To remove intermediate files after a successful run, use the Nextflow clean command:
-
-```bash
-nextflow clean <run_name> -f
-```
-
-The run name is printed when the pipeline starts. You can also list previous runs with `nextflow log`.
-
-## 2. Run UniFIRE after building it from its source code
+## 3. Run UniFIRE after building it from its source code
 
 ### Prerequisites
 
@@ -509,6 +642,48 @@ By excluding some of those analyses, some rules might not be triggered as a resu
 
 If you do not wish to install InterProScan, you can use the [online version](https://www.ebi.ac.uk/interpro/search/sequence-search) and then download the results in XML.
 The only limitation is that the online version does not provide the sequence alignments for the matches, making the execution of UniRule positional features impossible (non-positional rules will still be executed).
+
+### Running InterProScan 6
+
+InterProScan 6 is run automatically by the Nextflow pipeline when the input is a FASTA file. If you prefer to run it separately, the InterProScan 6 Nextflow workflow can be executed directly. See the [InterProScan 6 documentation](https://interproscan6.readthedocs.io/) for full details.
+
+Prerequisites:
+- [Nextflow](https://www.nextflow.io/)
+- A container engine: **Docker** (default), **Singularity** or **Podman**
+
+Command:
+
+``` bash
+nextflow run ebi-pf-team/interproscan6 \
+  --applications HAMAP,PROSITE-profiles,PROSITE-patterns,Pfam,NCBIFAM,SMART,PRINTS,SFLD,CDD,CATH-Gene3D,PIRSF,PANTHER,SUPERFAMILY,CATH-FunFam \
+  -r 6.0.1 \
+  --interpro latest \
+  -profile docker \
+  --datadir iprscan6-data \
+  --input multifasta_sequences.fasta \
+  --formats xml \
+  --outdir results
+```
+
+#### Analyses to run
+
+* HAMAP
+* PROSITE-profiles
+* PROSITE-patterns
+* Pfam
+* NCBIFAM
+* SMART
+* PRINTS
+* SFLD
+* CDD
+* CATH-Gene3D
+* PIRSF
+* PANTHER
+* SUPERFAMILY
+* CATH-FunFam
+
+It is possible to include/exclude some of the analyses by modifying the `--applications` option in the above command. UniFIRE will still be able to process the data.
+By excluding some of those analyses, some rules might not be triggered as a result.
 
 ### Running UniFIRE
 
