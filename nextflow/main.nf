@@ -9,6 +9,7 @@ workflow {
     printBanner()
 
     def systems = parseSystems(params.systems)
+    validateIprscan6ProfileName(params.iprscan6ProfileName)
     println("Using UniProt release: ${params.uniprotRelease}, systems: ${systems}")
     dataPaths = fetchData(params.dataPath, systems)
 
@@ -44,15 +45,15 @@ workflow {
     def taxonomyLineageXmlPath = generateTaxonomyLineage(iprscanXmlPath)
 
     if ("unirule" in systems) {
-        runUnirulePipeline(chunkSize, dataPaths.uniruleUrmlFilePath, taxonomyLineageXmlPath, dataPaths.urmlTemplatesFilePath, outputDir, "predictions_unirule.out", inputType)
+        runUnirulePipeline(chunkSize, dataPaths.uniruleUrmlFilePath, taxonomyLineageXmlPath, dataPaths.urmlTemplatesFilePath, "predictions_unirule.out", inputType)
     }
 
     if ("arba" in systems) {
-        runArbaPipeline(chunkSize, dataPaths.arbaUrmlFilePath, taxonomyLineageXmlPath, dataPaths.urmlTemplatesFilePath, outputDir, "predictions_arba.out", inputType)
+        runArbaPipeline(chunkSize, dataPaths.arbaUrmlFilePath, taxonomyLineageXmlPath, dataPaths.urmlTemplatesFilePath, "predictions_arba.out", inputType)
     }
 
     if ("pirsr" in systems) {
-        runPirsrPipeline(chunkSize, taxonomyLineageXmlPath, dataPaths.pirsrUrmlFilePath, dataPaths.pirsrDir, outputDir, "predictions_unirule-pirsr.out", inputType)
+        runPirsrPipeline(chunkSize, taxonomyLineageXmlPath, dataPaths.pirsrUrmlFilePath, dataPaths.pirsrDir, "predictions_unirule-pirsr.out", inputType)
     }
 }
 
@@ -89,6 +90,14 @@ def parseChunkSize(chunkSizeParam) {
         exit(1)
     }
     return chunkSizeParam
+}
+
+def validateIprscan6ProfileName(profileName) {
+    def validProfiles = ['docker', 'singularity', 'podman']
+    if (!(profileName in validProfiles)) {
+        log.error("Invalid iprscan6ProfileName: ${profileName}. Must be one of: ${validProfiles.join(', ')}")
+        exit(1)
+    }
 }
 
 def inferInputType(inputFile) {

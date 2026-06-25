@@ -21,7 +21,7 @@ process runIprscan6 {
         --applications HAMAP,PROSITE-profiles,PROSITE-patterns,Pfam,NCBIFAM,SMART,PRINTS,SFLD,CDD,CATH-Gene3D,PIRSF,PANTHER,SUPERFAMILY,CATH-FunFam \
         -r ${iprscanVersion} \
         --interpro ${iprVersion} \
-        -profile docker \
+        -profile ${params.iprscan6ProfileName} \
         --datadir iprscan6-data \
         --input ${inputSequencePath} \
         --formats xml \
