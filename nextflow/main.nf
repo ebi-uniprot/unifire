@@ -10,6 +10,7 @@ workflow {
 
     def systems = parseSystems(params.systems)
     validateIprscan6ProfileName(params.iprscan6ProfileName)
+    def outputFormat = parseOutputFormat(params.outputFormat)
     println("Using UniProt release: ${params.uniprotRelease}, systems: ${systems}")
     dataPaths = fetchData(params.dataPath, systems)
 
@@ -45,15 +46,15 @@ workflow {
     def taxonomyLineageXmlPath = generateTaxonomyLineage(iprscanXmlPath)
 
     if ("unirule" in systems) {
-        runUnirulePipeline(chunkSize, dataPaths.uniruleUrmlFilePath, taxonomyLineageXmlPath, dataPaths.urmlTemplatesFilePath, "predictions_unirule.out", inputType)
+        runUnirulePipeline(chunkSize, dataPaths.uniruleUrmlFilePath, taxonomyLineageXmlPath, dataPaths.urmlTemplatesFilePath, "predictions_unirule.out", inputType, outputFormat)
     }
 
     if ("arba" in systems) {
-        runArbaPipeline(chunkSize, dataPaths.arbaUrmlFilePath, taxonomyLineageXmlPath, dataPaths.urmlTemplatesFilePath, "predictions_arba.out", inputType)
+        runArbaPipeline(chunkSize, dataPaths.arbaUrmlFilePath, taxonomyLineageXmlPath, dataPaths.urmlTemplatesFilePath, "predictions_arba.out", inputType, outputFormat)
     }
 
     if ("pirsr" in systems) {
-        runPirsrPipeline(chunkSize, taxonomyLineageXmlPath, dataPaths.pirsrUrmlFilePath, dataPaths.pirsrDir, "predictions_unirule-pirsr.out", inputType)
+        runPirsrPipeline(chunkSize, taxonomyLineageXmlPath, dataPaths.pirsrUrmlFilePath, dataPaths.pirsrDir, "predictions_unirule-pirsr.out", inputType, outputFormat)
     }
 }
 
@@ -98,6 +99,15 @@ def validateIprscan6ProfileName(profileName) {
         log.error("Invalid iprscan6ProfileName: ${profileName}. Must be one of: ${validProfiles.join(', ')}")
         exit(1)
     }
+}
+
+def parseOutputFormat(outputFormatParam) {
+    def validFormats = ['TSV', 'XML']
+    if (!(outputFormatParam in validFormats)) {
+        log.error("Invalid output format: ${outputFormatParam}. '--outputFormat' must be one of: ${validFormats.join(', ')}")
+        exit(1)
+    }
+    return outputFormatParam
 }
 
 def inferInputType(inputFile) {

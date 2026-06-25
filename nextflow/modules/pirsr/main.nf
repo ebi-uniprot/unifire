@@ -9,6 +9,7 @@ process runPirsrPipeline {
     path pirsrDir
     val fileName
     val inputType
+    val outputFormat
 
     output:
     path "${fileName}"
@@ -22,7 +23,7 @@ process runPirsrPipeline {
     mv pirsr-pred/*.xml pirsr-pred.xml
 
     echo "Running rules inference on PIRSR..."
-    /opt/code/distribution/bin/unifire.sh -n ${chunkSize} -r ${pirsrUrmlXmlFilePath} -i pirsr-pred.xml -s XML -t ${pirsrDir}/pirsr_data/PIRSR_templates.xml -o ${fileName} ${memoryOpt}
+    /opt/code/distribution/bin/unifire.sh -n ${chunkSize} -r ${pirsrUrmlXmlFilePath} -i pirsr-pred.xml -s XML -t ${pirsrDir}/pirsr_data/PIRSR_templates.xml -o ${fileName} -f ${outputFormat} ${memoryOpt}
 
     ls -lah
     """

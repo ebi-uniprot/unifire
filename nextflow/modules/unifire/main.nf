@@ -9,6 +9,7 @@ process runUnifirePipeline {
     path urmlTemplatesXmlFilePath
     val fileName
     val inputType
+    val outputFormat
 
     output:
     path "${fileName}"
@@ -16,6 +17,6 @@ process runUnifirePipeline {
     script:
     def memoryOpt = params.unifireMemory ? "-m ${params.unifireMemory}" : ""
     """
-    /opt/code/distribution/bin/unifire.sh -n ${chunkSize} -r ${urmlRulesXmlFilePath} -i ${iprscanXmlFilePath} -t ${urmlTemplatesXmlFilePath} -s ${inputType} -o ${fileName} ${memoryOpt}
+    /opt/code/distribution/bin/unifire.sh -n ${chunkSize} -r ${urmlRulesXmlFilePath} -i ${iprscanXmlFilePath} -t ${urmlTemplatesXmlFilePath} -s ${inputType} -o ${fileName} -f ${outputFormat} ${memoryOpt}
     """
 }
