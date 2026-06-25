@@ -1,8 +1,9 @@
 include { fetchData } from './data.nf'
+include { runIprscan6 } from './modules/interproscan6'
 include { generateTaxonomyLineage } from './modules/taxonomy'
 include { runUnifirePipeline as runUnirulePipeline } from './modules/unifire'
 include { runUnifirePipeline as runArbaPipeline } from './modules/unifire'
-include { runIprscan6 } from './modules/interproscan6'
+include { runPirsrPipeline } from './modules/pirsr'
 
 workflow {
     // Fetch required data
@@ -13,8 +14,6 @@ workflow {
     // Define pipeline inputs
     def inputPath = file(params.input)
     def iprscanXmlPath = inputPath
-    def pirsrDir = dataPaths.pirsrDir
-    def pirsrTemplatesXmlPath = dataPaths.pirsrUrmlFilePath
 
     def outputDir = file(params.output)
     if (outputDir.isFile()) {
@@ -26,6 +25,7 @@ workflow {
     }
 
     def inputType = params.inputType ?: inferInputType(params.input)
+    println("Inferred input type: ${inputType}")
 
     if (inputType == "fasta") {
         // Run InterProScan 6 pipeline
@@ -49,29 +49,28 @@ workflow {
     }
 
     if ("pirsr" in systems) {
-        // TODO run pirsr
-        def pirsr = ""
+        runPirsrPipeline(params.chunkSize, taxonomyLineageXmlPath, dataPaths.pirsrUrmlFilePath, dataPaths.pirsrDir, outputDir, "predictions_pirsr.out", inputType)
     }
 }
 
-process inferInputType {
-    input:
-    path fileName
+def inferInputType(inputFile) {
+    def inferredType = null
+    def lowerName = inputFile.toLowerCase()
 
-    output:
-    stdout
+    if (lowerName.endsWith('.fasta')) {
+        inferredType = 'fasta'
+    } else if (lowerName.endsWith('.xml')) {
+        def file = file(inputFile)
+        def content = file.text
+        def matcher = content =~ /<(\w+)/
+        def rootElement = matcher ? matcher[0][1] : null
 
-    script:
-    """
-    if [[ "${fileName}" == *.fasta ]]; then
-        echo "fasta"
-    elif [[ "${fileName}" == *.xml ]]; then
-        root_element=\$(grep -oP '(?<=<)[^>\\s/]+' "${fileName}" | head -1)
-        if [[ "\$root_element" == "protein-matches" ]]; then
-            echo "InterProScan"
-        elif [[ "\$root_element" == "results" ]]; then
-            echo "InterProScan6"
-        fi
-    fi
-    """
+        if (rootElement == 'protein-matches') {
+            inferredType = 'InterProScan'
+        } else if (rootElement == 'results') {
+            inferredType = 'InterProScan6'
+        }
+    }
+
+    return inferredType
 }
