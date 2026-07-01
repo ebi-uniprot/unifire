@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2018 European Molecular Biology Laboratory
+ *  Copyright (c) 2026 European Molecular Biology Laboratory
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  *  limitations under the License.
  */
 
-package uk.ac.ebi.uniprot.urml.input.parsers.xml.interpro;
+package uk.ac.ebi.uniprot.urml.input.parsers.xml.interpro6;
 
 import org.uniprot.urml.facts.FactSet;
-import uk.ac.ebi.interpro.scan.model.ProteinMatchesHolder;
+import uk.ac.ebi.uniprot.aa.interproscan6.model.generated.ResultsType;
 import uk.ac.ebi.uniprot.urml.input.parsers.FactSetParser;
 import uk.ac.ebi.uniprot.urml.input.parsers.xml.XmlUnmarshaller;
 
@@ -31,23 +31,23 @@ import java.util.Iterator;
  *
  * @author Alexandre Renaux
  */
-public class InterProXmlProteinParser implements FactSetParser {
+public class InterPro6XmlProteinParser implements FactSetParser {
 
-    private final XmlUnmarshaller<ProteinMatchesHolder> interProXMLUnmarshaller;
+    private final XmlUnmarshaller<ResultsType> interProXMLUnmarshaller;
 
-    public InterProXmlProteinParser() {
-        this.interProXMLUnmarshaller = new XmlUnmarshaller<>(ProteinMatchesHolder.class);
+    public InterPro6XmlProteinParser() {
+        this.interProXMLUnmarshaller = new XmlUnmarshaller<>(ResultsType.class);
     }
 
     public Iterator<FactSet> parse(InputStream inputStream) throws IOException {
-        ProteinMatchesHolder proteinMatches;
+        ResultsType resultsType;
         try {
-            proteinMatches = interProXMLUnmarshaller.read(inputStream);
+            resultsType = interProXMLUnmarshaller.read(inputStream);
         } catch (JAXBException e) {
             throw new IOException("Cannot parse the input source", e);
         }
 
-        return new InterProXmlProteinConverter(proteinMatches);
+        return new InterPro6XmlProteinConverter(resultsType);
     }
 
 }

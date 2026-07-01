@@ -18,6 +18,7 @@ package uk.ac.ebi.uniprot.urml.input.parsers;
 
 import uk.ac.ebi.uniprot.urml.input.InputType;
 import uk.ac.ebi.uniprot.urml.input.parsers.xml.interpro.InterProXmlFactSetChunkParser;
+import uk.ac.ebi.uniprot.urml.input.parsers.xml.interpro6.InterPro6XmlFactSetChunkParser;
 import uk.ac.ebi.uniprot.urml.input.parsers.xml.uniparc.UniParcXmlFactSetChunkParser;
 
 import java.io.IOException;
@@ -42,6 +43,8 @@ public interface FactSetChunkParser extends AutoCloseable {
                     throw new UnsupportedOperationException("FACT-XML cannot be parsed chunk-by-chunk.");
                 case INTERPROSCAN_XML:
                     return new InterProXmlFactSetChunkParser(inputStream);
+                case INTERPROSCAN6_XML:
+                    return new InterPro6XmlFactSetChunkParser(inputStream);
                 case UNIPARC_XML:
                     return new UniParcXmlFactSetChunkParser(inputStream);
                 default:
@@ -54,6 +57,8 @@ public interface FactSetChunkParser extends AutoCloseable {
                     throw new UnsupportedOperationException("FACT-XML cannot be parsed chunk-by-chunk.");
                 case INTERPROSCAN_XML:
                     return new InterProXmlFactSetChunkParser(inputStream, chunksize);
+                case INTERPROSCAN6_XML:
+                    return new InterPro6XmlFactSetChunkParser(inputStream, chunksize);
                 case UNIPARC_XML:
                     return new UniParcXmlFactSetChunkParser(inputStream, chunksize);
                 default:
