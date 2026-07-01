@@ -39,20 +39,28 @@
         <unirule.public.version>1.1</unirule.public.version>
         <interproscan-model.version>5.66-98.0</interproscan-model.version>
         <!-- logging -->
-        <logback.version>1.4.14</logback.version>
+        <logback.version>1.5.25</logback.version>
         <slf4j.version>2.0.9</slf4j.version>
         <!-- commons/utils/etc -->
         <commons-collections.version>4.1</commons-collections.version>
-        <commons-lang3.version>3.11</commons-lang3.version>
-        <guava.version>30.0-jre</guava.version>
+        <commons-lang3.version>3.18.0</commons-lang3.version>
+        <commons-io.version>2.14.0</commons-io.version>
+        <commons-beanutils.version>1.11.0</commons-beanutils.version>
+        <guava.version>32.1.3-jre</guava.version>
         <reflections.version>0.10.2</reflections.version>
         <!--Testing-->
         <mockito.version>3.6.0</mockito.version>
         <hamcrest.version>2.2</hamcrest.version>
         <junit5.version>5.8.2</junit5.version>
-        <xmlunit.version>2.7.0</xmlunit.version>
+        <xmlunit.version>2.10.0</xmlunit.version>
+        <!-- transitive vulnerable deps -->
+        <jackson.version>2.18.8</jackson.version>
+        <woodstox-core.version>6.7.0</woodstox-core.version>
+        <xstream.version>1.4.21</xstream.version>
+        <protobuf.version>3.25.5</protobuf.version>
+        <javax-persistence.version>2.2</javax-persistence.version>
         <!--JAXB-->
-        <plugin.jaxb.version>2.0.9</plugin.jaxb.version>
+        <plugin.jaxb.version>2.0.16</plugin.jaxb.version>
         <jaxb2-rich-contract-plugin.version>2.0.1</jaxb2-rich-contract-plugin.version>
         <glassfish.jaxb.runtime.version>2.3.8</glassfish.jaxb.runtime.version>
         <javax-activation.version>1.1</javax-activation.version>
@@ -195,6 +203,52 @@
                 <artifactId>reflections</artifactId>
                 <version>${reflections.version}</version>
             </dependency>
+
+            <!-- vulnerable transitive dependencies -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-xml</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.woodstox</groupId>
+                <artifactId>woodstox-core</artifactId>
+                <version>${woodstox-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.thoughtworks.xstream</groupId>
+                <artifactId>xstream</artifactId>
+                <version>${xstream.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf.version}</version>
+            </dependency>
+
+
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
+            </dependency>
+
+
 
             <!-- https://mvnrepository.com/artifact/org.fusesource.jansi/jansi -->
             <dependency>

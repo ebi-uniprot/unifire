@@ -23,7 +23,6 @@ import uk.ac.ebi.uniprot.urml.input.parsers.fasta.header.FastaHeaderData;
 import uk.ac.ebi.uniprot.urml.input.parsers.fasta.header.FastaHeaderParser;
 
 import java.util.*;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.uniprot.urml.facts.Signature;
@@ -167,8 +166,9 @@ public class InterProXmlProteinConverter implements Iterator<FactSet>{
         if (fastaHeaderData.getRecommendedOlnOrOrf() != null){
             geneBuilder.withOrfOrOlnNames(fastaHeaderData.getRecommendedOlnOrOrf());
         }
-        if (!CollectionUtils.isEmpty(fastaHeaderData.getGeneLocationOrganelles())){
-            geneBuilder.withOrganelleLocations(fastaHeaderData.getGeneLocationOrganelles());
+        List<OrganelleType> organelles = fastaHeaderData.getGeneLocationOrganelles();
+        if (organelles != null && !organelles.isEmpty()){
+            geneBuilder.withOrganelleLocations(organelles);
         }
     }
 
