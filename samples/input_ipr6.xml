@@ -1,0 +1,351 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<results interproscan-version="6.0.1" interpro-version="109.0">
+  <protein>
+    <sequence md5="228FEA885BDA1B7325DEE6A215060C21">MSLSPKQEQLFKQANKHIPGGVNSPVRAFNGVGGTPIFIEKAQGAYLYDVDGKRYVDYVGSWGPMILGHAHPSIIKAVQDAAVDGLSFGAPTVHETTLADIICDIMPSIELVRMTNSGTEATMTAIRLARGYTGRDKIVKFEGCYHGHSDSLLVKAGSGLLTKGEGEATSAGVPADFAKHTLTLPYNDIATLKECFAKFGSEIAGVIVEPVAGNMNLVKPIDGFLQAIRDVCDEHGSVFIIDEVMTGFRVGLGGAQAHYGVTPDLTTLGKIIGAGLPVGAFGGKREVMECIAPLGNVYQAGTLSGNPLAMRAGIEMFKHLREPGFYEKLTAQLEKLLAGLQAAADEAGIPFKTQQVGGMFGLYFTDQEDITSFDSMLKCDVEAFKKFFHGMLSRGVNLAPSAFEAGFISAAHSDEDIEFTIQAAKETFAEMKG</sequence>
+    <xref id="tr|A0A009EAR0|A0A009EAR0_ACIBA" name="tr|A0A009EAR0|A0A009EAR0_ACIBA Glutamate-1-semialdehyde 2,1-aminomutase OS=Acinetobacter baumannii 348935 OX=1310605 GN=hemL PE=3 SV=1"/>
+    <matches>
+      <match source="PROSITE patterns">
+        <signature ac="PS00600" name="AA_TRANSFER_CLASS_3" type="Conserved_site">
+          <signature-library-release library="PROSITE patterns" version="2026_01"/>
+          <entry ac="IPR049704" desc="Aminotransferases class-III pyridoxal-phosphate attachment site" name="Aminotrans_3_PPA_site" type="Conserved_site"/>
+        </signature>
+        <model-ac>PS00600</model-ac>
+        <locations>
+          <location start="239" end="275" representative="false" level="STRONG">
+            <location-fragments>
+              <fragment start="239" end="275" dc-status="CONTINUOUS"/>
+            </location-fragments>
+            <alignment>FIiDEVmtGFRvGlggaqahygvtpDLTtlGKiigAG</alignment>
+            <cigar-alignment>2M1I3M2I3M1I1M12I3M2I2M3I2M</cigar-alignment>
+          </location>
+        </locations>
+      </match>
+      <match source="SUPERFAMILY">
+        <signature ac="SSF53383" type="Homologous_superfamily">
+          <signature-library-release library="SUPERFAMILY" version="1.75"/>
+          <entry ac="IPR015424" desc="Pyridoxal phosphate-dependent transferase" name="PyrdxlP-dep_Trfase" type="Homologous_superfamily"/>
+        </signature>
+        <model-ac>0052943</model-ac>
+        <locations>
+          <location start="5" end="430" representative="true" evalue="2.25E-129" hmm-length="427">
+            <location-fragments>
+              <fragment start="5" end="430" dc-status="CONTINUOUS"/>
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match source="CDD">
+        <signature ac="cd00610" name="OAT_like" type="Domain">
+          <signature-library-release library="CDD" version="3.21"/>
+          <entry ac="IPR005814" desc="Aminotransferase class-III" name="Aminotrans_3" type="Family"/>
+        </signature>
+        <model-ac>cd00610</model-ac>
+        <locations>
+          <location start="10" end="428" representative="false" evalue="1.03747E-134" score="391.547">
+            <location-fragments>
+              <fragment start="10" end="428" dc-status="CONTINUOUS"/>
+            </location-fragments>
+            <sites>
+              <site description="catalytic residue" numLocations="1">
+                <site-locations>
+                  <site-location residue="K" start="270" end="270"/>
+                </site-locations>
+              </site>
+              <site description="pyridoxal 5'-phosphate binding site" numLocations="8">
+                <site-locations>
+                  <site-location residue="G" start="118" end="118"/>
+                  <site-location residue="T" start="119" end="119"/>
+                  <site-location residue="Y" start="145" end="145"/>
+                  <site-location residue="H" start="146" end="146"/>
+                  <site-location residue="E" start="209" end="209"/>
+                  <site-location residue="D" start="242" end="242"/>
+                  <site-location residue="M" start="245" end="245"/>
+                  <site-location residue="K" start="270" end="270"/>
+                </site-locations>
+              </site>
+              <site description="inhibitor-cofactor binding pocket" numLocations="11">
+                <site-locations>
+                  <site-location residue="S" start="117" end="117"/>
+                  <site-location residue="G" start="118" end="118"/>
+                  <site-location residue="T" start="119" end="119"/>
+                  <site-location residue="Y" start="145" end="145"/>
+                  <site-location residue="H" start="146" end="146"/>
+                  <site-location residue="H" start="148" end="148"/>
+                  <site-location residue="E" start="209" end="209"/>
+                  <site-location residue="D" start="242" end="242"/>
+                  <site-location residue="V" start="244" end="244"/>
+                  <site-location residue="M" start="245" end="245"/>
+                  <site-location residue="K" start="270" end="270"/>
+                </site-locations>
+              </site>
+            </sites>
+          </location>
+        </locations>
+      </match>
+      <match source="HAMAP">
+        <signature ac="MF_00375" name="HemL_aminotrans_3" type="Family">
+          <signature-library-release library="HAMAP" version="2026_01"/>
+          <entry ac="IPR004639" desc="Tetrapyrrole biosynthesis, glutamate-1-semialdehyde aminotransferase" name="4pyrrol_synth_GluAld_NH2Trfase" type="Family"/>
+        </signature>
+        <model-ac>MF_00375</model-ac>
+        <locations>
+          <location start="6" end="431" representative="false" score="104.917374">
+            <location-fragments>
+              <fragment start="6" end="431" dc-status="CONTINUOUS"/>
+            </location-fragments>
+            <alignment>KQEQLFKQANKHIPGGVNSPVRAFNGVGG-TPIFIEKAQGAYLYDVDGKRYVDYVGSWGPMILGHAHPSIIKAVQDAAVDGLSFGAPTVHETTLADIICDIMPSI-ELVRMTNSGTEATMTAIRLARGYTGRDKIVKFEGCYHGHSDSLLVKAGSGLLTKGE-------GeATSAGVPADFAKHTLTLPYNDIATLKECFAKF-GSEIAGVIVEPVAGNMNLVKPIDGFLQAIRDVCDEHGSVFIIDEVMTGFRVGLGGAQAHYGV--TPDLTTLGKIIGAGLPVGAFGGKREVMECIAPLGNVYQAGTLSGNPLAMRAGIEMFKHLRE---PGFYEKLTAQLEKLLAGLQAAADEAG-IPFKTQQVGGMFGLYFTDQE---DITSFDSMLK----CDVEAFKKFFHGMLSRGVNLAPSAFEAGFISAAHSDEDIEFTIQAAKETFAEM</alignment>
+            <cigar-alignment>29M1D75M1D56M7D1M1I32M1D62M2D61M3D26M1D20M3D10M4D53M</cigar-alignment>
+          </location>
+        </locations>
+      </match>
+      <match evalue="9.9E-73" score="256.7" source="Pfam">
+        <signature ac="PF00202" name="Aminotran_3" type="Domain">
+          <signature-library-release library="Pfam" version="38.2"/>
+          <entry ac="IPR005814" desc="Aminotransferase class-III" name="Aminotrans_3" type="Family"/>
+        </signature>
+        <model-ac>PF00202</model-ac>
+        <locations>
+          <location start="35" end="399" representative="false" hmm-start="9" hmm-end="372" hmm-length="403" hmm-bounds="INCOMPLETE" evalue="1.3E-72" score="256.4" env-start="29" env-end="417">
+            <location-fragments>
+              <fragment start="35" end="399" dc-status="CONTINUOUS"/>
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match evalue="1.6E-202" score="684.5" source="NCBIFAM">
+        <signature ac="NF000818" name="PRK00062.1" type="Family">
+          <signature-library-release library="NCBIFAM" version="19.0"/>
+          <entry ac="IPR004639" desc="Tetrapyrrole biosynthesis, glutamate-1-semialdehyde aminotransferase" name="4pyrrol_synth_GluAld_NH2Trfase" type="Family"/>
+        </signature>
+        <model-ac>NF000818</model-ac>
+        <locations>
+          <location start="6" end="431" representative="false" hmm-start="5" hmm-end="427" hmm-length="429" hmm-bounds="INCOMPLETE" evalue="1.8E-202" score="684.3" env-start="2" env-end="433">
+            <location-fragments>
+              <fragment start="6" end="431" dc-status="CONTINUOUS"/>
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match evalue="4.5E-184" score="623.6" source="NCBIFAM">
+        <signature ac="TIGR00713" name="hemL" type="Family">
+          <signature-library-release library="NCBIFAM" version="19.0"/>
+          <entry ac="IPR004639" desc="Tetrapyrrole biosynthesis, glutamate-1-semialdehyde aminotransferase" name="4pyrrol_synth_GluAld_NH2Trfase" type="Family"/>
+        </signature>
+        <model-ac>TIGR00713</model-ac>
+        <locations>
+          <location start="6" end="430" representative="false" hmm-start="1" hmm-end="422" hmm-length="423" hmm-bounds="N_TERMINAL_COMPLETE" evalue="5.1E-184" score="623.4" env-start="6" env-end="431">
+            <location-fragments>
+              <fragment start="6" end="430" dc-status="CONTINUOUS"/>
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match evalue="2.2E-192" score="641.2" source="CATH-Gene3D">
+        <signature ac="G3DSA:3.90.1150.10" type="Homologous_superfamily">
+          <signature-library-release library="CATH-Gene3D" version="4.3.0"/>
+          <entry ac="IPR015422" desc="Pyridoxal phosphate-dependent transferase, small domain" name="PyrdxlP-dep_Trfase_small" type="Homologous_superfamily"/>
+        </signature>
+        <model-ac>5hdmA01</model-ac>
+        <locations>
+          <location start="9" end="424" representative="false" hmm-start="1" hmm-end="414" hmm-length="414" hmm-bounds="COMPLETE" evalue="2.5E-192" score="641.0" env-start="8" env-end="424">
+            <location-fragments>
+              <fragment start="9" end="71" dc-status="C_TERMINAL_DISC"/>
+              <fragment start="323" end="424" dc-status="N_TERMINAL_DISC"/>
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match evalue="2.2E-192" score="641.2" source="CATH-Gene3D">
+        <signature ac="G3DSA:3.40.640.10" type="Homologous_superfamily">
+          <signature-library-release library="CATH-Gene3D" version="4.3.0"/>
+          <entry ac="IPR015421" desc="Pyridoxal phosphate-dependent transferase, major domain" name="PyrdxlP-dep_Trfase_major" type="Homologous_superfamily"/>
+        </signature>
+        <model-ac>5hdmA02</model-ac>
+        <locations>
+          <location start="72" end="322" representative="false" hmm-start="1" hmm-end="414" hmm-length="414" hmm-bounds="COMPLETE" evalue="2.5E-192" score="641.0" env-start="8" env-end="424">
+            <location-fragments>
+              <fragment start="72" end="322" dc-status="CONTINUOUS"/>
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match evalue="1.2E-113" score="380.2" source="CATH-FunFam">
+        <signature ac="G3DSA:3.40.640.10:FF:000021" type="Region">
+          <signature-library-release library="CATH-FunFam" version="4.3.0"/>
+        </signature>
+        <model-ac>3.40.640.10-FF-000021</model-ac>
+        <locations>
+          <location start="72" end="322" representative="false" hmm-start="1" hmm-end="248" hmm-length="249" hmm-bounds="N_TERMINAL_COMPLETE" evalue="1.6E-113" score="379.8" env-start="72" env-end="322">
+            <location-fragments>
+              <fragment start="72" end="322" dc-status="CONTINUOUS"/>
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match evalue="2.6E-174" score="592.0" source="PANTHER">
+        <signature ac="PTHR43713" type="Family">
+          <signature-library-release library="PANTHER" version="19.0"/>
+        </signature>
+        <model-ac>PTHR43713</model-ac>
+        <locations>
+          <location start="4" end="430" representative="true" hmm-start="23" hmm-end="445" hmm-length="447" hmm-bounds="INCOMPLETE" env-start="2" env-end="432" evalue="3.2E-174" score="591.7">
+            <location-fragments>
+              <fragment start="4" end="430" dc-status="CONTINUOUS"/>
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+    </matches>
+  </protein>
+  <protein>
+    <sequence md5="7D8AB207741D3B13E236C9135F4D5570">MLMAAVLAAPAFPAFSAGETPAAPTKAAAKPDLVKGEASFTAVCAACHGADGNSAIAANPKLSAQHPEYLVKQLQEFKSGKRNDPVMKGFAMALSDEDMKNIAYWVTAKAAKPGFAKDKALVSLGERIYRGGIADRQIAACAGCHSPNGAGIPAQYPRLSGQHADYTATQLVAFRDGKRGNSLQMTQVAAKLNDREIKAVADYIAGLR</sequence>
+    <xref id="tr|J0U7L2|J0U7L2_9BURK" name="tr|J0U7L2|J0U7L2_9BURK Cytochrome c553 OS=Acidovorax sp. CF316 OX=1144317 GN=PMI14_03334 PE=4 SV=1"/>
+    <matches>
+      <match evalue="4.4E-64" score="202.9" source="PIRSF">
+        <signature ac="PIRSF000005" name="Cytochrome_c4" type="Family">
+          <signature-library-release library="PIRSF" version="3.10"/>
+          <entry ac="IPR024167" desc="Cytochrome c4-like" name="Cytochrome_c4-like" type="Family"/>
+        </signature>
+        <model-ac>PIRSF000005</model-ac>
+        <locations>
+          <location start="5" end="208" representative="true" hmm-start="10" hmm-end="214" hmm-length="215" hmm-bounds="INCOMPLETE" evalue="4.4E-64" score="202.9" env-start="1" env-end="208">
+            <location-fragments>
+              <fragment start="5" end="208" dc-status="CONTINUOUS"/>
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match source="PROSITE profiles">
+        <signature ac="PS51007" name="CYTC" type="Domain">
+          <signature-library-release library="PROSITE profiles" version="2026_01"/>
+          <entry ac="IPR009056" desc="Cytochrome c-like domain" name="Cyt_c-like_dom" type="Domain"/>
+        </signature>
+        <model-ac>PS51007</model-ac>
+        <locations>
+          <location start="31" end="110" representative="false" score="11.508389">
+            <location-fragments>
+              <fragment start="31" end="110" dc-status="CONTINUOUS"/>
+            </location-fragments>
+            <alignment>PDLVKGEASFTAVCAACHGADGNSAIAANPKLSAQHPEYLV------KQLQEFKSGKRNDP--VMKGFAMALSDEDMKNIAYWVTAKA</alignment>
+            <cigar-alignment>41M6D14M2D25M</cigar-alignment>
+          </location>
+          <location start="120" end="208" representative="false" score="10.349862">
+            <location-fragments>
+              <fragment start="120" end="208" dc-status="CONTINUOUS"/>
+            </location-fragments>
+            <alignment>ALVSLGERIYRggiadrqiAACAGCHSPNGAGIPAQYPRLSGQHADYTA------TQLVAFRDGKRGN-SLQMTQVAAKLNDREIKAVADYIAGLR</alignment>
+            <cigar-alignment>11M8I30M6D13M1D27M</cigar-alignment>
+          </location>
+        </locations>
+      </match>
+      <match source="SUPERFAMILY">
+        <signature ac="SSF46626" type="Homologous_superfamily">
+          <signature-library-release library="SUPERFAMILY" version="1.75"/>
+          <entry ac="IPR036909" desc="Cytochrome c-like domain superfamily" name="Cyt_c-like_dom_sf" type="Homologous_superfamily"/>
+        </signature>
+        <model-ac>0047100</model-ac>
+        <locations>
+          <location start="118" end="206" representative="false" evalue="2.58E-22" hmm-length="90">
+            <location-fragments>
+              <fragment start="118" end="206" dc-status="CONTINUOUS"/>
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match source="SUPERFAMILY">
+        <signature ac="SSF46626" type="Homologous_superfamily">
+          <signature-library-release library="SUPERFAMILY" version="1.75"/>
+          <entry ac="IPR036909" desc="Cytochrome c-like domain superfamily" name="Cyt_c-like_dom_sf" type="Homologous_superfamily"/>
+        </signature>
+        <model-ac>0052127</model-ac>
+        <locations>
+          <location start="10" end="110" representative="true" evalue="6.55E-21" hmm-length="149">
+            <location-fragments>
+              <fragment start="10" end="110" dc-status="CONTINUOUS"/>
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match evalue="2.4E-18" score="78.5" source="Pfam">
+        <signature ac="PF00034" name="Cytochrom_C" type="Domain">
+          <signature-library-release library="Pfam" version="38.2"/>
+          <entry ac="IPR009056" desc="Cytochrome c-like domain" name="Cyt_c-like_dom" type="Domain"/>
+        </signature>
+        <model-ac>PF00034</model-ac>
+        <locations>
+          <location start="140" end="207" representative="false" hmm-start="11" hmm-end="87" hmm-length="88" hmm-bounds="INCOMPLETE" evalue="1.9E-6" score="40.3" env-start="124" env-end="208">
+            <location-fragments>
+              <fragment start="140" end="207" dc-status="CONTINUOUS"/>
+            </location-fragments>
+          </location>
+          <location start="34" end="106" representative="false" hmm-start="2" hmm-end="84" hmm-length="88" hmm-bounds="INCOMPLETE" evalue="6.1E-6" score="38.7" env-start="33" env-end="108">
+            <location-fragments>
+              <fragment start="34" end="106" dc-status="CONTINUOUS"/>
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match evalue="3.3E-49" score="167.2" source="CATH-Gene3D">
+        <signature ac="G3DSA:1.10.760.10" type="Homologous_superfamily">
+          <signature-library-release library="CATH-Gene3D" version="4.3.0"/>
+          <entry ac="IPR036909" desc="Cytochrome c-like domain superfamily" name="Cyt_c-like_dom_sf" type="Homologous_superfamily"/>
+        </signature>
+        <model-ac>1fcdC01</model-ac>
+        <locations>
+          <location start="36" end="109" representative="false" hmm-start="7" hmm-end="74" hmm-length="78" hmm-bounds="INCOMPLETE" evalue="3.5E-24" score="87.0" env-start="36" env-end="109">
+            <location-fragments>
+              <fragment start="36" end="109" dc-status="CONTINUOUS"/>
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match evalue="2.2E-50" score="170.9" source="CATH-Gene3D">
+        <signature ac="G3DSA:1.10.760.10" type="Homologous_superfamily">
+          <signature-library-release library="CATH-Gene3D" version="4.3.0"/>
+          <entry ac="IPR036909" desc="Cytochrome c-like domain superfamily" name="Cyt_c-like_dom_sf" type="Homologous_superfamily"/>
+        </signature>
+        <model-ac>1m70A02</model-ac>
+        <locations>
+          <location start="115" end="208" representative="true" hmm-start="5" hmm-end="98" hmm-length="99" hmm-bounds="INCOMPLETE" evalue="4.7E-27" score="96.1" env-start="115" env-end="208">
+            <location-fragments>
+              <fragment start="115" end="208" dc-status="CONTINUOUS"/>
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match evalue="4.9E-5" graphscan="Ii" source="PRINTS">
+        <signature ac="PR00605" name="CYTCHROMECIC" type="Family">
+          <signature-library-release library="PRINTS" version="42.0"/>
+          <entry ac="IPR008168" desc="Cytochrome c, class IC" name="Cyt_C_IC" type="Family"/>
+        </signature>
+        <model-ac>PR00605</model-ac>
+        <locations>
+          <location start="42" end="53" representative="false" motifNumber="1" pvalue="2.05E-5" score="54.67">
+            <location-fragments>
+              <fragment start="42" end="53" dc-status="CONTINUOUS"/>
+            </location-fragments>
+          </location>
+          <location start="182" end="204" representative="false" motifNumber="2" pvalue="1.0E-6" score="29.3">
+            <location-fragments>
+              <fragment start="182" end="204" dc-status="CONTINUOUS"/>
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match evalue="4.2E-44" score="162.3" source="PANTHER">
+        <signature ac="PTHR33751" type="Family">
+          <signature-library-release library="PANTHER" version="19.0"/>
+          <entry ac="IPR050597" desc="Cytochrome c Oxidase Subunit" name="Cytochrome_c_Oxidase_Subunit" type="Family"/>
+        </signature>
+        <model-ac>PTHR33751</model-ac>
+        <locations>
+          <location start="17" end="207" representative="false" hmm-start="41" hmm-end="221" hmm-length="225" hmm-bounds="INCOMPLETE" env-start="1" env-end="208" evalue="4.6E-44" score="162.1">
+            <location-fragments>
+              <fragment start="17" end="207" dc-status="CONTINUOUS"/>
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+    </matches>
+  </protein>
+</results>

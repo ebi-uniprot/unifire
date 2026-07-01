@@ -65,6 +65,7 @@ UNIFIRE_SCRIPT="${UNIFIRE_REPO}/distribution/bin/unifire.sh"
 PIRSR_SCRIPT="${UNIFIRE_REPO}/distribution/bin/pirsr.sh"
 LINEAGE_SCRIPT="${UNIFIRE_REPO}/misc/taxonomy/updateIPRScanWithTaxonomicLineage.py"
 INTERPROSCAN_SCRIPT="/opt/interproscan/interproscan.sh"
+IPRSCAN_INFER_FILE_TYPE_SCRIPT="/opt/scripts/bin/infer-xml-input-type.py"
 HMMALIGN="/usr/bin/hmmalign"
 
 URML_DIR="${UNIFIRE_REPO}/samples"
@@ -232,6 +233,8 @@ function run_workflow() {
       check_iprscan_version
   fi
 
+  IPRSCAN_FILE_TYPE=`${IPRSCAN_INFER_FILE_TYPE_SCRIPT} ${IPRSCAN_FILE}`
+
   # Update the lineage in the interproscan file
   echo "Updating taxonomy lineage for interproscan file ${IPRSCAN_FILE} into ${IPRSCAN_LINEAGE_FILE}..."
   ${LINEAGE_SCRIPT} -i ${IPRSCAN_FILE} -o ${IPRSCAN_LINEAGE_FILE} -t ${ETE4_TAXA}
@@ -240,20 +243,20 @@ function run_workflow() {
   # UniFIRE on UniRule rules
   if [[ -v input_systems_map["unirule"] ]]; then
       echo "Running rules inference on UniRule..."
-      ${UNIFIRE_SCRIPT} -n ${CHUNK_SIZE} -r ${UR_RULES} -i ${IPRSCAN_LINEAGE_FILE} -t ${UR_TMPL} -o ${UR_OUT_FILE}
+      ${UNIFIRE_SCRIPT} -n ${CHUNK_SIZE} -r ${UR_RULES} -i ${IPRSCAN_LINEAGE_FILE} -t ${UR_TMPL} -o ${UR_OUT_FILE} -s ${IPRSCAN_FILE_TYPE}
   fi
 
   # UniFIRE on ARBA rules
   if [[ -v input_systems_map["arba"] ]]; then
     echo "Running rules inference on ARBA..."
-    ${UNIFIRE_SCRIPT} -n ${CHUNK_SIZE} -r ${ARBA_RULES} -i ${IPRSCAN_LINEAGE_FILE} -o ${ARBA_OUT_FILE}
+    ${UNIFIRE_SCRIPT} -n ${CHUNK_SIZE} -r ${ARBA_RULES} -i ${IPRSCAN_LINEAGE_FILE} -o ${ARBA_OUT_FILE} -s ${IPRSCAN_FILE_TYPE}
   fi
 
   # UniFIRE on PIRSR rules
   # This is a two-steps process: run hmmalign to align the sequences to the PIRSR templates, and then run rules inference
   if [[ -v input_systems_map["pirsr"] ]]; then
     echo "Running PIRSR hmmalign..."
-    ${PIRSR_SCRIPT} -i ${IPRSCAN_LINEAGE_FILE} -o ${OUT_DIR} -a ${HMMALIGN} -d ${PIRSR_DIR}
+    ${PIRSR_SCRIPT} -i ${IPRSCAN_LINEAGE_FILE} -o ${OUT_DIR} -a ${HMMALIGN} -d ${PIRSR_DIR} -t ${IPRSCAN_FILE_TYPE}
 
     echo "Running rules inference on PIRSR..."
     ${UNIFIRE_SCRIPT} -n ${CHUNK_SIZE} -r ${PIRSR_RULES} -i ${PIRSR_FACT_FILE} -s XML -t ${PIRSR_TMPL} -o ${PIRSR_OUT_FILE}

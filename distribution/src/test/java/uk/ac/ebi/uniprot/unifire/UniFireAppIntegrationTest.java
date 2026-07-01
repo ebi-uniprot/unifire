@@ -98,6 +98,68 @@ class UniFireAppIntegrationTest {
                 .withNodeFilter(node -> !node.getNodeName().equals("#comment")));
     }
 
+    @Test
+    void test_iprscan6_ShouldVerifyThatGeneratedTabSeparatedPredictionFileMatchesTheExpectedFile() throws Exception {
+        //given
+        String iprFasta = this.getClass().getResource("/unifireapp/input/input_ipr6.fasta.xml").getPath();
+        String ruleFile = this.getClass().getResource("/unifireapp/input/unirule-urml-latest.xml").getPath();
+        String templateFile = this.getClass().getResource("/unifireapp/input/unirule-templates-latest.xml").getPath();
+        String outputPath = outputDir.getPath() + "/unifire_output.tsv";
+        List<String> args = new ArrayList<>();
+        args.add("-i");
+        args.add(iprFasta);
+        args.add("-r");
+        args.add(ruleFile);
+        args.add("-t");
+        args.add(templateFile);
+        args.add("-o");
+        args.add(outputPath);
+        args.add("-s");
+        args.add("InterProScan6");
+
+        //when
+        String[] argsArray = args.toArray(new String[0]);
+        UniFireApp.main(argsArray);
+
+        //then
+        String expectedOutputFilePath = this.getClass().getResource("/unifireapp/unifire_output.tsv").getPath();
+        assertFiles(Paths.get(outputPath).toFile(), Paths.get(expectedOutputFilePath).toFile());
+    }
+
+    @Test
+    void test_iprscan6_ShouldVerifyThatGeneratedXMLPredictionFileMatchesTheExpectedFile() throws Exception {
+        //given
+        String iprFasta = this.getClass().getResource("/unifireapp/input/input_ipr6.fasta.xml").getPath();
+        String ruleFile = this.getClass().getResource("/unifireapp/input/unirule-urml-latest.xml").getPath();
+        String templateFile = this.getClass().getResource("/unifireapp/input/unirule-templates-latest.xml").getPath();
+        String outputPath = outputDir.getPath() + "/unifire_output.xml";
+        List<String> args = new ArrayList<>();
+        args.add("-i");
+        args.add(iprFasta);
+        args.add("-r");
+        args.add(ruleFile);
+        args.add("-t");
+        args.add(templateFile);
+        args.add("-o");
+        args.add(outputPath);
+        args.add("-s");
+        args.add("InterProScan6");
+        args.add("-f");
+        args.add("XML");
+
+        //when
+        String[] argsArray = args.toArray(new String[0]);
+        UniFireApp.main(argsArray);
+
+        //then
+        String expectedOutputFilePath = this.getClass().getResource("/unifireapp/unifire_output.xml").getPath();
+        assertThat(new File(outputPath), CompareMatcher.isSimilarTo(new File(expectedOutputFilePath))
+                .ignoreWhitespace()
+                .normalizeWhitespace()
+                .withNodeMatcher(NodeMatcherBuilder.unifireXMLNodeMatcher())
+                .withNodeFilter(node -> !node.getNodeName().equals("#comment")));
+    }
+
     public static void assertFiles(File actual, File expected) throws IOException {
         List<String> actualLines = FileUtils.readLines(actual);
         List<String> expectedLines = FileUtils.readLines(expected);

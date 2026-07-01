@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.uniprot.urml.facts.Signature;
 import org.uniprot.urml.facts.*;
+import uk.ac.ebi.uniprot.urml.input.parsers.xml.XmlFormatException;
 
 /**
  * Iterates over {@link Protein} and convert them to {@link org.uniprot.urml.facts.FactSet}.
@@ -95,8 +96,7 @@ public class InterProXmlProteinConverter implements Iterator<FactSet>{
                 factSetQueue.add(factSetBuilder.build());
             }
         } else {
-            throw new InterProScanXmlFormatException(
-                    String.format("Missing xref tag for ipsProtein md5=%s", ipsProtein.getMd5()));
+            throw new XmlFormatException(String.format("Missing xref tag for ipsProtein md5=%s", ipsProtein.getMd5()));
         }
 
     }

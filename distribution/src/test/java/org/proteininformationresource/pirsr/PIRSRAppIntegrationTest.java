@@ -115,6 +115,39 @@ class PIRSRAppIntegrationTest {
     }
 
     @Test
+    void testShouldVerifyThatDefaultInterproScan6OutputXmlMatchesTheExpectedFile() throws Exception {
+        //given
+        String inputIprScanFile = this.getClass().getResource("/pirsrapp/input/pirsr_data/PIRSR-input-iprscan6.xml").getPath();
+        String pirsrDataDir = this.getClass().getResource("/pirsrapp/input/pirsr_data/").getPath();
+        String outputPath = outputDir.getPath();
+        List<String> args = new ArrayList<>();
+        args.add("-i");
+        args.add(inputIprScanFile);
+        args.add("-d");
+        args.add(pirsrDataDir);
+        args.add("-a");
+        args.add(hmmAlignPath);
+        args.add("-t");
+        args.add("InterProScan6");
+        args.add("-o");
+        args.add(outputPath);
+
+        //when
+        String[] argsArray = args.toArray(new String[0]);
+        PIRSRApp.main(argsArray);
+
+        //then
+        // NOTE: Expected output file should be identical to InterProScan 5
+        File expectedOutputFile = new File(this.getClass().getResource("/pirsrapp/expectedoutput/PIRSR-input-iprscan-urml.xml").getPath());
+        File actualOutputFile = new File(outputPath + "/PIRSR-input-iprscan-urml.xml");
+        assertThat(actualOutputFile, CompareMatcher.isSimilarTo(expectedOutputFile)
+                .ignoreWhitespace()
+                .normalizeWhitespace()
+                .withNodeMatcher(NodeMatcherBuilder.factXMLNodeMatcher())
+                .withNodeFilter(node -> !node.getNodeName().equals("#comment")));
+    }
+
+    @Test
     void testShouldVerifyThatFactXmlMatchesTheExpectedFile() throws Exception {
         //given
         String iprFasta = this.getClass().getResource("/pirsrapp/input/pirsr_data/PIRSR-input-fact.xml").getPath();

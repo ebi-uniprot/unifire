@@ -1,0 +1,538 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<results interproscan-version="5.36" interpro-version="75.0">
+  <protein>
+    <sequence md5="7d8ab207741d3b13e236c9135f4d5570">MLMAAVLAAPAFPAFSAGETPAAPTKAAAKPDLVKGEASFTAVCAACHGADGNSAIAANPKLSAQHPEYLVKQLQEFKSGKRNDPVMKGFAMALSDEDMKNIAYWVTAKAAKPGFAKDKALVSLGERIYRGGIADRQIAACAGCHSPNGAGIPAQYPRLSGQHADYTATQLVAFRDGKRGNSLQMTQVAAKLNDREIKAVADYIAGLR</sequence>
+    <xref id="TR|J0U7L2|J0U7L2_9BURK" name="TR|J0U7L2|J0U7L2_9BURK CYTOCHROME C553 OS=ACIDOVORAX SP. CF316 OX=1,131567,2,1224,28216,80840,80864,12916,1144317 GN=PMI14_03334 PE=4 SV=1" />
+    <matches>
+      <match evalue="4.9E-5" graphscan="Ii" source="PRINTS">
+        <signature ac="PR00605" desc="Class IC cytochrome C signature" name="CYTCHROMECIC">
+          <signature-library-release library="PRINTS" version="42.0" />
+          <entry ac="IPR008168" desc="Cytochrome c, class IC" name="Cyt_C_IC" type="Family">
+            <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0009055" name="electron transfer activity" />
+            <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0005506" name="iron ion binding" />
+          </entry>
+        </signature>
+        <model-ac>PR00605</model-ac>
+        <locations>
+          <location motifNumber="1" pvalue="2.05E-5" score="54.67" start="42" end="53">
+            <location-fragments>
+              <fragment start="42" end="53" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+          <location motifNumber="2" pvalue="1.0E-6" score="29.3" start="182" end="204">
+            <location-fragments>
+              <fragment start="182" end="204" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match evalue="8.7E-61" score="203.0" source="PIRSF">
+        <signature ac="PIRSF000005" name="Cytochrome_c4">
+          <signature-library-release library="PIRSF" version="3.02" />
+          <entry ac="IPR024167" desc="Cytochrome c4-like" name="Cytochrome_c4-like" type="Family">
+            <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0005506" name="iron ion binding" />
+            <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0009055" name="electron transfer activity" />
+            <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0020037" name="heme binding" />
+            <go-xref category="CELLULAR_COMPONENT" db="GO" id="GO:0042597" name="periplasmic space" />
+          </entry>
+        </signature>
+        <model-ac>PIRSF000005</model-ac>
+        <locations>
+          <location env-end="207" env-start="1" score="202.9" evalue="9.6E-61" hmm-start="5" hmm-end="207" hmm-length="215" hmm-bounds="COMPLETE" start="1" end="207">
+            <location-fragments>
+              <fragment start="1" end="207" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match evalue="4.6E-19" score="68.4" source="Pfam">
+        <signature ac="PF13442" desc="Cytochrome C oxidase, cbb3-type, subunit III" name="Cytochrome_CBB3">
+          <signature-library-release library="Pfam" version="32.0" />
+          <entry ac="IPR009056" desc="Cytochrome c-like domain" name="Cyt_c-like_dom" type="Domain">
+            <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0009055" name="electron transfer activity" />
+            <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0020037" name="heme binding" />
+            <pathway-xref db="Reactome" id="R-HSA-111457" name="Release of apoptotic factors from the mitochondria" />
+            <pathway-xref db="Reactome" id="R-HSA-111464" name="SMAC(DIABLO)-mediated dissociation of IAP:caspase complexes" />
+            <pathway-xref db="Reactome" id="R-HSA-111458" name="Formation of apoptosome" />
+            <pathway-xref db="Reactome" id="R-HSA-111459" name="Activation of caspases through apoptosome-mediated cleavage" />
+            <pathway-xref db="Reactome" id="R-HSA-5628897" name="TP53 Regulates Metabolic Genes" />
+            <pathway-xref db="Reactome" id="R-HSA-2151201" name="Transcriptional activation of mitochondrial biogenesis" />
+            <pathway-xref db="Reactome" id="R-HSA-611105" name="Respiratory electron transport" />
+            <pathway-xref db="Reactome" id="R-HSA-9627069" name="Regulation of the apoptosome activity" />
+            <pathway-xref db="Reactome" id="R-HSA-3299685" name="Detoxification of Reactive Oxygen Species" />
+            <pathway-xref db="Reactome" id="R-HSA-111463" name="SMAC (DIABLO) binds to IAPs" />
+          </entry>
+        </signature>
+        <model-ac>PF13442</model-ac>
+        <locations>
+          <location env-end="106" env-start="31" score="35.0" evalue="1.2E-8" hmm-start="3" hmm-end="67" hmm-length="67" hmm-bounds="C_TERMINAL_COMPLETE" start="33" end="106">
+            <location-fragments>
+              <fragment start="33" end="106" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match evalue="2.9E-48" score="164.1" source="CATH-Gene3D">
+        <signature ac="G3DSA:1.10.760.10">
+          <signature-library-release library="CATH-Gene3D" version="4.2.0" />
+          <entry ac="IPR036909" desc="Cytochrome c-like domain superfamily" name="Cyt_c-like_dom_sf" type="Homologous_superfamily">
+            <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0020037" name="heme binding" />
+            <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0009055" name="electron transfer activity" />
+            <pathway-xref db="Reactome" id="R-HSA-611105" name="Respiratory electron transport" />
+          </entry>
+        </signature>
+        <model-ac>3vrdA01</model-ac>
+        <locations>
+          <location env-end="110" env-start="36" score="86.7" evalue="4.2E-24" hmm-start="7" hmm-end="74" hmm-length="78" hmm-bounds="COMPLETE" start="36" end="110">
+            <location-fragments>
+              <fragment start="36" end="110" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match evalue="7.0E-50" score="169.3" source="CATH-Gene3D">
+        <signature ac="G3DSA:1.10.760.10">
+          <signature-library-release library="CATH-Gene3D" version="4.2.0" />
+          <entry ac="IPR036909" desc="Cytochrome c-like domain superfamily" name="Cyt_c-like_dom_sf" type="Homologous_superfamily">
+            <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0020037" name="heme binding" />
+            <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0009055" name="electron transfer activity" />
+            <pathway-xref db="Reactome" id="R-HSA-611105" name="Respiratory electron transport" />
+          </entry>
+        </signature>
+        <model-ac>1m70A02</model-ac>
+        <locations>
+          <location env-end="207" env-start="115" score="96.1" evalue="4.7E-27" hmm-start="4" hmm-end="98" hmm-length="99" hmm-bounds="COMPLETE" start="115" end="207">
+            <location-fragments>
+              <fragment start="115" end="207" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match evalue="4.7E-20" score="72.4" source="Pfam">
+        <signature ac="PF00034" desc="Cytochrome c" name="Cytochrom_C">
+          <signature-library-release library="Pfam" version="32.0" />
+          <entry ac="IPR009056" desc="Cytochrome c-like domain" name="Cyt_c-like_dom" type="Domain">
+            <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0009055" name="electron transfer activity" />
+            <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0020037" name="heme binding" />
+            <pathway-xref db="Reactome" id="R-HSA-111457" name="Release of apoptotic factors from the mitochondria" />
+            <pathway-xref db="Reactome" id="R-HSA-111464" name="SMAC(DIABLO)-mediated dissociation of IAP:caspase complexes" />
+            <pathway-xref db="Reactome" id="R-HSA-111458" name="Formation of apoptosome" />
+            <pathway-xref db="Reactome" id="R-HSA-111459" name="Activation of caspases through apoptosome-mediated cleavage" />
+            <pathway-xref db="Reactome" id="R-HSA-5628897" name="TP53 Regulates Metabolic Genes" />
+            <pathway-xref db="Reactome" id="R-HSA-2151201" name="Transcriptional activation of mitochondrial biogenesis" />
+            <pathway-xref db="Reactome" id="R-HSA-611105" name="Respiratory electron transport" />
+            <pathway-xref db="Reactome" id="R-HSA-9627069" name="Regulation of the apoptosome activity" />
+            <pathway-xref db="Reactome" id="R-HSA-3299685" name="Detoxification of Reactive Oxygen Species" />
+            <pathway-xref db="Reactome" id="R-HSA-111463" name="SMAC (DIABLO) binds to IAPs" />
+          </entry>
+        </signature>
+        <model-ac>PF00034</model-ac>
+        <locations>
+          <location env-end="208" env-start="124" score="38.1" evalue="2.5E-9" hmm-start="10" hmm-end="90" hmm-length="92" hmm-bounds="INCOMPLETE" start="139" end="206">
+            <location-fragments>
+              <fragment start="139" end="206" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match evalue="1.6E-52" score="180.6" source="PANTHER">
+        <signature ac="PTHR33751:SF9" name="">
+          <signature-library-release library="PANTHER" version="14.1" />
+        </signature>
+        <model-ac>PTHR33751:SF9</model-ac>
+        <locations>
+          <location env-start="1" env-end="208" hmm-start="34" hmm-end="216" hmm-length="218" hmm-bounds="INCOMPLETE" start="19" end="207">
+            <location-fragments>
+              <fragment start="19" end="207" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match evalue="1.6E-52" score="180.6" source="PANTHER">
+        <signature ac="PTHR33751" name="FAMILY NOT NAMED">
+          <signature-library-release library="PANTHER" version="14.1" />
+        </signature>
+        <model-ac>PTHR33751</model-ac>
+        <locations>
+          <location env-start="1" env-end="208" hmm-start="34" hmm-end="216" hmm-length="218" hmm-bounds="INCOMPLETE" start="19" end="207">
+            <location-fragments>
+              <fragment start="19" end="207" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match source="Phobius">
+        <signature ac="SIGNAL_PEPTIDE" desc="Signal peptide region" name="Signal Peptide">
+          <signature-library-release library="Phobius" version="1.01" />
+        </signature>
+        <model-ac>SIGNAL_PEPTIDE</model-ac>
+        <locations>
+          <location start="1" end="27">
+            <location-fragments>
+              <fragment start="1" end="27" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match source="Phobius">
+        <signature ac="SIGNAL_PEPTIDE_C_REGION" desc="C-terminal region of a signal peptide." name="Signal peptide C-region">
+          <signature-library-release library="Phobius" version="1.01" />
+        </signature>
+        <model-ac>SIGNAL_PEPTIDE_C_REGION</model-ac>
+        <locations>
+          <location start="16" end="27">
+            <location-fragments>
+              <fragment start="16" end="27" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match source="Phobius">
+        <signature ac="SIGNAL_PEPTIDE_N_REGION" desc="N-terminal region of a signal peptide." name="Signal peptide N-region">
+          <signature-library-release library="Phobius" version="1.01" />
+        </signature>
+        <model-ac>SIGNAL_PEPTIDE_N_REGION</model-ac>
+        <locations>
+          <location start="1" end="3">
+            <location-fragments>
+              <fragment start="1" end="3" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match source="Phobius">
+        <signature ac="NON_CYTOPLASMIC_DOMAIN" desc="Region of a membrane-bound protein predicted to be outside the membrane, in the extracellular region." name="Non cytoplasmic domain">
+          <signature-library-release library="Phobius" version="1.01" />
+        </signature>
+        <model-ac>NON_CYTOPLASMIC_DOMAIN</model-ac>
+        <locations>
+          <location start="28" end="208">
+            <location-fragments>
+              <fragment start="28" end="208" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match source="Phobius">
+        <signature ac="SIGNAL_PEPTIDE_H_REGION" desc="Hydrophobic region of a signal peptide." name="Signal peptide H-region">
+          <signature-library-release library="Phobius" version="1.01" />
+        </signature>
+        <model-ac>SIGNAL_PEPTIDE_H_REGION</model-ac>
+        <locations>
+          <location start="4" end="15">
+            <location-fragments>
+              <fragment start="4" end="15" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match source="PROSITE profiles">
+        <signature ac="PS51007" desc="Cytochrome c family profile." name="CYTC">
+          <signature-library-release library="PROSITE profiles" version="2019_01" />
+          <entry ac="IPR009056" desc="Cytochrome c-like domain" name="Cyt_c-like_dom" type="Domain">
+            <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0009055" name="electron transfer activity" />
+            <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0020037" name="heme binding" />
+            <pathway-xref db="Reactome" id="R-HSA-111457" name="Release of apoptotic factors from the mitochondria" />
+            <pathway-xref db="Reactome" id="R-HSA-111464" name="SMAC(DIABLO)-mediated dissociation of IAP:caspase complexes" />
+            <pathway-xref db="Reactome" id="R-HSA-111458" name="Formation of apoptosome" />
+            <pathway-xref db="Reactome" id="R-HSA-111459" name="Activation of caspases through apoptosome-mediated cleavage" />
+            <pathway-xref db="Reactome" id="R-HSA-5628897" name="TP53 Regulates Metabolic Genes" />
+            <pathway-xref db="Reactome" id="R-HSA-2151201" name="Transcriptional activation of mitochondrial biogenesis" />
+            <pathway-xref db="Reactome" id="R-HSA-611105" name="Respiratory electron transport" />
+            <pathway-xref db="Reactome" id="R-HSA-9627069" name="Regulation of the apoptosome activity" />
+            <pathway-xref db="Reactome" id="R-HSA-3299685" name="Detoxification of Reactive Oxygen Species" />
+            <pathway-xref db="Reactome" id="R-HSA-111463" name="SMAC (DIABLO) binds to IAPs" />
+          </entry>
+        </signature>
+        <model-ac>PS51007</model-ac>
+        <locations>
+          <location score="10.35" start="120" end="208">
+            <location-fragments>
+              <fragment start="120" end="208" dc-status="CONTINUOUS" />
+            </location-fragments>
+            <alignment>ALVSLGERIYRggiadrqiAACAGCHSPNGAGIPAQYPRLSGQHADYTA------TQLVAFRDGKRGN-SLQMTQVAAKLNDREIKAVADYIAGLR</alignment>
+          </location>
+        </locations>
+      </match>
+      <match source="PROSITE profiles">
+        <signature ac="PS51007" desc="Cytochrome c family profile." name="CYTC">
+          <signature-library-release library="PROSITE profiles" version="2019_01" />
+          <entry ac="IPR009056" desc="Cytochrome c-like domain" name="Cyt_c-like_dom" type="Domain">
+            <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0009055" name="electron transfer activity" />
+            <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0020037" name="heme binding" />
+            <pathway-xref db="Reactome" id="R-HSA-111457" name="Release of apoptotic factors from the mitochondria" />
+            <pathway-xref db="Reactome" id="R-HSA-111464" name="SMAC(DIABLO)-mediated dissociation of IAP:caspase complexes" />
+            <pathway-xref db="Reactome" id="R-HSA-111458" name="Formation of apoptosome" />
+            <pathway-xref db="Reactome" id="R-HSA-111459" name="Activation of caspases through apoptosome-mediated cleavage" />
+            <pathway-xref db="Reactome" id="R-HSA-5628897" name="TP53 Regulates Metabolic Genes" />
+            <pathway-xref db="Reactome" id="R-HSA-2151201" name="Transcriptional activation of mitochondrial biogenesis" />
+            <pathway-xref db="Reactome" id="R-HSA-611105" name="Respiratory electron transport" />
+            <pathway-xref db="Reactome" id="R-HSA-9627069" name="Regulation of the apoptosome activity" />
+            <pathway-xref db="Reactome" id="R-HSA-3299685" name="Detoxification of Reactive Oxygen Species" />
+            <pathway-xref db="Reactome" id="R-HSA-111463" name="SMAC (DIABLO) binds to IAPs" />
+          </entry>
+        </signature>
+        <model-ac>PS51007</model-ac>
+        <locations>
+          <location score="11.508" start="31" end="110">
+            <location-fragments>
+              <fragment start="31" end="110" dc-status="CONTINUOUS" />
+            </location-fragments>
+            <alignment>PDLVKGEASFTAVCAACHGADGNSAIAANPKLSAQHPEYLV------KQLQEFKSGKRNDP--VMKGFAMALSDEDMKNIAYWVTAKA</alignment>
+          </location>
+        </locations>
+      </match>
+      <match source="SIGNALP_EUK">
+        <signature ac="SignalP-noTM" name="SignalP-noTM">
+          <signature-library-release library="SIGNALP_EUK" version="4.1" />
+        </signature>
+        <model-ac>SignalP-noTM</model-ac>
+        <locations>
+          <location score="0.524" start="1" end="18">
+            <location-fragments>
+              <fragment start="1" end="18" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match source="SIGNALP_GRAM_POSITIVE">
+        <signature ac="SignalP-TM" name="SignalP-TM">
+          <signature-library-release library="SIGNALP_GRAM_POSITIVE" version="4.1" />
+        </signature>
+        <model-ac>SignalP-TM</model-ac>
+        <locations>
+          <location score="0.525" start="1" end="22">
+            <location-fragments>
+              <fragment start="1" end="22" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match source="SIGNALP_EUK">
+        <signature ac="SignalP-noTM" name="SignalP-noTM">
+          <signature-library-release library="SIGNALP_EUK" version="4.1" />
+        </signature>
+        <model-ac>SignalP-noTM</model-ac>
+        <locations>
+          <location score="0.681" start="1" end="16">
+            <location-fragments>
+              <fragment start="1" end="16" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match evalue="2.58E-22" source="SUPERFAMILY">
+        <signature ac="SSF46626" name="Cytochrome c">
+          <signature-library-release library="SUPERFAMILY" version="1.75" />
+          <entry ac="IPR036909" desc="Cytochrome c-like domain superfamily" name="Cyt_c-like_dom_sf" type="Homologous_superfamily">
+            <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0020037" name="heme binding" />
+            <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0009055" name="electron transfer activity" />
+            <pathway-xref db="Reactome" id="R-HSA-611105" name="Respiratory electron transport" />
+          </entry>
+        </signature>
+        <model-ac>0047100</model-ac>
+        <locations>
+          <location hmm-length="90" start="118" end="206" evalue="2.58E-22">
+            <location-fragments>
+              <fragment start="118" end="206" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match evalue="6.55E-21" source="SUPERFAMILY">
+        <signature ac="SSF46626" name="Cytochrome c">
+          <signature-library-release library="SUPERFAMILY" version="1.75" />
+          <entry ac="IPR036909" desc="Cytochrome c-like domain superfamily" name="Cyt_c-like_dom_sf" type="Homologous_superfamily">
+            <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0020037" name="heme binding" />
+            <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0009055" name="electron transfer activity" />
+            <pathway-xref db="Reactome" id="R-HSA-611105" name="Respiratory electron transport" />
+          </entry>
+        </signature>
+        <model-ac>0052127</model-ac>
+        <locations>
+          <location hmm-length="149" start="10" end="110" evalue="6.55E-21">
+            <location-fragments>
+              <fragment start="10" end="110" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+    </matches>
+  </protein>
+  <protein>
+    <sequence md5="d3bb87329266bdd23af9469f40e5f77d">MKIREYIQWLLPSHKWKVLAIIFLGMVVGGGALFLYMLRAHTYLTDDPAACVNCHIMGPYYATWFHSSHSRNATCNDCHVPHENPVKKWVFKGMDGMRHVAVFLTRGEKDVLRANKESAEVIMNNCIRCHTQLNTEFVNTGRIDYMMSQVGEGKACWDCHRDVPHGGSNSAASTPDALVPYPDSPTPEWLRKMIE</sequence>
+    <xref id="tr|A0A015UPS8|A0A015UPS8_BACFG" name="tr|A0A015UPS8|A0A015UPS8_BACFG Cytochrome c-type protein OS=Bacteroides fragilis str. 3988T(B)14 OX=1,131567,2,1783270,68336,976,200643,171549,815,816,817,1339315 GN=nrfH PE=4 SV=1" />
+    <matches>
+      <match evalue="3.8E-53" score="177.2" source="TIGRFAM">
+        <signature ac="TIGR03153" desc="cytochr_NrfH: cytochrome c nitrite reductase, small subunit" name="TIGR03153">
+          <signature-library-release library="TIGRFAM" version="15.0" />
+          <entry ac="IPR017571" desc="Cytochrome c nitrite reductase, small subunit" name="NrfH" type="Family">
+            <go-xref category="BIOLOGICAL_PROCESS" db="GO" id="GO:0022900" name="electron transport chain" />
+            <go-xref category="CELLULAR_COMPONENT" db="GO" id="GO:0016021" name="integral component of membrane" />
+          </entry>
+        </signature>
+        <model-ac>TIGR03153</model-ac>
+        <locations>
+          <location env-end="165" env-start="21" score="176.9" evalue="4.7E-53" hmm-start="2" hmm-end="138" hmm-length="138" hmm-bounds="C_TERMINAL_COMPLETE" start="22" end="165">
+            <location-fragments>
+              <fragment start="22" end="165" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match evalue="1.8E-44" score="153.0" source="CATH-Gene3D">
+        <signature ac="G3DSA:1.10.3820.10">
+          <signature-library-release library="CATH-Gene3D" version="4.2.0" />
+          <entry ac="IPR038266" desc="NapC/NirT cytochrome c superfamily" name="NapC/NirT_cytc_sf" type="Homologous_superfamily" />
+        </signature>
+        <model-ac>2j7aC00</model-ac>
+        <locations>
+          <location env-end="177" env-start="12" score="152.7" evalue="2.2E-44" hmm-start="11" hmm-end="150" hmm-length="159" hmm-bounds="COMPLETE" start="12" end="177">
+            <location-fragments>
+              <fragment start="12" end="177" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match evalue="6.7E-12" score="43.2" source="PIRSF">
+        <signature ac="PIRSF000013" name="4_hem_cytochrm_NapC">
+          <signature-library-release library="PIRSF" version="3.02" />
+          <entry ac="IPR024717" desc="Denitrification system component NapC/NirT/NrfH" name="NapC/NirT/NrfH" type="Family">
+            <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0020037" name="heme binding" />
+            <go-xref category="BIOLOGICAL_PROCESS" db="GO" id="GO:0019333" name="denitrification pathway" />
+            <go-xref category="CELLULAR_COMPONENT" db="GO" id="GO:0016021" name="integral component of membrane" />
+          </entry>
+        </signature>
+        <model-ac>PIRSF000013</model-ac>
+        <locations>
+          <location env-end="177" env-start="1" score="39.7" evalue="8.0E-11" hmm-start="4" hmm-end="165" hmm-length="204" hmm-bounds="COMPLETE" start="1" end="177">
+            <location-fragments>
+              <fragment start="1" end="177" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match evalue="6.2E-19" score="68.3" source="Pfam">
+        <signature ac="PF03264" desc="NapC/NirT cytochrome c family, N-terminal region" name="Cytochrom_NNT">
+          <signature-library-release library="Pfam" version="32.0" />
+          <entry ac="IPR005126" desc="NapC/NirT cytochrome c, N-terminal" name="NapC/NirT_cyt_c_N" type="Domain" />
+        </signature>
+        <model-ac>PF03264</model-ac>
+        <locations>
+          <location env-end="170" env-start="11" score="67.1" evalue="1.4E-18" hmm-start="3" hmm-end="169" hmm-length="174" hmm-bounds="INCOMPLETE" start="13" end="165">
+            <location-fragments>
+              <fragment start="13" end="165" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match evalue="5.5E-44" score="153.1" source="PANTHER">
+        <signature ac="PTHR30333:SF1" name="CYTOCHROME C-TYPE PROTEIN NAPC">
+          <signature-library-release library="PANTHER" version="14.1" />
+        </signature>
+        <model-ac>PTHR30333:SF1</model-ac>
+        <locations>
+          <location env-start="1" env-end="195" hmm-start="10" hmm-end="181" hmm-length="198" hmm-bounds="INCOMPLETE" start="8" end="178">
+            <location-fragments>
+              <fragment start="8" end="178" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match evalue="5.5E-44" score="153.1" source="PANTHER">
+        <signature ac="PTHR30333" name="CYTOCHROME C-TYPE PROTEIN">
+          <signature-library-release library="PANTHER" version="14.1" />
+        </signature>
+        <model-ac>PTHR30333</model-ac>
+        <locations>
+          <location env-start="1" env-end="195" hmm-start="10" hmm-end="181" hmm-length="198" hmm-bounds="INCOMPLETE" start="8" end="178">
+            <location-fragments>
+              <fragment start="8" end="178" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match source="Phobius">
+        <signature ac="NON_CYTOPLASMIC_DOMAIN" desc="Region of a membrane-bound protein predicted to be outside the membrane, in the extracellular region." name="Non cytoplasmic domain">
+          <signature-library-release library="Phobius" version="1.01" />
+        </signature>
+        <model-ac>NON_CYTOPLASMIC_DOMAIN</model-ac>
+        <locations>
+          <location start="1" end="17">
+            <location-fragments>
+              <fragment start="1" end="17" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match source="Phobius">
+        <signature ac="TRANSMEMBRANE" desc="Region of a membrane-bound protein predicted to be embedded in the membrane." name="Transmembrane region">
+          <signature-library-release library="Phobius" version="1.01" />
+        </signature>
+        <model-ac>TRANSMEMBRANE</model-ac>
+        <locations>
+          <location start="18" end="38">
+            <location-fragments>
+              <fragment start="18" end="38" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match source="Phobius">
+        <signature ac="CYTOPLASMIC_DOMAIN" desc="Region of a membrane-bound protein predicted to be outside the membrane, in the cytoplasm." name="Cytoplasmic domain">
+          <signature-library-release library="Phobius" version="1.01" />
+        </signature>
+        <model-ac>CYTOPLASMIC_DOMAIN</model-ac>
+        <locations>
+          <location start="39" end="195">
+            <location-fragments>
+              <fragment start="39" end="195" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match source="PROSITE profiles">
+        <signature ac="PS51008" desc="Multiheme cytochrome c family profile." name="MULTIHEME_CYTC">
+          <signature-library-release library="PROSITE profiles" version="2019_01" />
+          <entry ac="IPR011031" desc="Multihaem cytochrome" name="Multihaem_cyt" type="Domain" />
+        </signature>
+        <model-ac>PS51008</model-ac>
+        <locations>
+          <location score="9.688" start="46" end="165">
+            <location-fragments>
+              <fragment start="46" end="165" dc-status="CONTINUOUS" />
+            </location-fragments>
+            <alignment>DDPAACVNCHIMGPYYatwfhsshsRNATCNDCHVPHEnpvkkwvfkgmdgmrhvavfltrgekdvlrankesaEVIMNNCIRCHTQLNTEfvntgridymmsqvgEGKACWDCHRDVPH</alignment>
+          </location>
+        </locations>
+      </match>
+      <match evalue="2.25E-38" source="SUPERFAMILY">
+        <signature ac="SSF48695" name="Multiheme cytochromes">
+          <signature-library-release library="SUPERFAMILY" version="1.75" />
+          <entry ac="IPR036280" desc="Multiheme cytochrome superfamily" name="Multihaem_cyt_sf" type="Homologous_superfamily" />
+        </signature>
+        <model-ac>0037264</model-ac>
+        <locations>
+          <location hmm-length="310" start="17" end="165" evalue="2.25E-38">
+            <location-fragments>
+              <fragment start="17" end="165" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+      <match source="TMHMM">
+        <signature ac="TMhelix" desc="Region of a membrane-bound protein predicted to be embedded in the membrane.">
+          <signature-library-release library="TMHMM" version="2.0c" />
+        </signature>
+        <model-ac>TMhelix</model-ac>
+        <locations>
+          <location start="16" end="38">
+            <location-fragments>
+              <fragment start="16" end="38" dc-status="CONTINUOUS" />
+            </location-fragments>
+          </location>
+        </locations>
+      </match>
+    </matches>
+  </protein>
+</results>

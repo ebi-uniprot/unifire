@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.uniprot.uniparc.*;
 import org.uniprot.urml.facts.*;
+import uk.ac.ebi.uniprot.urml.input.parsers.xml.XmlFormatException;
 
 /**
  * Iterates over {@link org.uniprot.uniparc.Entry} and convert them to {@link org.uniprot.urml.facts.FactSet}.
@@ -58,7 +59,7 @@ public class UniParcXmlEntryConverter implements Iterator<FactSet> {
         String geneName = null;
         String organismScientificName = null;
         if (uniparcEntry.getDbReference().size() > 1){
-            throw new UniParcXmlFormatException("UniParc XML should be preprocessed to keep only 1 dbReference (accession="+accession+").");
+            throw new XmlFormatException("UniParc XML should be preprocessed to keep only 1 dbReference (accession="+accession+").");
         }
         for (DbReferenceType dbReference : uniparcEntry.getDbReference()) {
             dbReferenceId = dbReference.getId();
@@ -81,7 +82,7 @@ public class UniParcXmlEntryConverter implements Iterator<FactSet> {
         }
 
         if (dbReferenceId == null){
-            throw new UniParcXmlFormatException("Missing dbReference for accession="+accession);
+            throw new XmlFormatException("Missing dbReference for accession="+accession);
         }
 
         FactSet.Builder<Void> factSetBuilder = FactSet.builder();
@@ -90,7 +91,7 @@ public class UniParcXmlEntryConverter implements Iterator<FactSet> {
         if (ncbiTaxIds != null){
             taxIdList = Ints.stringConverter().convertAll(Splitter.on(",").split(ncbiTaxIds));
         } else {
-            throw new UniParcXmlFormatException("UniParc XML should be preprocessed to have dbReference property 'NCBI_taxonomy_lineage_ids' (accession="+accession+")");
+            throw new XmlFormatException("UniParc XML should be preprocessed to have dbReference property 'NCBI_taxonomy_lineage_ids' (accession="+accession+")");
         }
         Organism organism = createOrGetOrganism(ncbiTaxId, organismScientificName, taxIdList);
         factSetBuilder.addFact(organism);

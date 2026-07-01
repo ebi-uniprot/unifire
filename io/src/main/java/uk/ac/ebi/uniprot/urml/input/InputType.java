@@ -28,6 +28,7 @@ import java.util.Arrays;
 public enum InputType implements SelectorEnum {
 
     INTERPROSCAN_XML("InterProScan", "InterProScan Output XML"),
+    INTERPROSCAN6_XML("InterProScan6", "InterProScan6 Output XML"),
     UNIPARC_XML("UniParc", "UniParc XML"),
     FACT_XML("XML", "Input Fact XML");
 
