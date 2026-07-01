@@ -51,6 +51,8 @@ public class URMLFactReader implements URMLReader<FactSet> {
         try {
             context = JAXBContext.newInstance(URMLConstants.URML_FACTS_JAXB_CONTEXT);
             SAXParserFactory spf = SAXParserFactory.newInstance();
+            // Addresses CWE-611 vulnerability
+            spf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
             spf.setNamespaceAware(true);
             spf.setXIncludeAware(true);
             spf.setValidating(true);

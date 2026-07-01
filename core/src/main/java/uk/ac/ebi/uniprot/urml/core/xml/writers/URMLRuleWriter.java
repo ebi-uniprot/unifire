@@ -90,6 +90,8 @@ public class URMLRuleWriter extends AbstractURMLWriter<Rules, Rule> {
             }
             try (InputStream newInput = new ByteArrayInputStream(outputStream.toByteArray())) {
                 DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+                // Addresses CWE-611 vulnerability
+                dbFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
                 dbFactory.setNamespaceAware(true);
                 DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
                 return dBuilder.parse(newInput);
