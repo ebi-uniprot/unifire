@@ -17,6 +17,7 @@
 
 package org.proteininformationresource.pirsr;
 
+import org.apache.commons.lang3.StringUtils;
 import uk.ac.ebi.uniprot.unifire.UniFireApp;
 import uk.ac.ebi.uniprot.urml.core.utils.SelectorEnum;
 import uk.ac.ebi.uniprot.urml.input.InputType;
@@ -26,7 +27,6 @@ import java.io.File;
 import java.util.Comparator;
 import java.util.function.Function;
 import org.apache.commons.cli.*;
-import org.drools.core.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
