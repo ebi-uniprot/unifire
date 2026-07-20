@@ -129,7 +129,8 @@ class URMLToDroolsTranspilerTest {
         // become double-quoted, and field values must be quoted strings
         assertConditionsEquivalent("$protein := Protein()", drl);
         assertConsequencesEquivalent("""
-                insertLogical(ProteinAnnotation.builder().withProtein($protein).withEvidence("RULE_1").withType("keyword").withValue("DNA-binding").build())
+                ProteinAnnotation $annotation = ProteinAnnotation.builder().withProtein($protein).withEvidence("RULE_1").withType("keyword").withValue("DNA-binding").build();
+                insertLogical($annotation);
                 """, drl);
     }
 
@@ -786,6 +787,41 @@ class URMLToDroolsTranspilerTest {
     }
 
     /**
+     * A procedural call argument that references an RHS-declared variable is emitted
+     * without the '$' prefix.
+     */
+    @Test
+    void shouldTranspileProceduralCallArgumentReferencingRhsDeclaredVariable() {
+        /*
+         * Given that a declare action uses a procedural call whose argument references another
+         * fact declared earlier in the same actions block:
+         * <action type="declare">... declare 'otherAnnotation' ...</action>
+         * <action type="declare">
+         *   <fact type="fact:ProteinAnnotation" id="annotation">
+         *     <call uri="java://uk.ac.ebi.uniprot.procedures.TestProcedure" procedure="combine">
+         *       <arguments><argument isReference="true">otherAnnotation</argument></arguments>
+         *     </call>
+         *   </fact>
+         * </action>
+         */
+        RuleFact otherDeclared = fact(PROTEIN_ANNOTATION, "otherAnnotation");
+        otherDeclared.setCall(call("createAnnotation", arg("protein", true)));
+        RuleFact annotation = fact(PROTEIN_ANNOTATION, "annotation");
+        annotation.setCall(call("combine", arg("otherAnnotation", true)));
+
+        // When the rule is transpiled to DRL
+        String drl = transpile(rules(rule("RULE_1", and(condition(PROTEIN, "protein")),
+                actions(action(ActionType.DECLARE, otherDeclared), action(ActionType.DECLARE, annotation)))));
+
+        // Then the reference argument must be emitted WITHOUT the '$' prefix because it is an
+        // RHS-declared variable
+        assertConsequencesEquivalent("""
+                ProteinAnnotation otherAnnotation = uk.ac.ebi.uniprot.procedures.TestProcedure.createAnnotation($protein)
+                ProteinAnnotation annotation = uk.ac.ebi.uniprot.procedures.TestProcedure.combine(otherAnnotation)
+                """, drl);
+    }
+
+    /**
      * A create action with a procedural call inserts the call result logically, with
      * reference arguments '$'-prefixed and plain arguments emitted as-is.
      */
@@ -810,8 +846,42 @@ class URMLToDroolsTranspilerTest {
 
         // Then the call result must be inserted logically, the reference argument '$'-prefixed, the
         // plain argument emitted as-is, and both separated by a comma
-        assertConsequencesEquivalent(
-                "insertLogical(uk.ac.ebi.uniprot.procedures.TestProcedure.createAnnotation($protein, 5))", drl);
+        assertConsequencesEquivalent("""
+                ProteinAnnotation $annotation = uk.ac.ebi.uniprot.procedures.TestProcedure.createAnnotation($protein, 5);
+                insertLogical($annotation);
+                """, drl);
+    }
+
+    /**
+     * A create action builder field that references an RHS-declared variable omits the '$' prefix.
+     */
+    @Test
+    void shouldTranspileCreateBuilderFieldReferencingRhsDeclaredVariable() {
+        /*
+         * Given that a create action sets a builder field by referencing a fact declared earlier
+         * in the same actions block:
+         * <action type="declare">... declare 'otherAnnotation' ...</action>
+         * <action type="create">
+         *   <fact type="fact:ProteinAnnotation" id="annotation">
+     *     <field attribute="evidence" isReference="true">otherAnnotation</field>
+         *   </fact>
+         * </action>
+         */
+        RuleFact otherDeclared = fact(PROTEIN_ANNOTATION, "otherAnnotation");
+        otherDeclared.setCall(call("createAnnotation", arg("protein", true)));
+        RuleFact annotation = fact(PROTEIN_ANNOTATION, "annotation", referenceField("evidence", "otherAnnotation"));
+
+        // When the rule is transpiled to DRL
+        String drl = transpile(rules(rule("RULE_1", and(condition(PROTEIN, "protein")),
+                actions(action(ActionType.DECLARE, otherDeclared), action(ActionType.CREATE, annotation)))));
+
+        // Then the builder field reference must be emitted WITHOUT the '$' prefix because it is an
+        // RHS-declared variable
+        assertConsequencesEquivalent("""
+                ProteinAnnotation otherAnnotation = uk.ac.ebi.uniprot.procedures.TestProcedure.createAnnotation($protein)
+                ProteinAnnotation $annotation = ProteinAnnotation.builder().withEvidence(otherAnnotation).build();
+                insertLogical($annotation);
+                """, drl);
     }
 
     /**
@@ -838,14 +908,12 @@ class URMLToDroolsTranspilerTest {
 
         /*
          * Then the fact must be updated via 'update($id)' followed by one setter call per field, with
-         * the reference field '$'-prefixed and the '$' prefix emitted only on the first setter; the
-         * missing ';' after 'update($id)' and the trailing standalone ';' the transpiler appends are
-         * tolerated, because normalizeMvel canonicalizes statement terminators
+         * the reference field '$'-prefixed.
          */
         assertConsequencesEquivalent("""
                 update($proteinAnnotation)
                 $proteinAnnotation.setType("keyword")
-                proteinAnnotation.setEvidence($otherAnnotation)
+                $proteinAnnotation.setEvidence($otherAnnotation)
                 """, drl);
     }
 
@@ -877,8 +945,76 @@ class URMLToDroolsTranspilerTest {
         // it is already a local RHS variable rather than a fact binding from the 'when' part
         assertConsequencesEquivalent("""
                 ProteinAnnotation annotation = uk.ac.ebi.uniprot.procedures.TestProcedure.createAnnotation($protein)
-                update($annotation)
+                update(annotation)
                 annotation.setValue("x")
+                """, drl);
+    }
+
+    /**
+     * An update action field reference that targets an RHS-declared variable omits the '$' prefix
+     * from the reference value.
+     */
+    @Test
+    void shouldTranspileUpdateFieldReferenceReferencingRhsDeclaredVariable() {
+        /*
+         * Given that an update action sets a field by referencing a fact declared earlier in the
+         * same actions block:
+         * <action type="declare">... declare 'otherAnnotation' ...</action>
+         * <action type="update">
+         *   <fact type="fact:ProteinAnnotation" id="annotation">
+         *     <field attribute="evidence" isReference="true">otherAnnotation</field>
+         *   </fact>
+         * </action>
+         */
+        RuleFact otherDeclared = fact(PROTEIN_ANNOTATION, "otherAnnotation");
+        otherDeclared.setCall(call("createAnnotation", arg("protein", true)));
+        RuleFact updated = fact(PROTEIN_ANNOTATION, "annotation", referenceField("evidence", "otherAnnotation"));
+
+        // When the rule is transpiled to DRL
+        String drl = transpile(rules(rule("RULE_1", and(condition(PROTEIN, "protein")),
+                actions(action(ActionType.DECLARE, otherDeclared), action(ActionType.UPDATE, updated)))));
+
+        // Then the field reference must be emitted WITHOUT the '$' prefix because it is an
+        // RHS-declared variable, while the update target keeps '$' because it is LHS-bound
+        assertConsequencesEquivalent("""
+                ProteinAnnotation otherAnnotation = uk.ac.ebi.uniprot.procedures.TestProcedure.createAnnotation($protein)
+                update($annotation)
+                $annotation.setEvidence(otherAnnotation)
+                """, drl);
+    }
+
+    /**
+     * An update action field reference that targets a property of an RHS-declared variable omits
+     * the '$' prefix from the root variable name only.
+     */
+    @Test
+    void shouldTranspileUpdateFieldReferenceReferencingPropertyOfRhsDeclaredVariable() {
+        /*
+         * Given that an update action sets a field by referencing a property of a fact declared
+         * earlier in the same actions block:
+         * <action type="declare">... declare 'newPositionalMapping' ...</action>
+         * <action type="update">
+         *   <fact type="fact:PositionalMapping" id="positionalMapping">
+         *     <field attribute="mappedStart" isReference="true">newPositionalMapping.mappedStart</field>
+         *   </fact>
+         * </action>
+         */
+        RuleFact newMapping = fact(new QName(FACT_NAMESPACE, "PositionalMapping", "fact"), "newPositionalMapping");
+        newMapping.setCall(call("map", arg("positionalMapping", true)));
+        RuleFact updated = fact(new QName(FACT_NAMESPACE, "PositionalMapping", "fact"), "positionalMapping",
+                referenceField("mappedStart", "newPositionalMapping.mappedStart"));
+
+        // When the rule is transpiled to DRL
+        String drl = transpile(rules(rule("RULE_1",
+                and(condition(new QName(FACT_NAMESPACE, "PositionalMapping", "fact"), "positionalMapping")),
+                actions(action(ActionType.DECLARE, newMapping), action(ActionType.UPDATE, updated)))));
+
+        // Then the root of the dotted reference must be emitted WITHOUT the '$' prefix because it is
+        // an RHS-declared variable, while the LHS-bound update target keeps '$'
+        assertConsequencesEquivalent("""
+                PositionalMapping newPositionalMapping = uk.ac.ebi.uniprot.procedures.TestProcedure.map($positionalMapping)
+                update($positionalMapping)
+                $positionalMapping.setMappedStart(newPositionalMapping.mappedStart)
                 """, drl);
     }
 
@@ -954,8 +1090,9 @@ class URMLToDroolsTranspilerTest {
         // Then the declared fact must be wired WITHOUT the '$' prefix (it is a known RHS variable),
         // and the single-quoted literal must be rewritten with double quotes
         assertConsequencesEquivalent("""
-                ProteinAnnotation annotation = uk.ac.ebi.uniprot.procedures.TestProcedure.createAnnotation($protein)
-                insertLogical(ProteinAnnotation.builder().withProtein(annotation).withType("keyword").build())
+                ProteinAnnotation annotation = uk.ac.ebi.uniprot.procedures.TestProcedure.createAnnotation($protein);
+                ProteinAnnotation $annotation2 = ProteinAnnotation.builder().withProtein(annotation).withType("keyword").build();
+                insertLogical($annotation2);
                 """, drl);
     }
 
@@ -979,8 +1116,62 @@ class URMLToDroolsTranspilerTest {
         String drl = transpile(rules(rule("RULE_1", and(condition(PROTEIN, "protein")), actions(create))));
 
         // Then the reference field must be emitted as a '$'-prefixed variable, not a quoted literal
-        assertConsequencesEquivalent(
-                "insertLogical(ProteinAnnotation.builder().withProtein($otherProtein).build())", drl);
+        assertConsequencesEquivalent("""
+                ProteinAnnotation $annotation = ProteinAnnotation.builder().withProtein($otherProtein).build();
+                insertLogical($annotation);
+                """, drl);
+    }
+
+    /**
+     * A CREATE action without an explicit fact id inserts the builder expression inline.
+     */
+    @Test
+    void shouldInlineInsertWhenCreateFactIdIsEmpty() {
+        /*
+         * Given that a create action has no id:
+         * <action type="create">
+         *   <fact type="fact:ProteinAnnotation">
+         *     <field attribute="type">keyword</field>
+         *   </fact>
+         * </action>
+         */
+        Action create = action(ActionType.CREATE, fact(PROTEIN_ANNOTATION, null, field("type", "keyword")));
+
+        // When the rule is transpiled to DRL
+        String drl = transpile(rules(rule("RULE_1", and(condition(PROTEIN, "protein")), actions(create))));
+
+        // Then the fact must be inserted directly without declaring a local variable
+        assertConsequencesEquivalent("""
+                insertLogical(ProteinAnnotation.builder().withType("keyword").build());
+                """, drl);
+    }
+
+    /**
+     * A CREATE action without an explicit fact id inserts a procedural call inline.
+     */
+    @Test
+    void shouldInlineInsertForProceduralCallWhenCreateFactIdIsEmpty() {
+        /*
+         * Given that a create action uses a procedural attachment and has no id:
+         * <action type="create">
+         *   <fact type="fact:ProteinAnnotation">
+         *     <call uri="java://..." procedure="createAnnotation">
+         *       <arguments><argument isReference="true">protein</argument></arguments>
+         *     </call>
+         *   </fact>
+         * </action>
+         */
+        RuleFact annotation = fact(PROTEIN_ANNOTATION, null);
+        annotation.setCall(call("createAnnotation", arg("protein", true)));
+        Action create = action(ActionType.CREATE, annotation);
+
+        // When the rule is transpiled to DRL
+        String drl = transpile(rules(rule("RULE_1", and(condition(PROTEIN, "protein")), actions(create))));
+
+        // Then the procedure call must be inserted directly without declaring a local variable
+        assertConsequencesEquivalent("""
+                insertLogical(uk.ac.ebi.uniprot.procedures.TestProcedure.createAnnotation($protein));
+                """, drl);
     }
 
     /**
@@ -1043,7 +1234,8 @@ class URMLToDroolsTranspilerTest {
         // Then the sanitized value must appear in the build statement, and the sanitizer must have
         // been invoked exactly once with the raw field value
         assertConsequencesEquivalent("""
-                insertLogical(ProteinAnnotation.builder().withValue("SANITIZED").build())
+                ProteinAnnotation $annotation = ProteinAnnotation.builder().withValue("SANITIZED").build();
+                insertLogical($annotation);
                 """, drl);
         verify(sanitizer, times(1)).sanitize("DNA-binding");
     }
@@ -1076,6 +1268,96 @@ class URMLToDroolsTranspilerTest {
                 $annotation.setType("keyword")
                 """, drl);
         verifyNoInteractions(sanitizer);
+    }
+
+    /**
+     * An update action whose fact carries 'with' entries emits one setter call per wired
+     * reference, after the field setters: colon forms map attribute to value, single-quoted
+     * literals are rewritten with double quotes, and plain forms bind the same-named attribute
+     * to a '$'-prefixed reference.
+     */
+    @Test
+    void shouldTranspileUpdateActionWithWiredSetters() {
+        /*
+         * Given that an update action fact wires two values:
+         * <action type="update">
+         *   <fact type="fact:ProteinAnnotation" id="annotation" with="value:'Updated' protein"/>
+         * </action>
+         */
+        RuleFact annotation = fact(PROTEIN_ANNOTATION, "annotation");
+        annotation.getWith().addAll(List.of("value:'Updated'", "protein"));
+
+        // When the rule is transpiled to DRL
+        String drl = transpile(rules(rule("RULE_1", and(condition(PROTEIN, "protein")),
+                actions(action(ActionType.UPDATE, annotation)))));
+
+        // Then each wired entry must become a separate setter call: the colon form sets 'value' to
+        // the double-quoted literal, and the plain form sets the same-named attribute to the
+        // '$'-prefixed reference
+        assertConsequencesEquivalent("""
+                update($annotation);
+                $annotation.setValue("Updated");
+                $annotation.setProtein($protein);
+                """, drl);
+    }
+
+    /**
+     * Wired setters on a fact declared earlier in the same actions block omit the '$' prefix
+     * on both the setter target and wired values referencing other RHS-declared variables.
+     */
+    @Test
+    void shouldTranspileWiredSetterOnFactDeclaredEarlierInSameActions() {
+        /*
+         * Given that an update action targets a fact declared earlier in the same actions block,
+         * and wires a value from another declared fact:
+         * <action type="declare">... declare 'annotation' ...</action>
+         * <action type="declare">... declare 'otherAnnotation' ...</action>
+         * <action type="update">
+         *   <fact type="fact:ProteinAnnotation" id="annotation" with="value:otherAnnotation"/>
+         * </action>
+         */
+        RuleFact declared = fact(PROTEIN_ANNOTATION, "annotation");
+        declared.setCall(call("createAnnotation", arg("protein", true)));
+        RuleFact otherDeclared = fact(PROTEIN_ANNOTATION, "otherAnnotation");
+        otherDeclared.setCall(call("createAnnotation", arg("protein", true)));
+        RuleFact updated = fact(PROTEIN_ANNOTATION, "annotation");
+        updated.getWith().add("value:otherAnnotation");
+
+        // When the rule is transpiled to DRL
+        String drl = transpile(rules(rule("RULE_1", and(condition(PROTEIN, "protein")),
+                actions(action(ActionType.DECLARE, declared), action(ActionType.DECLARE, otherDeclared),
+                        action(ActionType.UPDATE, updated)))));
+
+        // Then the setter target and the wired value must both be emitted WITHOUT the '$' prefix,
+        // because both are local RHS variables rather than fact bindings from the 'when' part
+        assertConsequencesEquivalent("""
+                ProteinAnnotation annotation = uk.ac.ebi.uniprot.procedures.TestProcedure.createAnnotation($protein);
+                ProteinAnnotation otherAnnotation = uk.ac.ebi.uniprot.procedures.TestProcedure.createAnnotation($protein);
+                update(annotation);
+                annotation.setValue(otherAnnotation);
+                """, drl);
+    }
+
+    /**
+     * A wired setter value that starts but does not end with a single quote is not treated as
+     * a string literal and falls through to the '$'-prefixed reference branch.
+     */
+    @Test
+    void shouldNotTreatPartiallyQuotedWiredSetterValueAsStringLiteral() {
+        // Given that a wired setter value starts with a single quote but does NOT end with one:
+        // <action type="update">
+        //   <fact type="fact:ProteinAnnotation" id="annotation" with="note:'unterminated"/>
+        // </action>
+        RuleFact annotation = fact(PROTEIN_ANNOTATION, "annotation");
+        annotation.getWith().add("note:'unterminated");
+
+        // When the rule is transpiled to DRL
+        String drl = transpile(rules(rule("RULE_1", and(condition(PROTEIN, "protein")),
+                actions(action(ActionType.UPDATE, annotation)))));
+
+        // Then the value must NOT be treated as a string literal; it falls through to the
+        // reference branch and is emitted with a '$' prefix
+        assertDrlContains("$annotation.setNote($'unterminated)", drl);
     }
 
     private String transpile(Rules rules) {
