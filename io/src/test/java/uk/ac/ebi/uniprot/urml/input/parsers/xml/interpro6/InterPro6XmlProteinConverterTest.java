@@ -18,17 +18,17 @@ package uk.ac.ebi.uniprot.urml.input.parsers.xml.interpro6;
 
 import org.junit.jupiter.api.Test;
 import org.uniprot.urml.facts.*;
-import uk.ac.ebi.uniprot.aa.interproscan6.model.generated.EntryType;
-import uk.ac.ebi.uniprot.aa.interproscan6.model.generated.LocationType;
-import uk.ac.ebi.uniprot.aa.interproscan6.model.generated.LocationsType;
-import uk.ac.ebi.uniprot.aa.interproscan6.model.generated.MatchType;
-import uk.ac.ebi.uniprot.aa.interproscan6.model.generated.MatchesType;
-import uk.ac.ebi.uniprot.aa.interproscan6.model.generated.NucleicResultType;
-import uk.ac.ebi.uniprot.aa.interproscan6.model.generated.ProteinResultType;
-import uk.ac.ebi.uniprot.aa.interproscan6.model.generated.ResultsType;
-import uk.ac.ebi.uniprot.aa.interproscan6.model.generated.SequenceType;
-import uk.ac.ebi.uniprot.aa.interproscan6.model.generated.SignatureLibraryReleaseType;
-import uk.ac.ebi.uniprot.aa.interproscan6.model.generated.XrefType;
+import uk.ac.ebi.uniprot.aa.interpro.scan.v6.model.EntryType;
+import uk.ac.ebi.uniprot.aa.interpro.scan.v6.model.LocationType;
+import uk.ac.ebi.uniprot.aa.interpro.scan.v6.model.LocationsType;
+import uk.ac.ebi.uniprot.aa.interpro.scan.v6.model.MatchType;
+import uk.ac.ebi.uniprot.aa.interpro.scan.v6.model.MatchesType;
+import uk.ac.ebi.uniprot.aa.interpro.scan.v6.model.NucleicResultType;
+import uk.ac.ebi.uniprot.aa.interpro.scan.v6.model.ProteinResultType;
+import uk.ac.ebi.uniprot.aa.interpro.scan.v6.model.ResultsType;
+import uk.ac.ebi.uniprot.aa.interpro.scan.v6.model.SequenceType;
+import uk.ac.ebi.uniprot.aa.interpro.scan.v6.model.SignatureLibraryReleaseType;
+import uk.ac.ebi.uniprot.aa.interpro.scan.v6.model.XrefType;
 import uk.ac.ebi.uniprot.urml.input.parsers.xml.XmlFormatException;
 
 import java.math.BigInteger;
@@ -620,8 +620,8 @@ class InterPro6XmlProteinConverterTest {
         match.setSource(library);
         match.setModelAc(signatureAc);
 
-        uk.ac.ebi.uniprot.aa.interproscan6.model.generated.SignatureType signature =
-                new uk.ac.ebi.uniprot.aa.interproscan6.model.generated.SignatureType();
+        uk.ac.ebi.uniprot.aa.interpro.scan.v6.model.SignatureType signature =
+                new uk.ac.ebi.uniprot.aa.interpro.scan.v6.model.SignatureType();
         signature.setAc(signatureAc);
         signature.setName("Test signature");
 

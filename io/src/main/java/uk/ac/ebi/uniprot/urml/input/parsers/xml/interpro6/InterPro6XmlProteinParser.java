@@ -17,7 +17,7 @@
 package uk.ac.ebi.uniprot.urml.input.parsers.xml.interpro6;
 
 import org.uniprot.urml.facts.FactSet;
-import uk.ac.ebi.uniprot.aa.interproscan6.model.generated.ResultsType;
+import uk.ac.ebi.uniprot.aa.interpro.scan.v6.model.ResultsType;
 import uk.ac.ebi.uniprot.urml.input.parsers.FactSetParser;
 import uk.ac.ebi.uniprot.urml.input.parsers.xml.XmlUnmarshaller;
 
