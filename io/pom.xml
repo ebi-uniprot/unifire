@@ -39,11 +39,6 @@
             <artifactId>interproscan-model</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.persistence</groupId>
-            <artifactId>javax.persistence-api</artifactId>
-            <version>${javax-persistence.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.jvnet.jaxb</groupId>
             <artifactId>jaxb2-basics</artifactId>
         </dependency>
