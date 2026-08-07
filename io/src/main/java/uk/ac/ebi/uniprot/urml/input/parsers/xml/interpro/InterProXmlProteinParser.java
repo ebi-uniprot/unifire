@@ -17,7 +17,7 @@
 package uk.ac.ebi.uniprot.urml.input.parsers.xml.interpro;
 
 import org.uniprot.urml.facts.FactSet;
-import uk.ac.ebi.interpro.scan.model.ProteinMatchesHolder;
+import uk.ac.ebi.uniprot.aa.interpro.scan.model.ProteinMatchesHolder;
 import uk.ac.ebi.uniprot.urml.input.parsers.FactSetParser;
 import uk.ac.ebi.uniprot.urml.input.parsers.xml.XmlUnmarshaller;
 

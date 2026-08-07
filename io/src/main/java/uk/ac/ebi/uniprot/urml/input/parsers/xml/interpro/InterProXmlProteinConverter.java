@@ -17,8 +17,8 @@
 package uk.ac.ebi.uniprot.urml.input.parsers.xml.interpro;
 
 import org.apache.commons.lang3.StringUtils;
-import uk.ac.ebi.interpro.scan.model.Protein;
-import uk.ac.ebi.interpro.scan.model.*;
+import uk.ac.ebi.uniprot.aa.interpro.scan.model.Protein;
+import uk.ac.ebi.uniprot.aa.interpro.scan.model.*;
 import uk.ac.ebi.uniprot.urml.input.parsers.fasta.header.FastaHeaderData;
 import uk.ac.ebi.uniprot.urml.input.parsers.fasta.header.FastaHeaderParser;
 

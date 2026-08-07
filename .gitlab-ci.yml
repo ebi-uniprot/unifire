@@ -49,15 +49,21 @@ build:
     paths:
       - "**/*.jar"
       - "**/maven.graph.json"
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_COMMIT_BRANCH
+  rules: &trigger_rules
+    # Run on MR events: opened, new commits pushed to the source branch, reopened, etc.
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    # Prevent duplicate branch pipelines when an MR already exists for the branch
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+      when: never
+    # Allow branch pipelines only when no open MR exists
+    - if: '$CI_COMMIT_BRANCH'
 
 test:
   extends: .mvn
   stage: test
   script:
     - mvn clean verify
+  rules: *trigger_rules
 
 python-test:
   stage: test
@@ -70,6 +76,7 @@ python-test:
   script:
     - cd ${CI_PROJECT_DIR}/misc/taxonomy
     - python3 -m unittest discover -s tests
+  rules: *trigger_rules
 
 .docker_image:
   image: docker:24.0.5
