@@ -88,6 +88,7 @@ python-test:
     - echo "Building UniFire docker image"
     - docker --version
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin
+    - echo "$GHCR_PASSWORD" | docker login -u $GHCR_USERNAME "ghcr.io" --password-stdin
     - export UNIFIRE_IMAGE_TAG=$(grep -E "^UNIFIRE_DOCKER_IMAGE_VERSION=" "${IMAGE_TAG_FILE}" | cut -d '=' -f 2)
     - echo "UniFire image tag will be = ${UNIFIRE_IMAGE_TAG}"
 
@@ -101,8 +102,13 @@ python-test:
     - docker build --target ${DOCKER_TARGET} --tag ${IMAGE_NAME} --no-cache docker
     - docker image ls
     - docker push ${IMAGE_NAME}
+    - GHCR_IMAGE=ghcr.io/ebi-uniprot/unifire:${UNIFIRE_IMAGE_TAG}${IMAGE_SUFFIX}
+    - docker tag ${IMAGE_NAME} ${GHCR_IMAGE}
+    - docker push ${GHCR_IMAGE}
     - docker rmi ${IMAGE_NAME}
+    - docker rmi ${GHCR_IMAGE}
     - docker logout "$CI_REGISTRY"
+    - docker logout "ghcr.io"
   rules:
     - if: $CI_COMMIT_BRANCH == "pre_release" && $CI_COMMIT_TITLE =~ /^Merge branch '.*' into 'pre_release'$/
       when: on_success
