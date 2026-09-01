@@ -23,11 +23,15 @@
     <parent>
         <artifactId>unifire</artifactId>
         <groupId>uk.ac.ebi.uniprot.aa</groupId>
-        <version>2.0-SNAPSHOT</version>
+        <version>${revision}</version>
         <relativePath>..</relativePath>
     </parent>
 
     <artifactId>unifire-procedures</artifactId>
+
+    <properties>
+        <revision>3.0-SNAPSHOT</revision>
+    </properties>
 
     <dependencies>
         <dependency>
