@@ -8,6 +8,7 @@
 stages:
   - build_dependency
   - test
+  - release
   - build_docker_image
 
 include:
