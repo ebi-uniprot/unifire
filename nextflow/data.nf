@@ -11,11 +11,11 @@ workflow fetchData {
     pirsrRelease
 
     main:
-    dataPath = file(dataPath)
+    def dataPathFile = file(dataPath)
 
-    def urmlBasePath = dataPath.resolve("urml")
+    def urmlBasePath = dataPathFile.resolve("urml")
     assert urmlBasePath.mkdirs()
-    def pirsrBasePath = dataPath.resolve("pirsr")
+    def pirsrBasePath = dataPathFile.resolve("pirsr")
     assert pirsrBasePath.mkdirs()
 
     urmlTemplatesFilePath = urmlBasePath.resolve("unirule-templates.xml")
@@ -29,12 +29,12 @@ workflow fetchData {
     def pirsrEnabled = 'pirsr' in systems
 
     if (!params.skipDownloads) {
-        if (dataPath.isFile()) {
+        if (dataPathFile.isFile()) {
             log.error("'--dataPath <DATA-DIR>' is required and cannot be an existing file.")
             exit(1)
         }
-        else if (!dataPath.isDirectory()) {
-            assert dataPath.mkdirs()
+        else if (!dataPathFile.isDirectory()) {
+            assert dataPathFile.mkdirs()
         }
 
         if (uniruleEnabled || arbaEnabled) {
@@ -62,7 +62,7 @@ workflow fetchData {
     }
 
     emit:
-    dataPath
+    dataPath = dataPathFile
     urmlTemplatesFilePath
     uniruleUrmlFilePath
     arbaUrmlFilePath
