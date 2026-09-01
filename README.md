@@ -75,12 +75,12 @@ nextflow run nextflow/main.nf \
   --skipDownloads
 ```
 
-Run only UniRule and ARBA from a precomputed InterProScan 6 XML file, with a specific UniProt release version:
+Run only UniRule and ARBA from a precomputed InterProScan 6 XML file, with a specific version set:
 
 ```bash
 nextflow run nextflow/main.nf \
   --input samples/input_ipr6.xml \
-  --uniprotRelease 2026_02 \
+  --version 2026.4 \
   --output out \
   --dataPath data \
   --systems unirule,arba \
@@ -129,11 +129,12 @@ The pipeline is composed of the following stages, orchestrated by `nextflow/main
 | `--systems` | no | `unirule,arba,pirsr` | Comma-separated list of systems to run: `unirule`, `arba`, `pirsr`. |
 | `--outputFormat` | no | `TSV` | Prediction output format: `TSV` or `XML`. |
 | `--chunkSize` | no | `500` | Number of proteins processed per chunk. |
-| `--uniprotRelease` | no | `latest` | UniProt release used to download rule files. |
-| `--pirsrRelease` | no | `latest` | PIRSR data release used to download PIRSR data files. |
+| `--version` | no | `2026.4` | Predefined version set to use. Determines defaults for `--uniprotRelease`, `--iprVersion` and `--iprscanVersion`. |
+| `--uniprotRelease` | no | `2026_04` (from `--version 2026.4`) | UniProt release used to download rule files. |
+| `--pirsrRelease` | no | `2026_03` (from `--version 2026.4`) | PIRSR data release used to download PIRSR data files. |
 | `--skipDownloads` | no | `false` | Skip downloading remote rule files (requires valid files already present in `--dataPath`). |
-| `--iprscanVersion` | no | `6.0.1` | InterProScan 6 version to run when the input is FASTA. |
-| `--iprVersion` | no | `latest` | InterPro version used with InterProScan 6. |
+| `--iprscanVersion` | no | `6.0.2` (from `--version 2026.4`) | InterProScan 6 version to run when the input is FASTA. |
+| `--iprVersion` | no | `110.0` (from `--version 2026.4`) | InterPro version used with InterProScan 6. |
 | `--iprscan6ProfileName` | no | `docker` | Container profile used by the InterProScan 6 sub-workflow: `docker`, `singularity` or `podman`. |
 | `--unifireImage` | no | `dockerhub.ebi.ac.uk/uniprot-public/unifire/nextflow` | Docker image used for UniFIRE rule inference. |
 | `--unifireVersion` | no | `latest` | Tag of the UniFIRE Docker image. |

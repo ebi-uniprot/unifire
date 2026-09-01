@@ -22,17 +22,21 @@ def printUsage() {
       --chunkSize N               Number of proteins to process per chunk.
                                   Default: ${params.defaultChunkSize}
 
+    Version options:
+      --version VERSION           Predefined version set to use.
+                                  Default: ${params.defaultVersion}
+
     InterProScan options (used only when input is FASTA):
       --iprscanVersion VERSION    InterProScan 6 version to run.
-                                  Default: ${params.defaultIprscanVersion}
+                                  Default: from --version ${params.defaultVersion} (${params.versions[params.defaultVersion].iprscanVersion})
       --iprVersion VERSION        InterPro version to use with InterProScan 6.
-                                  Default: ${params.defaultIprVersion}
+                                  Default: from --version ${params.defaultVersion} (${params.versions[params.defaultVersion].iprVersion})
 
     Data options:
       --uniprotRelease RELEASE    UniProt release used to download rule files.
-                                  Default: ${params.defaultUniprotRelease}
+                                  Default: from --version ${params.defaultVersion} (${params.versions[params.defaultVersion].uniprotRelease})
       --pirsrRelease RELEASE      PIRSR data release used to download PIRSR data files.
-                                  Default: ${params.defaultPirsrRelease}
+                                  Default: from --version ${params.defaultVersion} (${params.versions[params.defaultVersion].pirsrRelease})
       --skipDownloads             Skip downloading remote rule files.
 
     Container options:
