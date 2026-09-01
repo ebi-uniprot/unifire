@@ -7,6 +7,8 @@ workflow fetchData {
     take:
     dataPath
     systems
+    uniprotRelease
+    pirsrRelease
 
     main:
     dataPath = file(dataPath)
@@ -36,25 +38,25 @@ workflow fetchData {
         }
 
         if (uniruleEnabled || arbaEnabled) {
-            def urmlTemplatesUri = "ftp://ftp.ebi.ac.uk/pub/contrib/UniProt/UniFIRE/rules/unirule-templates-${params.uniprotRelease}.xml"
+            def urmlTemplatesUri = "ftp://ftp.ebi.ac.uk/pub/contrib/UniProt/UniFIRE/rules/unirule-templates-${uniprotRelease}.xml"
             urmlTemplatesFilePath = downloadUrmlTemplates(urmlTemplatesUri, urmlBasePath, "unirule-templates.xml")
         }
 
         if (uniruleEnabled) {
-            def uri = "ftp://ftp.ebi.ac.uk/pub/contrib/UniProt/UniFIRE/rules/unirule-urml-${params.uniprotRelease}.xml"
+            def uri = "ftp://ftp.ebi.ac.uk/pub/contrib/UniProt/UniFIRE/rules/unirule-urml-${uniprotRelease}.xml"
             uniruleUrmlFilePath = downloadUrml(uri, urmlBasePath, "unirule-urml.xml")
         }
 
         if (arbaEnabled) {
-            def uri = "ftp://ftp.ebi.ac.uk/pub/contrib/UniProt/UniFIRE/rules/arba-urml-${params.uniprotRelease}.xml"
+            def uri = "ftp://ftp.ebi.ac.uk/pub/contrib/UniProt/UniFIRE/rules/arba-urml-${uniprotRelease}.xml"
             arbaUrmlFilePath = downloadArba(uri, urmlBasePath, "arba-urml.xml")
         }
 
         if (pirsrEnabled) {
-            def urmlUri = "ftp://ftp.ebi.ac.uk/pub/contrib/UniProt/UniFIRE/rules/unirule.pirsr-urml-${params.uniprotRelease}.xml"
+            def urmlUri = "ftp://ftp.ebi.ac.uk/pub/contrib/UniProt/UniFIRE/rules/unirule.pirsr-urml-${uniprotRelease}.xml"
             pirsrUrmlFilePath = downloadPirsrUrml(urmlUri, urmlBasePath, "unirule.pirsr-urml.xml")
 
-            def uri = "https://proteininformationresource.org/pirsr/pirsr_data_${params.pirsrRelease}.tar.gz"
+            def uri = "https://proteininformationresource.org/pirsr/pirsr_data_${pirsrRelease}.tar.gz"
             pirsrDir = downloadPirsr(uri, pirsrBasePath)
         }
     }

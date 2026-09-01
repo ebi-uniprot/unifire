@@ -12,13 +12,29 @@ workflow {
         exit(0)
     }
 
+    // Resolve versioned defaults.
+    // Precedence: explicit CLI arguments > --version mapping > defaultVersion mapping.
+    def versionToUse = params.version ?: params.defaultVersion
+    def versionConfig = null
+    if (versionToUse) {
+        versionConfig = params.versions[versionToUse]
+        if (!versionConfig) {
+            log.error("Version '${versionToUse}' not found in versions.config. Available versions: ${params.versions.keySet().join(', ')}")
+            exit(1)
+        }
+    }
+    def uniprotRelease = params.uniprotRelease ?: versionConfig?.uniprotRelease
+    def iprVersion = params.iprVersion ?: versionConfig?.iprVersion
+    def iprscanVersion = params.iprscanVersion ?: versionConfig?.iprscanVersion
+    def pirsrRelease = params.pirsrRelease ?: versionConfig?.pirsrRelease
+
     printBanner()
 
     def systems = parseSystems(params.systems)
     validateIprscan6ProfileName(params.iprscan6ProfileName)
     def outputFormat = parseOutputFormat(params.outputFormat)
-    println("Using UniProt release: ${params.uniprotRelease}, systems: ${systems}")
-    dataPaths = fetchData(params.dataPath, systems)
+    println("Using UniProt release: ${uniprotRelease}, systems: ${systems}")
+    dataPaths = fetchData(params.dataPath, systems, uniprotRelease, pirsrRelease)
 
     // Define pipeline inputs
     def inputPath = file(params.input)
@@ -40,10 +56,10 @@ workflow {
 
     if (inputType == "fasta") {
         // Run InterProScan 6 pipeline
-        println("Running InterProScan 6 pipeline with iprscanVersion=${params.iprscanVersion}, iprVersion=${params.iprVersion}")
+        println("Running InterProScan 6 pipeline with iprscanVersion=${iprscanVersion}, iprVersion=${iprVersion}")
         def iprDataPath = dataPaths.dataPath.resolve("iprscan6")
         assert iprDataPath.mkdirs()
-        iprscanXmlPath = runIprscan6(params.iprscanVersion, params.iprVersion, inputPath, iprDataPath)
+        iprscanXmlPath = runIprscan6(iprscanVersion, iprVersion, inputPath, iprDataPath)
         inputType = "InterProScan6"
     }
 
