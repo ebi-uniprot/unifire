@@ -37,22 +37,25 @@
         <java.version>17</java.version>
         <!-- uniprot and interpro -->
         <unirule.public.version>1.1</unirule.public.version>
-        <interproscan-model.version>5.66-98.0</interproscan-model.version>
+        <interproscan-model.version>6.0.1</interproscan-model.version>
         <!-- logging -->
-        <logback.version>1.4.14</logback.version>
+        <logback.version>1.5.35</logback.version>
         <slf4j.version>2.0.9</slf4j.version>
         <!-- commons/utils/etc -->
         <commons-collections.version>4.1</commons-collections.version>
-        <commons-lang3.version>3.11</commons-lang3.version>
-        <guava.version>30.0-jre</guava.version>
+        <commons-lang3.version>3.18.0</commons-lang3.version>
+        <commons-io.version>2.14.0</commons-io.version>
+        <commons-beanutils.version>1.11.0</commons-beanutils.version>
+        <guava.version>32.1.3-jre</guava.version>
         <reflections.version>0.10.2</reflections.version>
+        <lombok.version>1.18.46</lombok.version>
         <!--Testing-->
         <mockito.version>3.6.0</mockito.version>
         <hamcrest.version>2.2</hamcrest.version>
         <junit5.version>5.8.2</junit5.version>
-        <xmlunit.version>2.7.0</xmlunit.version>
+        <xmlunit.version>2.10.0</xmlunit.version>
         <!--JAXB-->
-        <plugin.jaxb.version>2.0.9</plugin.jaxb.version>
+        <plugin.jaxb.version>2.0.16</plugin.jaxb.version>
         <jaxb2-rich-contract-plugin.version>2.0.1</jaxb2-rich-contract-plugin.version>
         <glassfish.jaxb.runtime.version>2.3.8</glassfish.jaxb.runtime.version>
         <javax-activation.version>1.1</javax-activation.version>
@@ -161,7 +164,7 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>uk.ac.ebi.interpro.scan</groupId>
+                <groupId>uk.ac.ebi.uniprot.aa.interpro.scan</groupId>
                 <artifactId>interproscan-model</artifactId>
                 <version>${interproscan-model.version}</version>
             </dependency>
@@ -194,6 +197,11 @@
                 <groupId>org.reflections</groupId>
                 <artifactId>reflections</artifactId>
                 <version>${reflections.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
             </dependency>
 
             <!-- https://mvnrepository.com/artifact/org.fusesource.jansi/jansi -->

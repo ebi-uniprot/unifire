@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2018 European Molecular Biology Laboratory
+ *  Copyright (c) 2026 European Molecular Biology Laboratory
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -14,29 +14,29 @@
  *  limitations under the License.
  */
 
-package uk.ac.ebi.uniprot.urml.input.parsers.xml.interpro;
+package uk.ac.ebi.uniprot.urml.input.parsers.xml;
 
 /**
  * Exception raised when the InterProScan format is incorrect or an important information is missing.
  *
  * @author Alexandre Renaux
  */
-public class InterProScanXmlFormatException extends RuntimeException {
+public class XmlFormatException extends RuntimeException {
 
-    public InterProScanXmlFormatException(String message) {
+    public XmlFormatException(String message) {
         super(message);
     }
 
-    public InterProScanXmlFormatException(String message, Throwable cause) {
+    public XmlFormatException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public InterProScanXmlFormatException(Throwable cause) {
+    public XmlFormatException(Throwable cause) {
         super(cause);
     }
 
-    protected InterProScanXmlFormatException(String message, Throwable cause, boolean enableSuppression,
-            boolean writableStackTrace) {
+    protected XmlFormatException(String message, Throwable cause, boolean enableSuppression,
+                                 boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

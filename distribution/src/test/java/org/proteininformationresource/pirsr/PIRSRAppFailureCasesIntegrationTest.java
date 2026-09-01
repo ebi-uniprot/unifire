@@ -82,6 +82,7 @@ class PIRSRAppFailureCasesIntegrationTest {
                 "     -t,--input_type <INPUT_TYPE>             Type of the input file provided by -i option.\n" +
                 "                                              Supported Input types are\n" +
                 "                                              - InterProScan (InterProScan Output XML)\n" +
+                "                                              - InterProScan6 (InterProScan6 Output XML)\n" +
                 "                                              - XML (Input Fact XML)\n" +
                 "                                              (default: InterProScan)\n" +
                 "     -h,--help                                Print this usage.\n" +

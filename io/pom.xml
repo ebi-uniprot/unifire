@@ -35,26 +35,8 @@
             <artifactId>unifire-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>uk.ac.ebi.interpro.scan</groupId>
+            <groupId>uk.ac.ebi.uniprot.aa.interpro.scan</groupId>
             <artifactId>interproscan-model</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-reload4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.sun.xml.bind</groupId>
-                    <artifactId>jaxb-impl</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>javax.xml.bind</groupId>
-                    <artifactId>jaxb-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.jvnet.jaxb</groupId>

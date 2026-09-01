@@ -30,7 +30,8 @@
     <artifactId>unifire-engine</artifactId>
 
     <properties>
-        <drools.version>7.7.0.Final</drools.version>
+        <drools.version>7.70.0.Final</drools.version>
+        <xstream.version>1.4.21</xstream.version>
     </properties>
 
     <dependencies>
@@ -39,19 +40,32 @@
             <artifactId>unifire-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.kie</groupId>
             <artifactId>kie-api</artifactId>
             <version>${drools.version}</version>
         </dependency>
         <dependency>
             <groupId>org.drools</groupId>
-            <artifactId>drools-compiler</artifactId>
+            <artifactId>drools-mvel</artifactId>
             <version>${drools.version}</version>
         </dependency>
         <dependency>
             <groupId>org.drools</groupId>
-            <artifactId>drools-core</artifactId>
+            <artifactId>drools-engine</artifactId>
             <version>${drools.version}</version>
+        </dependency>
+
+        <!-- Vulnerable transitive dependencies -->
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>${xstream.version}</version>
         </dependency>
     </dependencies>
 

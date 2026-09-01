@@ -1,6 +1,6 @@
 package uk.ac.ebi.uniprot.urml.input.parsers.xml.interpro;
 
-import uk.ac.ebi.interpro.scan.model.Protein;
+import uk.ac.ebi.uniprot.aa.interpro.scan.model.Protein;
 import uk.ac.ebi.uniprot.urml.input.parsers.xml.AbstractXmlFactSetChunkParser;
 
 import java.io.IOException;

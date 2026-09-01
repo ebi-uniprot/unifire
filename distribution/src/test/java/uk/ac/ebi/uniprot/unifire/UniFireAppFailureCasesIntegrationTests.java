@@ -90,6 +90,7 @@ class UniFireAppFailureCasesIntegrationTests {
                 "                                            (default: 1000).\n" +
                 "     -s,--input-source <INPUT_SOURCE>       Input source type. Supported input sources are:\n" +
                 "                                            - InterProScan (InterProScan Output XML)\n" +
+                "                                            - InterProScan6 (InterProScan6 Output XML)\n" +
                 "                                            - UniParc (UniParc XML)\n" +
                 "                                            - XML (Input Fact XML)\n" +
                 "                                            (default: InterProScan).\n" +

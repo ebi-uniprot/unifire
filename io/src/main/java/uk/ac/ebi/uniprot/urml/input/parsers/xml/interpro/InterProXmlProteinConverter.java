@@ -17,17 +17,17 @@
 package uk.ac.ebi.uniprot.urml.input.parsers.xml.interpro;
 
 import org.apache.commons.lang3.StringUtils;
-import uk.ac.ebi.interpro.scan.model.Protein;
-import uk.ac.ebi.interpro.scan.model.*;
+import uk.ac.ebi.uniprot.aa.interpro.scan.model.Protein;
+import uk.ac.ebi.uniprot.aa.interpro.scan.model.*;
 import uk.ac.ebi.uniprot.urml.input.parsers.fasta.header.FastaHeaderData;
 import uk.ac.ebi.uniprot.urml.input.parsers.fasta.header.FastaHeaderParser;
 
 import java.util.*;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.uniprot.urml.facts.Signature;
 import org.uniprot.urml.facts.*;
+import uk.ac.ebi.uniprot.urml.input.parsers.xml.XmlFormatException;
 
 /**
  * Iterates over {@link Protein} and convert them to {@link org.uniprot.urml.facts.FactSet}.
@@ -95,8 +95,7 @@ public class InterProXmlProteinConverter implements Iterator<FactSet>{
                 factSetQueue.add(factSetBuilder.build());
             }
         } else {
-            throw new InterProScanXmlFormatException(
-                    String.format("Missing xref tag for ipsProtein md5=%s", ipsProtein.getMd5()));
+            throw new XmlFormatException(String.format("Missing xref tag for ipsProtein md5=%s", ipsProtein.getMd5()));
         }
 
     }
@@ -167,8 +166,9 @@ public class InterProXmlProteinConverter implements Iterator<FactSet>{
         if (fastaHeaderData.getRecommendedOlnOrOrf() != null){
             geneBuilder.withOrfOrOlnNames(fastaHeaderData.getRecommendedOlnOrOrf());
         }
-        if (!CollectionUtils.isEmpty(fastaHeaderData.getGeneLocationOrganelles())){
-            geneBuilder.withOrganelleLocations(fastaHeaderData.getGeneLocationOrganelles());
+        List<OrganelleType> organelles = fastaHeaderData.getGeneLocationOrganelles();
+        if (organelles != null && !organelles.isEmpty()){
+            geneBuilder.withOrganelleLocations(organelles);
         }
     }
 

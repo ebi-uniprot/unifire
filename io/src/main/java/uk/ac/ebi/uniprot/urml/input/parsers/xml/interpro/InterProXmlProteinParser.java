@@ -16,14 +16,15 @@
 
 package uk.ac.ebi.uniprot.urml.input.parsers.xml.interpro;
 
-import uk.ac.ebi.interpro.scan.model.ProteinMatchesHolder;
+import org.uniprot.urml.facts.FactSet;
+import uk.ac.ebi.uniprot.aa.interpro.scan.model.ProteinMatchesHolder;
 import uk.ac.ebi.uniprot.urml.input.parsers.FactSetParser;
+import uk.ac.ebi.uniprot.urml.input.parsers.xml.XmlUnmarshaller;
 
+import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
-import javax.xml.bind.JAXBException;
-import org.uniprot.urml.facts.FactSet;
 
 /**
  * Parses the InterProScan XML output and provides an iterator of {@link FactSet}
@@ -32,10 +33,10 @@ import org.uniprot.urml.facts.FactSet;
  */
 public class InterProXmlProteinParser implements FactSetParser {
 
-    private final InterProScanXmlOutputUnmarshaller interProXMLUnmarshaller;
+    private final XmlUnmarshaller<ProteinMatchesHolder> interProXMLUnmarshaller;
 
     public InterProXmlProteinParser() {
-        this.interProXMLUnmarshaller = new InterProScanXmlOutputUnmarshaller();
+        this.interProXMLUnmarshaller = new XmlUnmarshaller<>(ProteinMatchesHolder.class);
     }
 
     public Iterator<FactSet> parse(InputStream inputStream) throws IOException {

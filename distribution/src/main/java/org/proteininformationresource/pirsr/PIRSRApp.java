@@ -17,6 +17,7 @@
 
 package org.proteininformationresource.pirsr;
 
+import org.apache.commons.lang3.StringUtils;
 import uk.ac.ebi.uniprot.unifire.UniFireApp;
 import uk.ac.ebi.uniprot.urml.core.utils.SelectorEnum;
 import uk.ac.ebi.uniprot.urml.input.InputType;
@@ -26,7 +27,6 @@ import java.io.File;
 import java.util.Comparator;
 import java.util.function.Function;
 import org.apache.commons.cli.*;
-import org.drools.core.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +54,7 @@ public class PIRSRApp {
 				.type(File.class).required().build();
 		Option inputTypeOption = Option.builder("t").longOpt("input_type").hasArg().argName("INPUT_TYPE")
 				.desc(String.format("Type of the input file provided by -i option. Supported Input types are " +
-								"\n%s\n%s %s", prettyPrint(InputType.INTERPROSCAN_XML),
+								"\n%s\n%s\n%s %s", prettyPrint(InputType.INTERPROSCAN_XML), prettyPrint(InputType.INTERPROSCAN6_XML),
 						prettyPrint(InputType.FACT_XML), printDefault(InputType.INTERPROSCAN_XML)))
 				.type(InputType.class).optionalArg(true).build();
 		Option pirsrDataDirOption = Option.builder("d").longOpt("pirsr_data_dir").hasArg().argName("PIRSR_DATA_DIR").desc("Directory for PIRSR data.")
@@ -151,6 +151,9 @@ public class PIRSRApp {
 		static InputType check(String type) {
 			if ( type == null || type.equals("InterProScan") ) {
 				return InputType.INTERPROSCAN_XML;
+			}
+			else if (type.equals("InterProScan6") ) {
+				return InputType.INTERPROSCAN6_XML;
 			}
 			else if (type.equals("XML")) {
 				return InputType.FACT_XML;

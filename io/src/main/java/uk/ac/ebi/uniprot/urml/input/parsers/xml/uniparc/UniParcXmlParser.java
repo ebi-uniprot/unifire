@@ -16,16 +16,15 @@
 
 package uk.ac.ebi.uniprot.urml.input.parsers.xml.uniparc;
 
+import org.uniprot.uniparc.Uniparc;
+import org.uniprot.urml.facts.FactSet;
 import uk.ac.ebi.uniprot.urml.input.parsers.FactSetParser;
+import uk.ac.ebi.uniprot.urml.input.parsers.xml.XmlUnmarshaller;
 
+import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
-import javax.xml.bind.JAXBException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.uniprot.uniparc.Uniparc;
-import org.uniprot.urml.facts.FactSet;
 
 /**
  * Parses the UniParc XML and provides an iterator of {@link FactSet}
@@ -34,12 +33,10 @@ import org.uniprot.urml.facts.FactSet;
  */
 public class UniParcXmlParser implements FactSetParser {
 
-    private final static Logger logger = LoggerFactory.getLogger(UniParcXmlParser.class);
-
-    private final UniParcXmlUnmarshaller uniparcXmlUnmarshaller;
+    private final XmlUnmarshaller<Uniparc> uniparcXmlUnmarshaller;
 
     public UniParcXmlParser() {
-        this.uniparcXmlUnmarshaller = new UniParcXmlUnmarshaller();
+        this.uniparcXmlUnmarshaller = new XmlUnmarshaller<>(Uniparc.class);
     }
 
     public Iterator<FactSet> parse(InputStream inputStream) throws IOException {

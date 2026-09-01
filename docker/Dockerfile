@@ -19,11 +19,11 @@ FROM ubuntu:24.04 AS base
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 
 RUN apt-get update \
-    && DEBIAN_FRONTEND="noninteractive" apt-get install -y wget openjdk-17-jdk maven git coreutils hmmer python3-numpy python3-lxml python3-six \
-     python3-pip python3-biopython python3-requests python3 ncbi-data libdw1 libpcre3-dev
+    && DEBIAN_FRONTEND="noninteractive" apt-get install -y wget openjdk-17-jdk maven git coreutils hmmer \
+     python3-pip python3 ncbi-data libdw1 libpcre3-dev python3-dev gcc libc-dev
 
 # --break-system-packages flag is required to force system-wide installation (not in virtualenv)
-RUN pip install https://github.com/etetoolkit/ete/archive/ete4.zip --break-system-packages
+RUN pip install numpy lxml https://github.com/etetoolkit/ete/archive/ete4.zip --break-system-packages
 
 COPY scripts /opt/scripts/bin
 COPY versions.properties /opt/scripts/bin

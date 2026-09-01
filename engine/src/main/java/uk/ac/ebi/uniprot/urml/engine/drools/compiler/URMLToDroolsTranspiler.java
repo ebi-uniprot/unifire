@@ -20,6 +20,7 @@ import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.uniprot.urml.facts.*;
 import org.uniprot.urml.rules.*;
 import uk.ac.ebi.uniprot.urml.core.model.facts.reflection.FactModelHelper;
 import uk.ac.ebi.uniprot.urml.core.model.facts.reflection.FactModelReflectionException;
@@ -50,19 +51,18 @@ public class URMLToDroolsTranspiler {
         MATCHES("matches", "not matches"),
         CONTAINS("contains", "not contains");
 
-        protected String positive;
-        protected String negative;
+        private final String positive;
+        private final String negative;
 
-        DroolsComparator(String positive, String negative){
+        DroolsComparator(String positive, String negative) {
             this.positive = positive;
             this.negative = negative;
         }
 
-        String getValue(boolean isNegative){
+        String getValue(boolean isNegative) {
             return isNegative ? negative : positive;
         }
     }
-
 
     private static final String RULE_START = "rule";
     private static final String RULE_END = "end";
@@ -74,7 +74,7 @@ public class URMLToDroolsTranspiler {
     private static final String NEW_LINE = "\n";
     private static final String UNIFICATION = ":=";
 
-    private PrintWriter writer;
+    private final PrintWriter writer;
     private final Sanitizer sanitizer;
 
     public URMLToDroolsTranspiler(OutputStream outputStream, CompositeSanitizer sanitizer) {
@@ -82,6 +82,12 @@ public class URMLToDroolsTranspiler {
         this.sanitizer = sanitizer;
     }
 
+    /**
+     * Transpiles a URML rule set into Drools Rule Language (DRL).
+     *
+     * <p>Output starts with the package, fact imports, and a {@code @classReactive}
+     * declaration for each tracked fact class, followed by the generated rules.</p>
+     */
     public void translate(Rules rules) {
         logger.debug("Transpiling URML to Drools...");
         writer.write("package " + rules.getName() + ";");
@@ -90,11 +96,55 @@ public class URMLToDroolsTranspiler {
         newLines(1);
         writer.write("import java.util.List;");
         newLines(2);
-        rules.getRule().forEach(this::translate);
+        declareFactClassReactivity();
+        newLines(1);
+        rules.getRule().forEach(this::translateRule);
         writer.close();
     }
 
-    private void translate(Rule rule){
+    private void declareFactClassReactivity() {
+        var factClasses = List.of(
+                GeneInformation.class,
+                Organism.class,
+                PositionalFeatureTag.class,
+                PositionalMapping.class,
+                PositionalProteinSignature.class,
+                Protein.class,
+                ProteinAnnotation.class,
+                ProteinSignature.class,
+                TemplateProtein.class,
+                TemplateProteinSignature.class
+        );
+        for (Class<?> factClass : factClasses) {
+            writer.write(String.format("""
+                    declare %s
+                        @classReactive
+                    end
+                    """, factClass.getName()));
+            newLines(1);
+        }
+    }
+
+    /**
+     * Transpiles a single URML rule into a DRL rule.
+     *
+     * <p>Each rule is emitted with {@code dialect "mvel"} and {@code no-loop true}.
+     * Procedural rules additionally receive a low salience so they run after
+     * regular rules.</p>
+     *
+     * <p>Example output:</p>
+     * <pre>
+     * rule "UR_UPDATE"
+     *   dialect "mvel"
+     *   no-loop true
+     *   when
+     *     ...
+     *   then
+     *     ...
+     *   end
+     * </pre>
+     */
+    private void translateRule(Rule rule) {
         writer.write(RULE_START + " ");
         writer.write(enquote(rule.getId()));
         if (rule.getExtends() != null) {
@@ -106,25 +156,30 @@ public class URMLToDroolsTranspiler {
         newLines(1);
         writer.write("no-loop true");
         newLines(1);
-        if (rule.getProcedural()){
+        if (rule.getProcedural()) {
             writer.write("salience -10");
             newLines(1);
         }
         writer.write(LHS_KEYWORD);
         newLines(1);
-        translate(rule.getConditions());
+        translateDisjunctiveConditions(rule.getConditions());
         newLines(1);
         writer.write(RHS_KEYWORD);
         newLines(1);
-        translate(rule.getActions());
+        translateActions(rule.getActions());
         writer.write(RULE_END);
         newLines(2);
     }
 
-    private void translate(DisjunctiveConditionSet disjunctiveConditionSet) {
+    /**
+     * Emits the OR branches of a disjunctive condition set.
+     *
+     * <p>Each non-first branch is separated by an {@code or} keyword.</p>
+     */
+    private void translateDisjunctiveConditions(DisjunctiveConditionSet disjunctiveConditionSet) {
         boolean firstIteration = true;
         for (ConjunctiveConditionSet conjunctiveConditionSet : disjunctiveConditionSet.getAND()) {
-            if(!firstIteration){
+            if (!firstIteration) {
                 writer.write(NEW_LINE);
                 indent(1);
                 writer.write(OR);
@@ -133,36 +188,45 @@ public class URMLToDroolsTranspiler {
             indent(1);
             openParenthesis();
             writer.write(NEW_LINE);
-            translate(conjunctiveConditionSet);
+            translateConjunctiveConditions(conjunctiveConditionSet);
             indent(1);
             closeParenthesis();
             firstIteration = false;
         }
     }
 
-    private void translate(ConjunctiveConditionSet conjunctiveConditionSet) {
+    /**
+     * Emits the AND conditions of a conjunctive condition set.
+     *
+     * <p>Each non-first condition is separated by an {@code and} keyword.</p>
+     */
+    private void translateConjunctiveConditions(ConjunctiveConditionSet conjunctiveConditionSet) {
         boolean firstIteration = true;
         for (Condition condition : conjunctiveConditionSet.getCondition()) {
-            if (!firstIteration){
+            if (!firstIteration) {
                 indent(2);
                 writer.write("and");
                 newLines(1);
             }
-            translate(condition);
+            translateCondition(condition);
             firstIteration = false;
         }
     }
 
-    private void translate(Actions actions) {
-        Set<String> actionFactIds = new HashSet<>();
-        actions.getAction().forEach(a -> translate(a, actionFactIds));
+    /**
+     * Transpiles all actions of a rule, tracking RHS-declared variables so that
+     * subsequent references to them are not prefixed with {@code $}.
+     */
+    private void translateActions(Actions actions) {
+        Set<String> rhsDeclaredVariables = new HashSet<>();
+        actions.getAction().forEach(a -> translateAction(a, rhsDeclaredVariables));
     }
 
-    private void translate(Action action, Set<String> actionFactIds){
-        action.getFact().forEach(f -> translate(f, action, actionFactIds));
+    private void translateAction(Action action, Set<String> rhsDeclaredVariables) {
+        action.getFact().forEach(f -> translateActionFact(f, action, rhsDeclaredVariables));
     }
 
-    private String extractPackage(String uri){
+    private String extractPackage(String uri) {
         try {
             return new URI(uri).getHost();
         } catch (URISyntaxException e) {
@@ -170,238 +234,436 @@ public class URMLToDroolsTranspiler {
         }
     }
 
-    private void translate(RuleFact ruleFact, Action action,  Set<String> actionFactIds){
+    /**
+     * Dispatches a URML action fact to the handler for its action type.
+     */
+    private void translateActionFact(RuleFact ruleFact, Action action, Set<String> rhsDeclaredVariables) {
         indent(2);
-
-        switch (action.getType()){
-            case DECLARE:
-                writer.write(ruleFact.getType().getLocalPart());
-                writer.write(enspace(ruleFact.getId()));
-                writer.write("= ");
-                if (ruleFact.getCall() == null) {
-                    translateToBuildStatement(ruleFact, action.getWith(), actionFactIds);
-                } else {
-                    translate(ruleFact.getCall());
-                }
-                actionFactIds.add(ruleFact.getId());
-                break;
-            case CREATE:
-                writer.write("insertLogical");
-                openParenthesis();
-                if(ruleFact.getCall() == null) {
-                    translateToBuildStatement(ruleFact, action.getWith(), actionFactIds);
-                } else {
-                    translate(ruleFact.getCall());
-                }
-                closeParenthesis();
-                break;
-            case UPDATE:
-                writer.write("update");
-                openParenthesis();
-                writer.write("$"+ruleFact.getId());
-                closeParenthesis();
-                newLines(1);
-                indent(2);
-                if (ruleFact.getCall() == null){
-                    translateToSetStatements(ruleFact, actionFactIds);
-                } else {
-                    translate(ruleFact.getCall());
-                }
-                break;
-            case REMOVE:
-                writer.write("retract");
-                openParenthesis();
-                writer.write("$"+ruleFact.getId());
-                closeParenthesis();
-                break;
-            default:
-                throw new IllegalStateException("Unhandled action type "+action.getType());
+        switch (action.getType()) {
+            case DECLARE -> translateDeclareAction(ruleFact, action, rhsDeclaredVariables);
+            case CREATE -> translateCreateAction(ruleFact, action, rhsDeclaredVariables);
+            case UPDATE -> translateUpdateAction(ruleFact, action, rhsDeclaredVariables);
+            case REMOVE -> translateRemoveAction(ruleFact, action, rhsDeclaredVariables);
+            default -> throw new IllegalStateException("Unhandled action type " + action.getType());
         }
         writer.write(";");
         newLines(1);
     }
 
-    private void translateToSetStatements(RuleFact ruleFact, Set<String> actionFactIds){
-        boolean isRHSVariable = actionFactIds.contains(ruleFact.getId());
-        if (!isRHSVariable){
-            writer.write("$");
+    /**
+     * Transpiles a DECLARE action into a local RHS variable assignment.
+     *
+     * <p>DECLARE variables can be referenced by later actions in the same rule,
+     * so {@code ruleFact.getId()} is recorded in {@code rhsDeclaredVariables}.</p>
+     *
+     * <p>Example:</p>
+     * <pre>
+     * &lt;action type="DECLARE"&gt;
+     *   &lt;fact type="ProteinAnnotation" id="declared"&gt;
+     *     &lt;field attribute="type" value="keyword"/&gt;
+     *     &lt;field attribute="value" value="Declared"/&gt;
+     *   &lt;/fact&gt;
+     * &lt;/action&gt;
+     * </pre>
+     * becomes:
+     * <pre>
+     * ProteinAnnotation declared = ProteinAnnotation.builder().withType("keyword").withValue("Declared").build();
+     * </pre>
+     */
+    private void translateDeclareAction(RuleFact ruleFact, Action action, Set<String> rhsDeclaredVariables) {
+        writer.write(ruleFact.getType().getLocalPart());
+        writer.write(enspace(ruleFact.getId()));
+        writer.write("= ");
+        if (ruleFact.getCall() == null) {
+            translateToBuildStatement(ruleFact, action.getWith(), rhsDeclaredVariables);
+        } else {
+            translateProceduralCall(ruleFact.getCall(), rhsDeclaredVariables);
         }
+        rhsDeclaredVariables.add(ruleFact.getId());
+    }
+
+    /**
+     * Transpiles a CREATE action into a builder expression and an {@code insertLogical} call.
+     *
+     * <p>When the fact carries an explicit {@code id}, a local variable is declared and then
+     * inserted. When no {@code id} is present, the builder/procedural call is passed directly
+     * to {@code insertLogical(...)}.</p>
+     *
+     * <p>Example with id:</p>
+     * <pre>
+     * &lt;action type="CREATE"\u0026gt;
+     *   &lt;fact type="ProteinAnnotation" id="annotation"\u0026gt;
+     *     &lt;field attribute="type" value="keyword"/\u0026gt;
+     *   &lt;/fact&gt;
+     * &lt;/action&gt;
+     * </pre>
+     * becomes:
+     * <pre>
+     * ProteinAnnotation $annotation = ProteinAnnotation.builder().withType("keyword").build();
+     * insertLogical($annotation);
+     * </pre>
+     *
+     * <p>Example without id:</p>
+     * <pre>
+     * &lt;action type="CREATE"\u0026gt;
+     *   &lt;fact type="ProteinAnnotation"\u0026gt;
+     *     &lt;field attribute="type" value="keyword"/\u0026gt;
+     *   &lt;/fact&gt;
+     * &lt;/action&gt;
+     * </pre>
+     * becomes:
+     * <pre>
+     * insertLogical(ProteinAnnotation.builder().withType("keyword").build());
+     * </pre>
+     */
+    private void translateCreateAction(RuleFact ruleFact, Action action, Set<String> rhsDeclaredVariables) {
+        var factId = ruleFact.getId();
+        if (StringUtils.isNotEmpty(factId)) {
+            writer.write(ruleFact.getType().getLocalPart());
+            writer.write(" ");
+            writeVariableReference(factId, rhsDeclaredVariables);
+            writer.write(" = ");
+            translateCreateValue(ruleFact, action, rhsDeclaredVariables);
+            writer.write(";");
+            newLines(1);
+            indent(2);
+        }
+        writer.write("insertLogical");
+        openParenthesis();
+        if (StringUtils.isNotEmpty(factId)) {
+            writeVariableReference(factId, rhsDeclaredVariables);
+        } else {
+            translateCreateValue(ruleFact, action, rhsDeclaredVariables);
+        }
+        closeParenthesis();
+    }
+
+    private void translateCreateValue(RuleFact ruleFact, Action action, Set<String> rhsDeclaredVariables) {
+        if (ruleFact.getCall() == null) {
+            translateToBuildStatement(ruleFact, action.getWith(), rhsDeclaredVariables);
+        } else {
+            translateProceduralCall(ruleFact.getCall(), rhsDeclaredVariables);
+        }
+    }
+
+    /**
+     * Transpiles an UPDATE action into an {@code update(...)} call followed by setter calls.
+     *
+     * <p>Example:</p>
+     * <pre>
+     * &lt;action type="UPDATE"&gt;
+     *   &lt;fact type="ProteinAnnotation" id="ann"&gt;
+     *     &lt;field attribute="value" value="Updated"/&gt;
+     *   &lt;/fact&gt;
+     * &lt;/action&gt;
+     * </pre>
+     * becomes:
+     * <pre>
+     * update($ann);
+     * $ann.setValue("Updated");
+     * </pre>
+     */
+    private void translateUpdateAction(RuleFact ruleFact, Action action, Set<String> rhsDeclaredVariables) {
+        writer.write("update");
+        openParenthesis();
+        writeVariableReference(ruleFact.getId(), rhsDeclaredVariables);
+        closeParenthesis();
+        writer.write(";");
+        newLines(1);
+        indent(2);
+        if (ruleFact.getCall() == null) {
+            translateToSetStatements(ruleFact, rhsDeclaredVariables);
+        } else {
+            translateProceduralCall(ruleFact.getCall(), rhsDeclaredVariables);
+        }
+    }
+
+    /**
+     * Transpiles a REMOVE action into a {@code retract(...)} statement.
+     *
+     * <p>Example: {@code &lt;action type="REMOVE"&gt;&lt;fact type="ProteinAnnotation" id="ann"/&gt;&lt;/action&gt;}
+     * becomes {@code retract($ann);}.</p>
+     */
+    private void translateRemoveAction(RuleFact ruleFact, Action action, Set<String> rhsDeclaredVariables) {
+        writer.write("retract");
+        openParenthesis();
+        writeVariableReference(ruleFact.getId(), rhsDeclaredVariables);
+        closeParenthesis();
+    }
+
+    /**
+     * Emits the setter calls for every field and wired value of an UPDATE action.
+     *
+     * <p>Multiple fields are emitted as separate setter calls, e.g.:</p>
+     * <pre>
+     * $ann.setValue("Updated");
+     * $ann.setEvidence("UpdatedEvidence");
+     * </pre>
+     */
+    private void translateToSetStatements(RuleFact ruleFact, Set<String> rhsDeclaredVariables) {
         for (Field field : ruleFact.getField()) {
-            writer.write(ruleFact.getId());
+            writeVariableReference(ruleFact.getId(), rhsDeclaredVariables);
             writer.write(".set");
             writer.write(capitalizeFirstLetter(field.getAttribute()));
             openParenthesis();
-            if (field.getIsReference()){
-                translate("$"+field.getValue(), Object.class);
+            if (field.getIsReference()) {
+                writeVariableReference(field.getValue(), rhsDeclaredVariables);
             } else {
-                translate(field.getValue(), getJavaType(ruleFact.getType(), field.getAttribute()));
+                writeValue(field.getValue(), getJavaType(ruleFact.getType(), field.getAttribute()));
             }
             closeParenthesis();
             writer.write(";");
             newLines(1);
         }
+
+        // Update wired value
+        for (String wired : ruleFact.getWith()) {
+            translateSetter(ruleFact.getId(), wired, rhsDeclaredVariables);
+            writer.write(";");
+            newLines(1);
+        }
     }
 
-    private void translateToBuildStatement(RuleFact ruleFact, List<String> wiredFields, Set<String> actionFactIds) {
+    /**
+     * Writes a variable name, prefixing it with {@code $} unless it was declared
+     * on the RHS (e.g., by a DECLARE action).
+     *
+     * <p>Dotted references such as {@code newPositionalMapping.mappedStart} are handled by
+     * checking only the root variable name before the first dot.</p>
+     */
+    private void writeVariableReference(String variable, Set<String> rhsDeclaredVariables) {
+        String rootVariable = variable.contains(".") ? variable.substring(0, variable.indexOf('.')) : variable;
+        if (!rhsDeclaredVariables.contains(rootVariable)) {
+            writer.write("$");
+        }
+        writer.write(variable);
+    }
+
+    /**
+     * Emits a builder chain for a fact being created or declared.
+     *
+     * <p>Combines wired fields (from the action and the fact) and literal fields
+     * into a single expression, e.g.:</p>
+     * <pre>
+     * ProteinAnnotation.builder().withType("keyword").withValue("Nucleus").build()
+     * </pre>
+     */
+    private void translateToBuildStatement(RuleFact ruleFact, List<String> wiredFields, Set<String> rhsDeclaredVariables) {
         writer.write(ruleFact.getType().getLocalPart());
         writer.write(".builder()");
         for (String wired : ruleFact.getWith()) {
-            translate(wired, actionFactIds);
+            translateWiredReference(wired, rhsDeclaredVariables);
         }
-        for (String wired : wiredFields){
-            translate(wired, actionFactIds);
+        for (String wired : wiredFields) {
+            translateWiredReference(wired, rhsDeclaredVariables);
         }
-        ruleFact.getField().forEach(f -> translate(f, ruleFact));
+        ruleFact.getField().forEach(f -> translateBuilderField(f, ruleFact, rhsDeclaredVariables));
         writer.write(".build()");
     }
 
-    private void translate(String wiredReference, Set<String> actionFactIds) {
+    /**
+     * Emits a {@code .withAttribute(value)} builder fragment for a wired reference.
+     *
+     * <p>Example: {@code "type:keyword"} → {@code .withType("keyword")}.</p>
+     */
+    private void translateWiredReference(String wiredReference, Set<String> rhsDeclaredVariables) {
+        AttributeValue ref = parseAttributeValue(wiredReference);
         writer.write(".with");
-
-        String attribute;
-        String value;
-        if (wiredReference.contains(":")){
-            String[] attributeId = wiredReference.split(":");
-            attribute = attributeId[0];
-            value = attributeId[1];
-        } else {
-            attribute = wiredReference;
-            value = wiredReference;
-        }
-        writer.write(capitalizeFirstLetter(attribute));
+        writer.write(capitalizeFirstLetter(ref.attribute()));
         openParenthesis();
-        boolean isRHSVariable = actionFactIds.contains(value);
-        boolean isSimpleString = value.startsWith("'") && value.endsWith("'");
-        if (isSimpleString){
-            writer.write(value.replace("'", "\""));
-        } else {
-            if (!isRHSVariable){
-                writer.write("$");
-            }
-            writer.write(value);
-        }
+        writeWiredValue(ref.value(), rhsDeclaredVariables);
         closeParenthesis();
     }
 
-    private void translate(ProceduralAttachment call) {
+    /**
+     * Emits a wired value, either as a quoted literal or as a variable reference.
+     */
+    private void writeWiredValue(String value, Set<String> rhsDeclaredVariables) {
+        boolean isSimpleString = value.startsWith("'") && value.endsWith("'");
+        if (isSimpleString) {
+            writer.write(value.replace("'", "\""));
+        } else {
+            writeVariableReference(value, rhsDeclaredVariables);
+        }
+    }
+
+    /** A colon-separated attribute/value pair such as {@code "type:keyword"}. */
+    private record AttributeValue(String attribute, String value) {
+    }
+
+    /**
+     * Parses a wired reference into its attribute and value halves.
+     *
+     * <p>When no separator is present, both halves default to the whole input,
+     * e.g. {@code "protein"} → {@code attribute=protein, value=protein}.</p>
+     */
+    private AttributeValue parseAttributeValue(String wiredReference) {
+        int separatorIndex = wiredReference.indexOf(':');
+        if (separatorIndex == -1) {
+            return new AttributeValue(wiredReference, wiredReference);
+        }
+        return new AttributeValue(
+                wiredReference.substring(0, separatorIndex),
+                wiredReference.substring(separatorIndex + 1));
+    }
+
+    /**
+     * Emits a setter call for a wired value, e.g. {@code $ann.setValue("Updated")}.
+     */
+    private void translateSetter(String variable, String wiredReference, Set<String> rhsDeclaredVariables) {
+        AttributeValue ref = parseAttributeValue(wiredReference);
+        writeVariableReference(variable, rhsDeclaredVariables);
+        writer.write(".set");
+        writer.write(capitalizeFirstLetter(ref.attribute()));
+        openParenthesis();
+        writeWiredValue(ref.value(), rhsDeclaredVariables);
+        closeParenthesis();
+    }
+
+    /**
+     * Emits a procedural helper call in the RHS.
+     *
+     * <p>Example: {@code java://com.example.Helper#createAnnotation($protein)}
+     * → {@code com.example.Helper.createAnnotation($protein)}.
+     * Literal arguments are emitted without a {@code $} prefix.</p>
+     *
+     * <p>Reference arguments that name RHS-declared variables (e.g., from DECLARE)
+     * are emitted without the {@code $} prefix.</p>
+     */
+    private void translateProceduralCall(ProceduralAttachment call, Set<String> rhsDeclaredVariables) {
         writer.write(extractPackage(call.getUri()));
-        writer.write("."+call.getProcedure());
+        writer.write("." + call.getProcedure());
         openParenthesis();
         boolean firstIteration = true;
-        for (ProcedureArgument procedureArgument : call.getArguments().getArgument()){
-            if (!firstIteration){
+        for (ProcedureArgument procedureArgument : call.getArguments().getArgument()) {
+            if (!firstIteration) {
                 writer.write(", ");
             }
-            if (procedureArgument.getIsReference()){
-                writer.write("$");
+            if (procedureArgument.getIsReference()) {
+                writeVariableReference(procedureArgument.getValue(), rhsDeclaredVariables);
+            } else {
+                writer.write(procedureArgument.getValue());
             }
-            writer.write(procedureArgument.getValue());
             firstIteration = false;
         }
         closeParenthesis();
     }
 
-    private void translate(Field field, RuleFact ruleFact) {
+    /**
+     * Emits a builder field fragment from a literal or reference field.
+     *
+     * <p>Example: {@code <field attribute="type" value="keyword"/>} → {@code .withType("keyword")}.
+     * References are emitted as variables, e.g. {@code value="protein" isReference="true"}
+     * → {@code .withProtein($protein)}. References to RHS-declared variables are emitted
+     * without the {@code $} prefix.</p>
+     */
+    private void translateBuilderField(Field field, RuleFact ruleFact, Set<String> rhsDeclaredVariables) {
         writer.write(".with");
         writer.write(capitalizeFirstLetter(field.getAttribute()));
         openParenthesis();
-        if (field.getIsReference()){
-            translate("$"+field.getValue(), Object.class);
+        if (field.getIsReference()) {
+            writeVariableReference(field.getValue(), rhsDeclaredVariables);
         } else {
-            translate(sanitizer.sanitize(field.getValue()), getJavaType(ruleFact.getType(), field.getAttribute()));
+            writeValue(sanitizer.sanitize(field.getValue()), getJavaType(ruleFact.getType(), field.getAttribute()));
         }
         closeParenthesis();
     }
 
-    private void translate(Condition condition) {
+    /**
+     * Transpiles a URML condition into a Drools LHS pattern.
+     *
+     * <p>Examples:</p>
+     * <ul>
+     *   <li>Bind: {@code <condition on="Protein" bind="protein"/>}
+     *       → {@code $protein : Protein()}</li>
+     *   <li>With: {@code <condition on="ProteinSignature" with="protein"/>}
+     *       → {@code ProteinSignature(protein == $protein)}</li>
+     *   <li>Of: {@code <condition on="Organism" of="protein"/>}
+     *       → {@code Organism(this == $protein.organism)}</li>
+     *   <li>Exists: {@code <condition on="Organism" exists="true" of="protein"/>}
+     *       → {@code exists Organism(this == $protein.organism)}</li>
+     *   <li>Collect: {@code <condition on="ProteinSignature" bind="sigs" collect="true" with="protein"/>}
+     *       → {@code $sigs := List() from collect (ProteinSignature(protein == $protein))}</li>
+     * </ul>
+     */
+    private void translateCondition(Condition condition) {
         indent(3);
-        if (condition.getBind() != null){
-            writer.write("$"+condition.getBind());
+        if (condition.getBind() != null) {
+            writer.write("$" + condition.getBind());
             writer.write(enspace(UNIFICATION));
+        } else if (condition.getExists()) {
+            writer.write("exists ");
         } else {
-            if (condition.getExists()){
-                writer.write("exists ");
-            } else {
-                writer.write("not ");
-            }
+            writer.write("not ");
         }
-        if (condition.getCollect()){
+        if (condition.getCollect()) {
             writer.write("List() from collect (");
         }
         writer.write(condition.getOn().getLocalPart());
         openParenthesis();
         boolean firstIteration = true;
-        for (String bindingEqualityToAttribute : condition.getWith()) {
-            if (!firstIteration){
+        for (String bindingSpec : condition.getWith()) {
+            if (!firstIteration) {
                 writer.write(", ");
             }
-            String attribute;
-            String bindingId;
-            if (bindingEqualityToAttribute.contains(":")){
-                String[] attributeId = bindingEqualityToAttribute.split(":");
-                attribute = attributeId[0];
-                bindingId = attributeId[1];
-            } else {
-                attribute = bindingEqualityToAttribute;
-                bindingId = bindingEqualityToAttribute;
-            }
-            writer.write(attribute);
+            AttributeValue ref = parseAttributeValue(bindingSpec);
+            writer.write(ref.attribute());
             writer.write(enspace(DroolsComparator.EQUALS.positive));
-            writer.write("$"+bindingId);
+            writer.write("$" + ref.value());
             firstIteration = false;
         }
-        for (String bindingAttributeEqualityToSelf : condition.getOf()){
-            if (!firstIteration){
+        for (String bindingSpec : condition.getOf()) {
+            if (!firstIteration) {
                 writer.write(", ");
             }
-            String attribute;
-            String bindingId;
-            if (bindingAttributeEqualityToSelf.contains(":")){
-                String[] attributeId = bindingAttributeEqualityToSelf.split(":");
-                attribute = attributeId[0];
-                bindingId = attributeId[1];
-            } else {
-                bindingId = bindingAttributeEqualityToSelf;
-                attribute = condition.getOn().getLocalPart().toLowerCase();
-            }
+            AttributeValue ref = parseAttributeValue(bindingSpec);
+            String attribute = ref.attribute().equals(ref.value())
+                    ? condition.getOn().getLocalPart().toLowerCase()
+                    : ref.attribute();
             writer.write("this");
             writer.write(enspace(DroolsComparator.EQUALS.positive));
-            writer.write("$"+bindingId+"."+attribute);
+            writer.write("$" + ref.value() + "." + attribute);
             firstIteration = false;
         }
         for (Filter filter : condition.getFilter()) {
-            if (!firstIteration){
+            if (!firstIteration) {
                 writer.write(", ");
             }
-            translate(condition.getOn(), filter);
+            translateFilter(condition.getOn(), filter);
             firstIteration = false;
         }
 
         closeParenthesis();
 
-        if (condition.getCollect()){
+        if (condition.getCollect()) {
             closeParenthesis();
         }
         newLines(1);
     }
 
-    private void translate(QName on, Filter filter) {
+    /**
+     * Dispatches a URML filter to the appropriate comparator translation.
+     *
+     * <p>Supported filters include: contains, in, range, nested field filters,
+     * simple value, reference, startsWith, matches, and boolean existence.</p>
+     */
+    private void translateFilter(QName on, Filter filter) {
         if (filter.getContains() != null) {
-            translate(on, filter.getContains(), filter, DroolsComparator.CONTAINS);
-        } else if (filter.getIn() != null){
-            translate(on, filter.getIn(), filter, DroolsComparator.EQUALS);
-        } else if (filter.getRange() != null){
-            translate(on, filter.getRange(), filter);
-        } else if (!filter.getField().isEmpty()){
-            translate(on, filter.getField(), filter);
-        } else if (filter.getValue() != null){
-            translate(on, filter.getValue(), filter);
-        } else if (filter.getRef() != null){
-            translate(on, "$"+filter.getRef(), filter);
+            translateMultiValueFilter(on, filter.getContains(), filter, DroolsComparator.CONTAINS);
+        } else if (filter.getIn() != null) {
+            translateMultiValueFilter(on, filter.getIn(), filter, DroolsComparator.EQUALS);
+        } else if (filter.getRange() != null) {
+            translateRangeFilter(on, filter.getRange(), filter);
+        } else if (!filter.getField().isEmpty()) {
+            translateFieldFilter(on, filter.getField(), filter);
+        } else if (filter.getValue() != null) {
+            translateSimpleValueFilter(on, filter.getValue(), filter);
+        } else if (filter.getRef() != null) {
+            translateStringFilter(on, "$" + filter.getRef(), filter);
         } else if (filter.getStartsWith() != null) {
-            translate(on, filter.getStartsWith(), filter);
+            translateStartsWithFilter(on, filter.getStartsWith(), filter);
         } else if (filter.getMatches() != null) {
-            translate(on, filter.getMatches(), filter);
+            translateMatchesFilter(on, filter.getMatches(), filter);
         } else {
             writer.write(filter.getOn());
             writer.write(enspace(DroolsComparator.EQUALS.positive));
@@ -409,129 +671,135 @@ public class URMLToDroolsTranspiler {
         }
     }
 
-    private void translate(QName on, Filter constraint, String attribute,  DroolsComparator comparator , String value){
+    private void translateFilterConstraint(QName on, Filter constraint, String attribute, DroolsComparator comparator, String value) {
         String fullAttribute = constraint.getOn();
-        if (attribute != null){
+        if (attribute != null) {
             fullAttribute = fullAttribute + "." + attribute;
         }
         translateNullSafeAttribute(fullAttribute);
         writer.write(enspace(comparator.getValue(constraint.getNegative())));
-        translate(value, getJavaType(on, fullAttribute));
+        writeValue(value, getJavaType(on, fullAttribute));
     }
 
     private void translateNullSafeAttribute(String fullAttribute) {
         StringBuilder attrBuilder = new StringBuilder();
         String[] splittedAttributes = fullAttribute.split("\\.");
-        for (int i = 0; i < splittedAttributes.length - 1 ; i++) {
+        for (int i = 0; i < splittedAttributes.length - 1; i++) {
             attrBuilder.append(splittedAttributes[i]).append("!").append(".");
         }
-        attrBuilder.append(splittedAttributes[splittedAttributes.length-1]);
+        attrBuilder.append(splittedAttributes[splittedAttributes.length - 1]);
         writer.write(attrBuilder.toString());
     }
 
-    private void translate(QName on, Filter constraint, DroolsComparator comparator , String value){
-        translate(on, constraint, null, comparator, value);
+    private void translateFilterConstraint(QName on, Filter constraint, DroolsComparator comparator, String value) {
+        translateFilterConstraint(on, constraint, null, comparator, value);
     }
 
-    private void translate(QName on, StartsWith startsWith, Filter constraint) {
-        translate(on, constraint, DroolsComparator.MATCHES, startsWith.getValue()+".*");
+    private void translateStartsWithFilter(QName on, StartsWith startsWith, Filter constraint) {
+        translateFilterConstraint(on, constraint, DroolsComparator.MATCHES, startsWith.getValue() + ".*");
     }
 
-    private void translate(QName on, Matches matches, Filter constraint){
-        translate(on, constraint, DroolsComparator.MATCHES, matches.getValue());
+    private void translateMatchesFilter(QName on, Matches matches, Filter constraint) {
+        translateFilterConstraint(on, constraint, DroolsComparator.MATCHES, matches.getValue());
     }
 
-    private void translate(QName on, String value, Filter constraint) {
-        translate(on, constraint, DroolsComparator.EQUALS, value);
+    private void translateStringFilter(QName on, String value, Filter constraint) {
+        translateFilterConstraint(on, constraint, DroolsComparator.EQUALS, value);
     }
 
-    private void translate(QName on, SimpleValue value, Filter constraint) {
-        translate(on, constraint, DroolsComparator.EQUALS, value.getValue());
+    private void translateSimpleValueFilter(QName on, SimpleValue value, Filter constraint) {
+        translateFilterConstraint(on, constraint, DroolsComparator.EQUALS, value.getValue());
     }
 
-    private void translate(QName on, List<Field> fields, Filter constraint){
+    private void translateFieldFilter(QName on, List<Field> fields, Filter constraint) {
         boolean firstIteration = true;
         for (Field field : fields) {
-            if (!firstIteration){
+            if (!firstIteration) {
                 writer.write(", ");
             }
-            String value = field.getIsReference() ? "$"+field.getValue() : field.getValue();
-            translate(on, constraint, field.getAttribute(), DroolsComparator.EQUALS, value);
+            String value = field.getIsReference() ? "$" + field.getValue() : field.getValue();
+            translateFilterConstraint(on, constraint, field.getAttribute(), DroolsComparator.EQUALS, value);
             firstIteration = false;
         }
     }
 
-    private void translate(QName on, Range range, Filter constraint){
+    private void translateRangeFilter(QName on, Range range, Filter constraint) {
         if (range.isSetStart()) {
-            translate(on, constraint, DroolsComparator.GREATER_THAN_OR_EQ, String.valueOf(range.getStart()));
+            translateFilterConstraint(on, constraint, DroolsComparator.GREATER_THAN_OR_EQ, String.valueOf(range.getStart()));
         }
         if (range.isSetStart() && range.isSetEnd()) {
             writer.write(", ");
         }
         if (range.isSetEnd()) {
-            translate(on, constraint, DroolsComparator.LESS_THAN_OR_EQ, String.valueOf(range.getEnd()));
+            translateFilterConstraint(on, constraint, DroolsComparator.LESS_THAN_OR_EQ, String.valueOf(range.getEnd()));
         }
     }
 
-    private void translate(QName on, MultiValue multiValue, Filter constraint, DroolsComparator comparator){
+    /**
+     * Transpiles a multi-value filter into a parenthesized boolean expression.
+     *
+     * <p>Example with {@code ANY}: {@code values=[a,b]} → {@code (this == a || this == b)}.
+     * Example with {@code ALL}: {@code values=[a,b]} → {@code (this == a && this == b)}.</p>
+     */
+    private void translateMultiValueFilter(QName on, MultiValue multiValue, Filter constraint, DroolsComparator comparator) {
         openParenthesis();
         boolean firstIteration = true;
         for (SimpleValue value : multiValue.getValue()) {
-            if (!firstIteration){
+            if (!firstIteration) {
                 boolean orRelation = LogicalOperator.ANY.equals(multiValue.getOperator());
                 writer.write(enspace(orRelation ? "||" : "&&"));
             }
-            translate(on, constraint, comparator, value.getValue());
+            translateFilterConstraint(on, constraint, comparator, value.getValue());
             firstIteration = false;
         }
         closeParenthesis();
     }
 
-    private void translate(String value, Class<?> javaType){
-        if (value.startsWith("$") || "null".equals(value)){
+    private void writeValue(String value, Class<?> javaType) {
+        if (value.startsWith("$") || "null".equals(value)) {
             writer.write(value);
-        } else if (Enum.class.isAssignableFrom(javaType)){
-           writer.write(javaType.getSimpleName()+".fromValue(\""+value+"\")");
+        } else if (Enum.class.isAssignableFrom(javaType)) {
+            writer.write(javaType.getSimpleName() + ".fromValue(\"" + value + "\")");
         } else if (ClassUtils.isAssignable(javaType, Number.class) && StringUtils.isNumeric(value)) {
             writer.write(value);
-        } else if (ClassUtils.isAssignable(javaType, Boolean.class)){
+        } else if (ClassUtils.isAssignable(javaType, Boolean.class)) {
             writer.write(value);
-        } else if (String.class.isAssignableFrom(javaType)){
+        } else if (String.class.isAssignableFrom(javaType)) {
             writer.write(enquote(value));
         } else {
-            throw new IllegalArgumentException("Unsupported value "+value+ " of type "+javaType);
+            throw new IllegalArgumentException("Unsupported value " + value + " of type " + javaType);
         }
     }
 
-    private String enquote(String input){
+    private String enquote(String input) {
         return wrap(input, QUOTE);
     }
 
-    private String enspace(String input){
+    private String enspace(String input) {
         return wrap(input, " ");
     }
 
-    private String wrap(String input, String wrapping){
-        return wrapping+input+wrapping;
+    private String wrap(String input, String wrapping) {
+        return wrapping + input + wrapping;
     }
 
-    private void indent(int times){
+    private void indent(int times) {
         writer.write(StringUtils.repeat(INDENT_UNIT, times));
     }
 
-    private void newLines(int times){
+    private void newLines(int times) {
         writer.write(StringUtils.repeat(NEW_LINE, times));
     }
 
-    private void openParenthesis(){
+    private void openParenthesis() {
         writer.write('(');
     }
 
-    private void closeParenthesis(){
+    private void closeParenthesis() {
         writer.write(')');
     }
 
-    private String capitalizeFirstLetter(String input){
+    private String capitalizeFirstLetter(String input) {
         return input.substring(0, 1).toUpperCase() + input.substring(1);
     }
 
