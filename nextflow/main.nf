@@ -14,7 +14,7 @@ workflow {
 
     // Resolve versioned defaults.
     // Precedence: explicit CLI arguments > --version mapping > defaultVersion mapping.
-    def versionToUse = params.version ?: params.defaultVersion
+    def versionToUse = (params.version ?: params.defaultVersion).toString()
     def versionConfig = null
     if (versionToUse) {
         versionConfig = params.versions[versionToUse]
