@@ -24,7 +24,7 @@
         <artifactId>unifire</artifactId>
         <groupId>uk.ac.ebi.uniprot.aa</groupId>
         <version>${revision}</version>
-        <relativePath>..</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>unifire-procedures</artifactId>
