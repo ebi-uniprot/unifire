@@ -19,7 +19,6 @@ include:
   - component: $CI_SERVER_FQDN/uniprot/aa/ci-components/library-release@master
     inputs:
       production_branches: "master"
-      maven_cli_opts: "-P release"
 
 
 variables:
