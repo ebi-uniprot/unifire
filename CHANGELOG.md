@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Enforce that `params.defaultUnifireVersion` in nextflow config matches the version tag
   when a `v*` tag is pushed (shared check script, GitHub Actions and GitLab CI checks,
   local pre-push git hook).
+- Publish pre-release Docker images from `snapshot/*` tags: `snapshot/v0.1.0` publishes
+  `unifire/nextflow:snapshot-0.1.0` (never `latest`), with the same enforcement chain.
 
 ### Changed
 - Replace Null positions by "" in output TSV file
