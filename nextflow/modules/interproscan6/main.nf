@@ -1,4 +1,7 @@
 process runIprscan6 {
+    label "time_verylong"
+    label "mem_high"
+
     input:
     val iprscanVersion
     val iprVersion

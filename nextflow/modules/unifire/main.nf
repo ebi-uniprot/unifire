@@ -1,4 +1,7 @@
 process runUnifirePipeline {
+    label "time_verylong"
+    label "mem_veryhigh"
+
     container "${params.unifireImage}:${params.unifireVersion}"
     publishDir "${params.output}", mode: 'copy'
 

@@ -1,4 +1,7 @@
 process runPirsrPipeline {
+    label "time_verylong"
+    label "mem_high"
+
     container "${params.unifireImage}:${params.unifireVersion}"
     publishDir "${params.output}", mode: 'copy'
 
