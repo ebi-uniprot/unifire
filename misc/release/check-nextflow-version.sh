@@ -2,16 +2,19 @@
 #
 # Checks that params.defaultUnifireVersion in nextflow/conf/defaults.config
 # matches the expected UniFIRE version (the Docker image tag derived from a
-# v* or snapshot/v* git tag). Used by the pre-push git hook and by the
-# release jobs in the CI pipelines.
+# v* git tag, a release/* branch or a snapshot/* branch). Used by the
+# pre-push git hook and by the release jobs in the CI pipelines.
 #
 # Usage: check-nextflow-version.sh <expected-version> [<config-file>]
 #        check-nextflow-version.sh --config <config-file>
 #        check-nextflow-version.sh --tag <tag-or-ref> [--print] [<config-file>]
 #
-# --tag maps a git tag (or ref) to the corresponding Docker image tag:
-#   refs/tags/v1.2.3 or v1.2.3        -> 1.2.3
-#   refs/tags/snapshot/v0.1.0 or snapshot/v0.1.0 -> snapshot-0.1.0
+# --tag maps a git tag or branch ref to the corresponding Docker image tag:
+#   refs/tags/v1.2.3 or v1.2.3             -> 1.2.3
+#   refs/heads/release/v1.2.3              -> 1.2.3
+#   refs/heads/release/1.2.3 or release/1.2.3 -> 1.2.3
+#   refs/heads/snapshot/v1.2.3             -> 1.2.3-SNAPSHOT
+#   refs/heads/snapshot/1.2.3 or snapshot/1.2.3 -> 1.2.3-SNAPSHOT
 # With --print the mapped value is printed and no check is run.
 #
 set -euo pipefail
@@ -28,7 +31,7 @@ usage() {
 error_matches() {
     echo "ERROR: defaultUnifireVersion in ${file} is '${actual}' but expected '${expected}'" >&2
     echo "Update nextflow/conf/defaults.config so that params.defaultUnifireVersion" >&2
-    echo "matches the tag, then amend the tag." >&2
+    echo "matches the tag or branch name, then re-push." >&2
     exit 1
 }
 
@@ -36,13 +39,17 @@ get_value() {
     sed -n 's/.*defaultUnifireVersion *= *"\([^"]*\)".*/\1/p' "$1" | head -n1
 }
 
-# Maps a git tag (or full ref) to the Docker image tag.
+# Maps a git tag or branch ref to the Docker image tag.
 map_tag() {
     local tag="${1#refs/tags/}"
+    tag="${tag#refs/heads/}"
     case "$tag" in
         v*) printf '%s' "${tag#v}" ;;
-        snapshot/v*) printf 'snapshot-%s' "${tag#snapshot/v}" ;;
-        *) echo "ERROR: cannot derive image tag from git tag '${1}' (expected v* or snapshot/v*)" >&2; return 1 ;;
+        release/v*) printf '%s' "${tag#release/v}" ;;
+        release/*) printf '%s' "${tag#release/}" ;;
+        snapshot/v*) printf '%s-SNAPSHOT' "${tag#snapshot/v}" ;;
+        snapshot/*) printf '%s-SNAPSHOT' "${tag#snapshot/}" ;;
+        *) echo "ERROR: cannot derive image tag from ref '${1}' (expected v* tag, release/* or snapshot/* branch)" >&2; return 1 ;;
     esac
 }
 
@@ -56,7 +63,7 @@ if [ "${1:-}" = "--config" ]; then
         exit 0
     fi
     if ! printf '%s' "$actual" | grep -Eq '^v?[0-9A-Za-z][0-9A-Za-z._-]*$'; then
-        echo "ERROR: defaultUnifireVersion in ${file} is '${actual}' but must be 'latest' or a version-like string (e.g. '1.2.3', '0.1.0-dev1')" >&2
+        echo "ERROR: defaultUnifireVersion in ${file} is '${actual}' but must be 'latest' or a version-like string (e.g. '1.2.3', '0.1.0-dev1', '1.0.0-SNAPSHOT')" >&2
         exit 1
     fi
     exit 0

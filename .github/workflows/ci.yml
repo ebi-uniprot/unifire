@@ -177,7 +177,7 @@ jobs:
     name: Build and Push Nextflow Docker Image
     needs: [test, python-test]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/v') || startsWith(github.ref, 'refs/heads/release/'))
     permissions:
       contents: read
       packages: write
@@ -187,11 +187,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check nextflow defaultUnifireVersion matches tag
+      - name: Check nextflow defaultUnifireVersion matches tag or release branch
         run: |
-          EXPECTED=${GITHUB_REF#refs/tags/v}
+          EXPECTED=$(misc/release/check-nextflow-version.sh --tag "${GITHUB_REF}" --print)
           echo "Expecting defaultUnifireVersion = ${EXPECTED}"
-          misc/release/check-nextflow-version.sh "${EXPECTED}"
+          misc/release/check-nextflow-version.sh --tag "${GITHUB_REF}"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -207,29 +207,19 @@ jobs:
         env:
           IMAGE_NAME: ghcr.io/ebi-uniprot/unifire/nextflow
         run: |
-          TAG=${GITHUB_REF#refs/tags/v}
+          TAG=$(misc/release/check-nextflow-version.sh --tag "${GITHUB_REF}" --print)
           IMAGE=${IMAGE_NAME}:${TAG}
           echo "Building image ${IMAGE}"
           docker build --file docker/nextflow.Dockerfile --tag ${IMAGE} --no-cache .
           docker image ls
           docker push ${IMAGE}
-
-          if git branch -r --contains "${GITHUB_SHA}" | grep -q '^  origin/master$'; then
-            echo "Tag is on master branch, tagging and pushing latest"
-            docker tag ${IMAGE} ${IMAGE_NAME}:latest
-            docker push ${IMAGE_NAME}:latest
-            docker rmi ${IMAGE_NAME}:latest
-          else
-            echo "Tag is not on master branch, skipping latest tag"
-          fi
-
           docker rmi ${IMAGE}
 
   build-push-snapshot-nextflow-docker-image:
     name: Build and Push Nextflow Docker Image (snapshot)
     needs: [test, python-test]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/snapshot/')
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/snapshot/')
     permissions:
       contents: read
       packages: write
@@ -239,7 +229,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check nextflow defaultUnifireVersion matches snapshot tag
+      - name: Check nextflow defaultUnifireVersion matches snapshot branch
         run: |
           EXPECTED=$(misc/release/check-nextflow-version.sh --tag "${GITHUB_REF}" --print)
           echo "Expecting defaultUnifireVersion = ${EXPECTED}"

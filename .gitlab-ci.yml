@@ -143,30 +143,21 @@ build_push_nextflow_docker_image:
     - echo "Building UniFIRE Nextflow docker image"
     - docker --version
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin
-    - export NEXTFLOW_IMAGE_TAG=${CI_COMMIT_TAG#v}
+    - export NEXTFLOW_IMAGE_TAG=$(sh misc/release/check-nextflow-version.sh --tag "${CI_COMMIT_REF_NAME}" --print)
     - echo "UniFIRE Nextflow image tag will be = ${NEXTFLOW_IMAGE_TAG}"
-    - echo "Checking nextflow defaultUnifireVersion matches tag ${NEXTFLOW_IMAGE_TAG}"
-    - sh misc/release/check-nextflow-version.sh "${NEXTFLOW_IMAGE_TAG}"
+    - echo "Checking nextflow defaultUnifireVersion matches tag or branch ${CI_COMMIT_REF_NAME}"
+    - sh misc/release/check-nextflow-version.sh --tag "${CI_COMMIT_REF_NAME}"
   script:
     - IMAGE_NAME=${NEXTFLOW_IMAGE_NAME}:${NEXTFLOW_IMAGE_TAG}
-    - LATEST_IMAGE_NAME=${NEXTFLOW_IMAGE_NAME}:latest
     - echo "Building image ${IMAGE_NAME}"
     - docker build --file ${NEXTFLOW_DOCKERFILE} --tag ${IMAGE_NAME} --no-cache .
     - docker image ls
     - docker push ${IMAGE_NAME}
-    - |
-      if git branch -r --contains "$CI_COMMIT_SHA" | grep -q '^  origin/master$'; then
-        echo "Tag is on master branch, tagging and pushing latest"
-        docker tag ${IMAGE_NAME} ${LATEST_IMAGE_NAME}
-        docker push ${LATEST_IMAGE_NAME}
-        docker rmi ${LATEST_IMAGE_NAME}
-      else
-        echo "Tag is not on master branch, skipping latest tag"
-      fi
     - docker rmi ${IMAGE_NAME}
     - docker logout "$CI_REGISTRY"
   rules:
     - if: $CI_COMMIT_TAG =~ /^v/
+    - if: $CI_COMMIT_BRANCH =~ /^release\//
 
 build_push_snapshot_nextflow_docker_image:
   stage: build_docker_image
@@ -179,10 +170,10 @@ build_push_snapshot_nextflow_docker_image:
     - echo "Building UniFIRE Nextflow snapshot docker image"
     - docker --version
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin
-    - export NEXTFLOW_IMAGE_TAG=$(sh misc/release/check-nextflow-version.sh --tag "${CI_COMMIT_TAG}" --print)
+    - export NEXTFLOW_IMAGE_TAG=$(sh misc/release/check-nextflow-version.sh --tag "${CI_COMMIT_REF_NAME}" --print)
     - echo "UniFIRE Nextflow snapshot image tag will be = ${NEXTFLOW_IMAGE_TAG}"
-    - echo "Checking nextflow defaultUnifireVersion matches tag ${NEXTFLOW_IMAGE_TAG}"
-    - sh misc/release/check-nextflow-version.sh --tag "${CI_COMMIT_TAG}"
+    - echo "Checking nextflow defaultUnifireVersion matches branch ${CI_COMMIT_REF_NAME}"
+    - sh misc/release/check-nextflow-version.sh --tag "${CI_COMMIT_REF_NAME}"
   script:
     - IMAGE_NAME=${NEXTFLOW_IMAGE_NAME}:${NEXTFLOW_IMAGE_TAG}
     - echo "Building image ${IMAGE_NAME}"
@@ -192,4 +183,4 @@ build_push_snapshot_nextflow_docker_image:
     - docker rmi ${IMAGE_NAME}
     - docker logout "$CI_REGISTRY"
   rules:
-    - if: $CI_COMMIT_TAG =~ /^snapshot\/v/
+    - if: $CI_COMMIT_BRANCH =~ /^snapshot\//
