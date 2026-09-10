@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 #
-# Pre-push hook: verifies that for every v* or snapshot/v* tag being pushed,
-# the value of params.defaultUnifireVersion committed at the tag matches the
-# tag-derived Docker image tag (via the shared --tag mode of the check
-# script) before pushing.
+# Pre-push hook: verifies that for every v* tag, release/* branch or
+# snapshot/* branch being pushed, the value of params.defaultUnifireVersion
+# committed at that ref matches the tag/branch-derived Docker image tag (via
+# the shared --tag mode of the check script) before pushing.
 #
 # Enable by running:
 #   git config core.hooksPath .githooks
@@ -23,33 +23,32 @@ fi
 
 fail=0
 while read -r _local_ref _local_sha remote_ref _remote_sha; do
-    # Only check v* / snapshot/v* tags being pushed; skip deletions.
+    # Only check v* tags and release/* / snapshot/* branches; skip deletions.
     case "$remote_ref" in
-        refs/tags/v*|refs/tags/snapshot/v*) ;;
+        refs/tags/v*|refs/heads/release/*|refs/heads/snapshot/*) ;;
         *) continue ;;
     esac
 
     if [ -z "${_local_sha:-}" ] || [ "$_local_sha" = "$ZERO_SHA" ]; then
-        # Deletion of a tag on the remote - nothing to check.
-        echo "Skipping deleted tag: ${remote_ref}" >&2
+        # Deletion on the remote - nothing to check.
+        echo "Skipping deleted ref: ${remote_ref}" >&2
         continue
     fi
 
-    tag_name="${remote_ref#refs/tags/}"
-    expected="$(bash "$CHECK_SCRIPT" --tag "$tag_name" --print)"
+    expected="$(bash "$CHECK_SCRIPT" --tag "$remote_ref" --print)"
 
-    # Read the config file as committed at the tag (peel annotated tags).
-    tag_commit="$(git rev-parse "${tag_name}^{commit}")"
+    # Read the config file as committed at the ref (peel annotated tags).
+    ref_commit="$(git rev-parse "${remote_ref}^{commit}")"
     config_blob="$(mktemp)"
-    if ! git show "${tag_commit}:${CONFIG_REL_PATH}" > "$config_blob" 2>/dev/null; then
-        echo "ERROR: tag '${tag_name}' does not contain '${CONFIG_REL_PATH}'" >&2
+    if ! git show "${ref_commit}:${CONFIG_REL_PATH}" > "$config_blob" 2>/dev/null; then
+        echo "ERROR: ref '${remote_ref}' does not contain '${CONFIG_REL_PATH}'" >&2
         rm -f "$config_blob"
         fail=1
         continue
     fi
 
-    echo "Checking '${CONFIG_REL_PATH}' at tag '${tag_name}' (expect version '${expected}')" >&2
-    if ! bash "$CHECK_SCRIPT" --tag "$tag_name" "$config_blob"; then
+    echo "Checking '${CONFIG_REL_PATH}' at '${remote_ref}' (expect version '${expected}')" >&2
+    if ! bash "$CHECK_SCRIPT" --tag "$remote_ref" "$config_blob"; then
         fail=1
     fi
     rm -f "$config_blob"
