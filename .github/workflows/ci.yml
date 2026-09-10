@@ -84,6 +84,16 @@ jobs:
         working-directory: misc/taxonomy
         run: python3 -m unittest discover -s tests
 
+  nextflow-version-check:
+    name: Nextflow Version Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate defaultUnifireVersion format
+        run: misc/release/check-nextflow-version.sh --config nextflow/conf/defaults.config
+
   codeql:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
@@ -176,6 +186,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Check nextflow defaultUnifireVersion matches tag
+        run: |
+          EXPECTED=${GITHUB_REF#refs/tags/v}
+          echo "Expecting defaultUnifireVersion = ${EXPECTED}"
+          misc/release/check-nextflow-version.sh "${EXPECTED}"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

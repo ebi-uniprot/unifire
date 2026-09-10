@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+#
+# Pre-push hook: verifies that for every v* tag being pushed, the value of
+# params.defaultUnifireVersion committed at the tag matches the tag name
+# (without the leading "v") in git refs before pushing.
+#
+# Enable by running:
+#   git config core.hooksPath .githooks
+#
+set -euo pipefail
+
+ZERO_SHA="0000000000000000000000000000000000000000"
+CONFIG_REL_PATH="nextflow/conf/defaults.config"
+# Git runs hooks with the working directory set to the repo root, but the
+# check script may not be committed in the local clone; resolve it relative
+# to this hook's location instead.
+REPO_ROOT_FROM_HOOK="$(cd "$(dirname "$0")"/.. && pwd)"
+CHECK_SCRIPT="$REPO_ROOT_FROM_HOOK/misc/release/check-nextflow-version.sh"
+if [ ! -f "$CHECK_SCRIPT" ]; then
+    CHECK_SCRIPT="misc/release/check-nextflow-version.sh"
+fi
+
+fail=0
+while read -r _local_ref _local_sha remote_ref _remote_sha; do
+    # Only check v* tags being pushed (creation or update); skip deletions.
+    case "$remote_ref" in
+        refs/tags/v*) ;;
+        *) continue ;;
+    esac
+
+    if [ -z "${_local_sha:-}" ] || [ "$_local_sha" = "$ZERO_SHA" ]; then
+        # Deletion of a tag on the remote - nothing to check.
+        echo "Skipping deleted tag: ${remote_ref}" >&2
+        continue
+    fi
+
+    tag_name="${remote_ref#refs/tags/}"
+    expected="${tag_name#v}"
+
+    # Read the config file as committed at the tag (peel annotated tags).
+    tag_commit="$(git rev-parse "${tag_name}^{commit}")"
+    config_blob="$(mktemp)"
+    if ! git show "${tag_commit}:${CONFIG_REL_PATH}" > "$config_blob" 2>/dev/null; then
+        echo "ERROR: tag '${tag_name}' does not contain '${CONFIG_REL_PATH}'" >&2
+        rm -f "$config_blob"
+        fail=1
+        continue
+    fi
+
+    echo "Checking '${CONFIG_REL_PATH}' at tag '${tag_name}' (expect version '${expected}')" >&2
+    if ! bash "$CHECK_SCRIPT" "$expected" "$config_blob"; then
+        fail=1
+    fi
+    rm -f "$config_blob"
+done
+
+exit "$fail"
