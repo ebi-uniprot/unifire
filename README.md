@@ -764,16 +764,19 @@ This tool translates the URML rules into the Drools language, converts the input
 
 UniFIRE is released by pushing a git tag `v<version>` (e.g. `v5.1.2`), which triggers
 the CI pipelines to build and publish the `unifire/nextflow` Docker image tagged `<version>`.
+Pre-release artifacts are published similarly with `snapshot` tags: `snapshot/v0.1.0` publishes
+the image as `snapshot-0.1.0` and never updates the `latest` tag.
 
 To keep the pipeline self-consistent, the committed value of `params.defaultUnifireVersion`
 in [nextflow/conf/defaults.config](nextflow/conf/defaults.config) must equal the version being
-tagged (without the leading `v`). On `master` the value stays `latest`.
+tagged (`<version>` for `v*` tags, `snapshot-<version>` for `snapshot/*` tags). On `master`
+the value stays `latest`.
 
 The invariant is enforced at three levels, all using
 [misc/release/check-nextflow-version.sh](misc/release/check-nextflow-version.sh):
 
-1. **Local git hook** - a `pre-push` hook refuses to push a `v*` tag whose tagged commit
-   does not carry the matching `defaultUnifireVersion`. Enable it once per clone:
+1. **Local git hook** - a `pre-push` hook refuses to push a `v*` or `snapshot/*` tag whose
+   tagged commit does not carry the matching `defaultUnifireVersion`. Enable it once per clone:
 
     ```bash
     git config core.hooksPath .githooks
@@ -792,6 +795,12 @@ Release procedure:
 
 1. Update `nextflow/conf/defaults.config`: `defaultUnifireVersion = "<major>.<minor>.<patch>"`.
 2. Commit and tag the release commit: `git tag v<version>`.
+3. Push both the tag and its commit; the pre-push hook verifies the match.
+
+Snapshot procedure (e.g. `snapshot/v0.1.0`):
+
+1. Update `nextflow/conf/defaults.config`: `defaultUnifireVersion = "snapshot-<major>.<minor>.<patch>"`.
+2. Commit and tag the release commit: `git tag snapshot/v<version>`.
 3. Push both the tag and its commit; the pre-push hook verifies the match.
 
 ***

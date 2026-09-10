@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 #
-# Pre-push hook: verifies that for every v* tag being pushed, the value of
-# params.defaultUnifireVersion committed at the tag matches the tag name
-# (without the leading "v") in git refs before pushing.
+# Pre-push hook: verifies that for every v* or snapshot/v* tag being pushed,
+# the value of params.defaultUnifireVersion committed at the tag matches the
+# tag-derived Docker image tag (via the shared --tag mode of the check
+# script) before pushing.
 #
 # Enable by running:
 #   git config core.hooksPath .githooks
@@ -22,9 +23,9 @@ fi
 
 fail=0
 while read -r _local_ref _local_sha remote_ref _remote_sha; do
-    # Only check v* tags being pushed (creation or update); skip deletions.
+    # Only check v* / snapshot/v* tags being pushed; skip deletions.
     case "$remote_ref" in
-        refs/tags/v*) ;;
+        refs/tags/v*|refs/tags/snapshot/v*) ;;
         *) continue ;;
     esac
 
@@ -35,7 +36,7 @@ while read -r _local_ref _local_sha remote_ref _remote_sha; do
     fi
 
     tag_name="${remote_ref#refs/tags/}"
-    expected="${tag_name#v}"
+    expected="$(bash "$CHECK_SCRIPT" --tag "$tag_name" --print)"
 
     # Read the config file as committed at the tag (peel annotated tags).
     tag_commit="$(git rev-parse "${tag_name}^{commit}")"
@@ -48,7 +49,7 @@ while read -r _local_ref _local_sha remote_ref _remote_sha; do
     fi
 
     echo "Checking '${CONFIG_REL_PATH}' at tag '${tag_name}' (expect version '${expected}')" >&2
-    if ! bash "$CHECK_SCRIPT" "$expected" "$config_blob"; then
+    if ! bash "$CHECK_SCRIPT" --tag "$tag_name" "$config_blob"; then
         fail=1
     fi
     rm -f "$config_blob"
