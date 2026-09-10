@@ -31,7 +31,6 @@ workflow {
     printBanner()
 
     def systems = parseSystems(params.systems)
-    validateIprscan6ProfileName(params.iprscan6ProfileName)
     def outputFormat = parseOutputFormat(params.outputFormat)
     println("Using UniProt release: ${uniprotRelease}, systems: ${systems}")
     dataPaths = fetchData(params.dataPath, systems, uniprotRelease, pirsrRelease)
@@ -114,14 +113,6 @@ def parseChunkSize(chunkSizeParam) {
         exit(1)
     }
     return chunkSizeParam
-}
-
-def validateIprscan6ProfileName(profileName) {
-    def validProfiles = ['docker', 'singularity', 'podman']
-    if (!(profileName in validProfiles)) {
-        log.error("Invalid iprscan6ProfileName: ${profileName}. Must be one of: ${validProfiles.join(', ')}")
-        exit(1)
-    }
 }
 
 def parseOutputFormat(outputFormatParam) {
