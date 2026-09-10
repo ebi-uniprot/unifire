@@ -1,4 +1,7 @@
 process downloadRemoteFile {
+    label "time_short"
+    label "mem_low"
+
     input:
     val remoteUri
     path outputDir
@@ -19,6 +22,9 @@ process downloadRemoteFile {
 }
 
 process downloadAndUntarRemoteFile {
+    label "time_short"
+    label "mem_low"
+
     input:
     val remoteUri
     path outputDir

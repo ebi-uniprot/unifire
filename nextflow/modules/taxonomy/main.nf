@@ -1,4 +1,7 @@
 process generateTaxonomyLineage {
+    label "time_verylong"
+    label "mem_high"
+
     container "${params.unifireImage}:${params.unifireVersion}"
 
     input:
