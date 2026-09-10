@@ -1,10 +1,10 @@
-include { fetchData } from './data.nf'
-include { runIprscan6 } from './modules/interproscan6'
-include { generateTaxonomyLineage } from './modules/taxonomy'
-include { runUnifirePipeline as runUnirulePipeline } from './modules/unifire'
-include { runUnifirePipeline as runArbaPipeline } from './modules/unifire'
-include { runPirsrPipeline } from './modules/pirsr'
-include { printUsage } from './modules/help'
+include { fetchData } from './nextflow/data.nf'
+include { runIprscan6 } from './nextflow/modules/interproscan6'
+include { generateTaxonomyLineage } from './nextflow/modules/taxonomy'
+include { runUnifirePipeline as runUnirulePipeline } from './nextflow/modules/unifire'
+include { runUnifirePipeline as runArbaPipeline } from './nextflow/modules/unifire'
+include { runPirsrPipeline } from './nextflow/modules/pirsr'
+include { printUsage } from './nextflow/modules/help'
 
 workflow {
     if (params.help) {

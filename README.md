@@ -760,6 +760,41 @@ This tool translates the URML rules into the Drools language, converts the input
 
 ***
 
+### Releasing a new version
+
+UniFIRE is released by pushing a git tag `v<version>` (e.g. `v5.1.2`), which triggers
+the CI pipelines to build and publish the `unifire/nextflow` Docker image tagged `<version>`.
+
+To keep the pipeline self-consistent, the committed value of `params.defaultUnifireVersion`
+in [nextflow/conf/defaults.config](nextflow/conf/defaults.config) must equal the version being
+tagged (without the leading `v`). On `master` the value stays `latest`.
+
+The invariant is enforced at three levels, all using
+[misc/release/check-nextflow-version.sh](misc/release/check-nextflow-version.sh):
+
+1. **Local git hook** - a `pre-push` hook refuses to push a `v*` tag whose tagged commit
+   does not carry the matching `defaultUnifireVersion`. Enable it once per clone:
+
+    ```bash
+    git config core.hooksPath .githooks
+    ```
+
+   Note: hooks are a convenience and can be bypassed (`git push --no-verify`); the CI
+   checks below are the authoritative enforcement.
+2. **GitHub Actions** - the `Build and Push Nextflow Docker Image` job on a tag push fails
+   before building if the check fails.
+3. **GitLab CI** - the `build_push_nextflow_docker_image` job validates the version in its
+   `before_script`; a lightweight `nextflow-version-check` job additionally validates the
+   config format (either `latest` or `major.minor.patch`) on every MR pipeline.
+
+Release procedure:
+
+1. Update `nextflow/conf/defaults.config`: `defaultUnifireVersion = "<major>.<minor>.<patch>"`.
+2. Commit and tag the release commit: `git tag v<version>`.
+3. Push both the tag and its commit; the pre-push hook verifies the match.
+
+***
+
 ## Limitations
 
 ### Memory
