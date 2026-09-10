@@ -781,11 +781,12 @@ The invariant is enforced at three levels, all using
 
    Note: hooks are a convenience and can be bypassed (`git push --no-verify`); the CI
    checks below are the authoritative enforcement.
-2. **GitHub Actions** - the `Build and Push Nextflow Docker Image` job on a tag push fails
-   before building if the check fails.
-3. **GitLab CI** - the `build_push_nextflow_docker_image` job validates the version in its
-   `before_script`; a lightweight `nextflow-version-check` job additionally validates the
-   config format (either `latest` or `major.minor.patch`) on every MR pipeline.
+2. **CI pipelines** - the GitHub `Build and Push Nextflow Docker Image` job and the GitLab
+   `build_push_nextflow_docker_image` job on a tag push fail before building if the check
+   fails.
+3. **`nextflow-version-check` job** - a lightweight CI job on every push/MR pipeline
+   validates that the committed value is either `latest` or a version-like string.
+   It does not assert any specific version format.
 
 Release procedure:
 

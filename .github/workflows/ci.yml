@@ -91,7 +91,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Validate defaultUnifireVersion format
+      - name: Validate defaultUnifireVersion
         run: misc/release/check-nextflow-version.sh --config nextflow/conf/defaults.config
 
   codeql:
