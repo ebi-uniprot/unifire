@@ -14,7 +14,7 @@ CONFIG_REL_PATH="nextflow/conf/defaults.config"
 
 usage() {
     echo "Usage: $0 <expected-version> [<config-file>]" >&2
-    echo "       $0 --config <config-file>  (verifies value is 'latest' or semver-like)" >&2
+    echo "       $0 --config <config-file>  (verifies value is 'latest' or a version-like string)" >&2
     exit 2
 }
 
@@ -29,7 +29,6 @@ get_value() {
     sed -n 's/.*defaultUnifireVersion *= *"\([^"]*\)".*/\1/p' "$1" | head -n1
 }
 
-expected=""
 file="$CONFIG_REL_PATH"
 
 if [ "${1:-}" = "--config" ]; then
@@ -39,8 +38,8 @@ if [ "${1:-}" = "--config" ]; then
     if [ "$actual" = "latest" ]; then
         exit 0
     fi
-    if ! printf '%s' "$actual" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
-        echo "ERROR: defaultUnifireVersion in ${file} is '${actual}' but must be 'latest' or '<major>.<minor>.<patch>'" >&2
+    if ! printf '%s' "$actual" | grep -Eq '^v?[0-9A-Za-z][0-9A-Za-z._-]*$'; then
+        echo "ERROR: defaultUnifireVersion in ${file} is '${actual}' but must be 'latest' or a version-like string (e.g. '1.2.3', '0.1.0-dev1')" >&2
         exit 1
     fi
     exit 0
