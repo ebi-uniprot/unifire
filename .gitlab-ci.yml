@@ -88,7 +88,7 @@ nextflow-version-check:
   stage: test
   image: alpine:3.20
   script:
-    - sh misc/release/check-nextflow-version.sh --config nextflow/conf/defaults.config
+    - sh misc/release/check-nextflow-version.sh --config nextflow/defaults.nf
   rules: *trigger_rules
 
 .docker_image:
@@ -145,7 +145,7 @@ build_push_nextflow_docker_image:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin
     - export NEXTFLOW_IMAGE_TAG=$(sh misc/release/check-nextflow-version.sh --tag "${CI_COMMIT_REF_NAME}" --print)
     - echo "UniFIRE Nextflow image tag will be = ${NEXTFLOW_IMAGE_TAG}"
-    - echo "Checking nextflow defaultUnifireVersion matches tag or branch ${CI_COMMIT_REF_NAME}"
+    - echo "Checking nextflow engine.unifireVersion matches tag or branch ${CI_COMMIT_REF_NAME}"
     - sh misc/release/check-nextflow-version.sh --tag "${CI_COMMIT_REF_NAME}"
   script:
     - IMAGE_NAME=${NEXTFLOW_IMAGE_NAME}:${NEXTFLOW_IMAGE_TAG}
@@ -172,7 +172,7 @@ build_push_snapshot_nextflow_docker_image:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin
     - export NEXTFLOW_IMAGE_TAG=$(sh misc/release/check-nextflow-version.sh --tag "${CI_COMMIT_REF_NAME}" --print)
     - echo "UniFIRE Nextflow snapshot image tag will be = ${NEXTFLOW_IMAGE_TAG}"
-    - echo "Checking nextflow defaultUnifireVersion matches branch ${CI_COMMIT_REF_NAME}"
+    - echo "Checking nextflow engine.unifireVersion matches branch ${CI_COMMIT_REF_NAME}"
     - sh misc/release/check-nextflow-version.sh --tag "${CI_COMMIT_REF_NAME}"
   script:
     - IMAGE_NAME=${NEXTFLOW_IMAGE_NAME}:${NEXTFLOW_IMAGE_TAG}
