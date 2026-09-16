@@ -80,10 +80,14 @@ mkdir -p "\${NXF_CACHE_DIR}"
 ${childCmd}
 """
 
-    // Execute the child nextflow run; capture and relay stdout/stderr.
+    // Execute the child nextflow run from the task work dir so the staged input
+    // and data paths (relative to this task) resolve correctly, just as they do
+    // for regular process scripts. The reduce/resume session state lives in
+    // NXF_CACHE_DIR (under the parent work dir), not in the launch cwd, so
+    // resumability is unaffected by choosing the task dir as the launch dir.
     def stdout = new StringBuilder()
     def stderr = new StringBuilder()
-    def proc = ["bash", runScript.toString()].execute(null, cacheDir.toFile())
+    def proc = ["bash", runScript.toString()].execute(null, task.workDir.toFile())
     proc.waitForProcessOutput(stdout, stderr)
     System.out.print(stdout.toString())
     System.err.print(stderr.toString())
