@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Pre-push hook: verifies that for every v* tag, release/* branch or
-# snapshot/* branch being pushed, the value of params.defaultUnifireVersion
+# snapshot/* branch being pushed, the value of engine.unifireVersion
 # committed at that ref matches the tag/branch-derived Docker image tag (via
 # the shared --tag mode of the check script) before pushing.
 #
@@ -11,7 +11,7 @@
 set -euo pipefail
 
 ZERO_SHA="0000000000000000000000000000000000000000"
-CONFIG_REL_PATH="nextflow/conf/defaults.config"
+CONFIG_REL_PATH="nextflow/defaults.nf"
 # Git runs hooks with the working directory set to the repo root, but the
 # check script may not be committed in the local clone; resolve it relative
 # to this hook's location instead.

@@ -1,14 +1,18 @@
-def printUsage() {
+def printUsage(opts) {
+    def run = opts.run
+    def data = opts.data
+    def engine = opts.engine
     log.info """
     UniFIRE - UniProt Functional-Annotation Inference Rule Engine (Nextflow)
 
     Usage:
-      nextflow run nextflow/main.nf [options]
+      nextflow run . [options]
 
     Required options:
       --input FILE                Path to input file: multi-FASTA or InterProScan XML.
       --output DIR                Path to output directory for prediction files.
       --dataPath DIR              Path to a directory for downloaded rule data.
+                                  Default: ${data.dataPath}
 
     Input options:
       --inputType TYPE            Input type: fasta, InterProScan, InterProScan6.
@@ -16,34 +20,29 @@ def printUsage() {
 
     Analysis options:
       --systems LIST              Comma-separated list of systems to run: unirule, arba, pirsr.
-                                  Default: ${params.defaultSystems}
+                                  Default: ${run.systems}
       --outputFormat FORMAT       Prediction output format: TSV or XML.
-                                  Default: ${params.defaultOutputFormat}
+                                  Default: ${run.outputFormat}
       --chunkSize N               Number of proteins to process per chunk.
-                                  Default: ${params.defaultChunkSize}
+                                  Default: ${run.chunkSize}
 
     Version options:
-      --version VERSION           Predefined version set to use.
-                                  Default: ${params.defaultVersion}
+      --version VERSION           Predefined version set to use: ${opts.versions.versions.keySet().toSorted().join(', ')}.
 
     InterProScan options (used only when input is FASTA):
       --iprscanVersion VERSION    InterProScan 6 version to run.
-                                  Default: from --version ${params.defaultVersion} (${params.versions[params.defaultVersion].iprscanVersion})
       --iprVersion VERSION        InterPro version to use with InterProScan 6.
-                                  Default: from --version ${params.defaultVersion} (${params.versions[params.defaultVersion].iprVersion})
 
     Data options:
       --uniprotRelease RELEASE    UniProt release used to download rule files.
-                                  Default: from --version ${params.defaultVersion} (${params.versions[params.defaultVersion].uniprotRelease})
       --pirsrRelease RELEASE      PIRSR data release used to download PIRSR data files.
-                                  Default: from --version ${params.defaultVersion} (${params.versions[params.defaultVersion].pirsrRelease})
-      --skipDownloads             Skip downloading remote rule files.
+      --forceDownloads            Re-download remote rule and taxonomy data files even if they already exist locally.
 
     Container options:
       --unifireImage IMAGE        Docker image used for UniFIRE rule inference.
-                                  Default: ${params.defaultUnifireImage}
+                                  Default: ${engine.unifireImage}
       --unifireVersion VERSION    Tag of the UniFIRE Docker image.
-                                  Default: ${params.defaultUnifireVersion}
+                                  Default: ${engine.unifireVersion}
 
     Resource options:
       --unifireMemory MB          Max heap memory for UniFIRE rule inference.
@@ -55,8 +54,8 @@ def printUsage() {
       --help                      Show this message and exit.
 
     Examples:
-      nextflow run nextflow/main.nf --input samples/proteins.fasta --output out --dataPath data
-      nextflow run nextflow/main.nf --input samples/input_ipr.xml --output out --dataPath data --skipDownloads
-      nextflow run nextflow/main.nf --input samples/input_ipr6.xml --output out --dataPath data --systems unirule,arba
+      nextflow run . --input samples/proteins.fasta --output out --dataPath data
+      nextflow run . --input samples/input_ipr.xml --output out --dataPath data
+      nextflow run . --input samples/input_ipr6.xml --output out --dataPath data --systems unirule,arba
     """.stripIndent()
 }
