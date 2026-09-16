@@ -18,7 +18,7 @@ include:
   - template: Jobs/Dependency-Scanning.latest.gitlab-ci.yml
   - component: $CI_SERVER_FQDN/uniprot/aa/ci-components/library-release@master
     inputs:
-      image: maven:3-eclipse-temurin-17-alpine
+      image: maven:3.9.16-amazoncorretto-17-debian
       production_branches: "master"
       maven_cli_opts: "-P jenkins"
 
