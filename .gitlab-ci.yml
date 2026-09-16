@@ -97,9 +97,12 @@ nextflow-smoke-test:
   image: eclipse-temurin:17-jre-alpine
   before_script:
     - apk add --no-cache bash curl python3 libc6-compat
-    - curl -fsSL https://get.nextflow.io | bash
-    - mv nextflow /usr/local/bin/
+    # The installer writes a 'nextflow' launcher file into the current
+    # directory, which collides with the project's nextflow/ directory.
+    - mkdir -p /opt/nxf && (cd /opt/nxf && curl -fsSL https://get.nextflow.io | bash)
+    - mv /opt/nxf/nextflow /usr/local/bin/
     - nextflow -version
+    - python3 --version
   script:
     - python3 nextflow/tests/smoke.py
   rules: *trigger_rules
