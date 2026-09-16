@@ -108,9 +108,11 @@ jobs:
           distribution: 'temurin'
 
       - name: Install Nextflow
+        # The installer writes a 'nextflow' launcher file into the current
+        # directory, which collides with the project's nextflow/ directory.
         run: |
-          curl -fsSL https://get.nextflow.io | bash
-          sudo mv nextflow /usr/local/bin/
+          mkdir -p /tmp/nxf && (cd /tmp/nxf && curl -fsSL https://get.nextflow.io | bash)
+          sudo mv /tmp/nxf/nextflow /usr/local/bin/
 
       - name: Run smoke tests
         run: python3 nextflow/tests/smoke.py
