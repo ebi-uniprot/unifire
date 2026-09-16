@@ -52,7 +52,6 @@ workflow {
             unifireMemory: params.unifireMemory ?: '',
             pirsrMemory: params.pirsrMemory ?: '',
             iprscan6ProfileName: params.iprscan6ProfileName
-        ],
-        versionTree.versions
+        ]
     )
 }

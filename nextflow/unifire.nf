@@ -12,7 +12,6 @@ workflow UNIFIRE {
     run       // map: input, outputDir, inputType, systems, outputFormat, chunkSize
     data      // map: dataPath, forceDownloads, uniprotRelease, pirsrRelease, iprscanVersion, iprVersion
     engine    // map: unifireImage, unifireVersion, unifireMemory, pirsrMemory, iprscan6ProfileName
-    versions  // map: version key -> [uniprotRelease, pirsrRelease, iprscanVersion, iprVersion]
 
     main:
     def params = getDefaultParams()

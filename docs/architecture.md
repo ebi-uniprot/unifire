@@ -39,7 +39,7 @@ fetchData / runIprscan6 / generateTaxonomyLineage / runUnifirePipeline / runPirs
 
 ## UNIFIRE's `take:` contract
 
-`UNIFIRE(run, data, engine, versions)` receives four Groovy maps.
+`UNIFIRE(run, data, engine)` receives three Groovy maps.
 All values are optional; `UNIFIRE` merges them strictly against defaults.
 
 | Group   | Keys |
@@ -47,14 +47,15 @@ All values are optional; `UNIFIRE` merges them strictly against defaults.
 | `run`   | `input`, `outputDir`, `inputType`(nullable → inferred), `systems`, `outputFormat`, `chunkSize` |
 | `data`  | `dataPath`, `forceDownloads`, `uniprotRelease`, `pirsrRelease`, `iprscanVersion`, `iprVersion` |
 | `engine`| `unifireImage`, `unifireVersion`, `unifireMemory`, `pirsrMemory`, `iprscan6ProfileName` |
-| `versions` | version key → `[uniprotRelease, pirsrRelease, iprscanVersion, iprVersion]` |
 
 ### Defaults live in code
 
 `nextflow/defaults.nf` exposes `getDefaultParams()` — a single nested dict of
 the `run` / `data` / `engine` defaults. `nextflow/versions.nf` exposes
 `getDefaultVersions()` — a single nested dict containing `defaultKey` and the
-`versions` key→release map.
+`versions` key→release map, consumed by `main.nf` for `--version` resolution
+(callers embedding `UNIFIRE` either do the same lookup or pin explicit
+per-field values in `data`).
 
 Merging (`mergeStrict` in `nextflow/unifire.nf`) is strict: unknown keys fail
 fast with the valid key list (exit 1), and `null`-valued user keys fall back
@@ -70,8 +71,7 @@ workflow {
           systems: 'unirule' ],
         [ dataPath: file('data'), uniprotRelease: '2026_04', pirsrRelease: 'latest',
           iprscanVersion: '6.0.2', iprVersion: '110.0' ],
-        [:],   // engine defaults
-        getDefaultVersions()
+        [:]   // engine defaults
     )
 }
 ```
