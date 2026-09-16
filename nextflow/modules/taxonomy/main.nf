@@ -14,8 +14,7 @@ process refreshTaxaSqlite {
 
     script:
     """
-    /opt/scripts/bin/update-taxonomy-cache.sh
-    mv /opt/ete4/taxa.sqlite ${taxaDataDir}/taxa.sqlite
+    python3 /opt/scripts/bin/update-taxonomy-cache.py --sqlite-path ${taxaDataDir}/taxa.sqlite
     """
 }
 

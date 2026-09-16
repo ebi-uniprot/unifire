@@ -31,7 +31,25 @@
 #    limitations under the License.
 ############################################################################
 
+import argparse
+
 from ete4 import NCBITaxa
 
-ncbi = NCBITaxa()
-ncbi.update_taxonomy_database()
+
+def main():
+    parser = argparse.ArgumentParser(description="Update the NCBI taxonomy cache database.")
+    parser.add_argument(
+        "--sqlite-path",
+        "-s",
+        type=str,
+        default=None,
+        help="Path to the NCBI taxonomy SQLite database file.",
+    )
+    args = parser.parse_args()
+
+    ncbi = NCBITaxa(dbfile=args.sqlite_path)
+    ncbi.update_taxonomy_database()
+
+
+if __name__ == "__main__":
+    main()
