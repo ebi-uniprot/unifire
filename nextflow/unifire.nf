@@ -58,7 +58,7 @@ workflow UNIFIRE {
 
     if (resolvedInputType == "fasta") {
         // Run InterProScan 6 pipeline
-        println("Running InterProScan 6 pipeline with iprscanVersion=${cfgData.iprscanVersion}, iprVersion=${cfgData.iprVersion}")
+        println("Running InterProScan 6 pipeline with iprscanVersion=${cfgData.iprscanVersion}, iprVersion=${cfgData.iprVersion}, profile=${cfgEngine.iprscan6ProfileName}")
         def iprDataPath = dataPaths.dataPath.resolve("iprscan6")
         assert iprDataPath.mkdirs()
         iprscanXmlPath = runIprscan6(cfgData.iprscanVersion, cfgData.iprVersion, inputPath, iprDataPath, cfgEngine.iprscan6ProfileName)

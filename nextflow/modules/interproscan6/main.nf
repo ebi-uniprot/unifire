@@ -19,10 +19,10 @@ process runIprscan6 {
     """
     mkdir results/
     nextflow run ebi-pf-team/interproscan6 \
+        -profile ${iprscan6ProfileName} \
         --applications HAMAP,PROSITE-profiles,PROSITE-patterns,Pfam,NCBIFAM,SMART,PRINTS,SFLD,CDD,CATH-Gene3D,PIRSF,PANTHER,SUPERFAMILY,CATH-FunFam \
         -r ${iprscanVersion} \
         --interpro ${iprVersion} \
-        -profile ${iprscan6ProfileName} \
         --datadir $dataDir \
         --input ${inputSequencePath} \
         --formats xml \
