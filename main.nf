@@ -65,7 +65,7 @@ workflow {
     println("Running inference on input type: ${inputType}")
 
     // Run taxonomy lineage script
-    def taxonomyLineageXmlPath = generateTaxonomyLineage(iprscanXmlPath)
+    def taxonomyLineageXmlPath = generateTaxonomyLineage(iprscanXmlPath, dataPaths.taxaFilePath)
 
     if ("unirule" in systems) {
         runUnirulePipeline(chunkSize, dataPaths.uniruleUrmlFilePath, taxonomyLineageXmlPath, dataPaths.urmlTemplatesFilePath, "predictions_unirule.out", inputType, outputFormat)
