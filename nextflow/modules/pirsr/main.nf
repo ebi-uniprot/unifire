@@ -1,5 +1,5 @@
 process runPirsrPipeline {
-    label "time_verylong"
+    label "time_xlong"
     label "mem_high"
 
     container "${unifireImage}:${unifireVersion}"

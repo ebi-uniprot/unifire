@@ -1,5 +1,5 @@
 process runIprscan6 {
-    label "time_verylong"
+    label "time_xlong"
     label "mem_high"
 
     input:
