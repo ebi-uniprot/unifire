@@ -19,6 +19,12 @@ process downloadRemoteFile {
     fi
     echo "${outputDir}/${fileName}"
     """
+
+    stub:
+    """
+    mkdir -p ${outputDir}
+    touch ${outputDir}/${fileName}
+    """
 }
 
 process downloadAndUntarRemoteFile {
@@ -38,5 +44,10 @@ process downloadAndUntarRemoteFile {
     tar -zxf tmp.tar.gz -C ${outputDir}
     rm tmp.tar.gz
     echo "${outputDir}"
+    """
+
+    stub:
+    """
+    mkdir -p ${outputDir}
     """
 }

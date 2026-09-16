@@ -29,6 +29,43 @@ workflow UNIFIRE {
     def parsedSystems = parseSystems(cfgRun.systems)
     def parsedOutputFormat = parseOutputFormat(cfgRun.outputFormat)
     def parsedChunkSize = parseChunkSize(cfgRun.chunkSize)
+
+    // Validate run options before any data fetching, so bad or incomplete
+    // inputs fail fast.
+    def inputPath = cfgRun.input ? file(cfgRun.input) : null
+    if (!inputPath) {
+        log.error("'--input <FILE>' is required: path to a multi-FASTA or InterProScan XML file.")
+        exit(1)
+    }
+    else if (!inputPath.exists()) {
+        log.error("Input file does not exist: ${cfgRun.input}")
+        exit(1)
+    }
+    else if (!inputPath.isFile()) {
+        log.error("Input path must be a regular file, not a directory: ${cfgRun.input}")
+        exit(1)
+    }
+
+    def outputDir = (cfgRun.outputDir != null) ? file(cfgRun.outputDir) : null
+    if (!outputDir) {
+        log.error("'--output <DATA-DIR>' is required: output directory for prediction files.")
+        exit(1)
+    }
+    else if (outputDir.isFile()) {
+        log.error("'--output <DATA-DIR>' is required and cannot be an existing file.")
+        exit(1)
+    }
+    else if (!outputDir.isDirectory()) {
+        assert outputDir.mkdirs()
+    }
+
+    def resolvedInputType = cfgRun.inputType ? parseInputType(cfgRun.inputType) : inferInputType(inputPath)
+    if (!resolvedInputType) {
+        log.error("Could not infer input type from '${inputPath}'. '--input <FILE>' must be a multi-FASTA file (.fasta, .fa) or an InterProScan XML file (root element 'protein-matches' or 'results'), or specify '--inputType' explicitly (fasta, InterProScan, InterProScan6).")
+        exit(1)
+    }
+    println("Inferred input type: ${resolvedInputType}")
+
     println("Using UniProt release: ${cfgData.uniprotRelease}, systems: ${parsedSystems}")
 
     dataPaths = fetchData(
@@ -41,20 +78,7 @@ workflow UNIFIRE {
         cfgEngine.unifireVersion
     )
 
-    def inputPath = file(cfgRun.input)
     def iprscanXmlPath = inputPath
-
-    def outputDir = file(cfgRun.outputDir)
-    if (outputDir.isFile()) {
-        log.error("'--output <DATA-DIR>' is required and cannot be an existing file.")
-        exit(1)
-    }
-    else if (!outputDir.isDirectory()) {
-        assert outputDir.mkdirs()
-    }
-
-    def resolvedInputType = cfgRun.inputType ? parseInputType(cfgRun.inputType) : inferInputType(cfgRun.input.toString())
-    println("Inferred input type: ${resolvedInputType}")
 
     if (resolvedInputType == "fasta") {
         // Run InterProScan 6 pipeline
@@ -182,16 +206,15 @@ def parseOutputFormat(outputFormatParam) {
     return outputFormatParam
 }
 
-def inferInputType(inputFile) {
+def inferInputType(inputPath) {
     def inferredType = null
-    def lowerName = inputFile.toLowerCase()
+    def lowerName = inputPath.toString().toLowerCase()
 
     if (lowerName.endsWith('.fasta') || lowerName.endsWith('.fa')) {
         inferredType = 'fasta'
     }
     else if (lowerName.endsWith('.xml')) {
-        def file = file(inputFile)
-        def content = file.text
+        def content = inputPath.text
         // Remove XML declaration and comments, then find the first root-like element
         def cleaned = content
             .replaceAll(/<\?xml[^?]*\?>/, '')

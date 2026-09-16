@@ -94,6 +94,27 @@ jobs:
       - name: Validate unifireVersion
         run: misc/release/check-nextflow-version.sh --config nextflow/defaults.nf
 
+  nextflow-smoke-test:
+    name: Nextflow Smoke Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Install Nextflow
+        run: |
+          curl -fsSL https://get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
+
+      - name: Run smoke tests
+        run: python3 nextflow/tests/smoke.py
+
   codeql:
     name: CodeQL Analysis
     runs-on: ubuntu-latest

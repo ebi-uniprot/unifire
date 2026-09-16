@@ -31,8 +31,8 @@ workflow {
 
     UNIFIRE(
         [
-            input: file(params.input),
-            outputDir: file(params.output),
+            input: params.input,
+            outputDir: params.output,
             inputType: params.inputType,
             systems: params.systems,
             outputFormat: params.outputFormat,

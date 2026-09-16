@@ -29,4 +29,9 @@ process runIprscan6 {
         --outdir results
     mv results/*.xml output.xml
     """
+
+    stub:
+    """
+    touch output.xml
+    """
 }
