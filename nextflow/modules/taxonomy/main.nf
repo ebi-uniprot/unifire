@@ -16,6 +16,11 @@ process refreshTaxaSqlite {
     """
     python3 /opt/scripts/bin/update-taxonomy-cache.py --sqlite-path ${taxaDataDir}/taxa.sqlite
     """
+
+    stub:
+    """
+    touch ${taxaDataDir}/taxa.sqlite
+    """
 }
 
 process generateTaxonomyLineage {
@@ -36,5 +41,10 @@ process generateTaxonomyLineage {
     script:
     """
     python3 /opt/misc/taxonomy/updateIPRScanWithTaxonomicLineage.py -i ${iprscanXmlPath} -o taxonomy-lineage.xml -t ${taxaFilePath}
+    """
+
+    stub:
+    """
+    touch taxonomy-lineage.xml
     """
 }

@@ -34,4 +34,9 @@ process runPirsrPipeline {
 
     ls -lah
     """
+
+    stub:
+    """
+    touch ${fileName}
+    """
 }
