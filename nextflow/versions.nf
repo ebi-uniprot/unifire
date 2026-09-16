@@ -5,7 +5,7 @@ def getDefaultVersions() {
             '2026.4': [
                 uniprotRelease: '2026_04',
                 iprVersion: '110.0',
-                iprscanVersion: '6.0.2',
+                iprscanVersion: '6.0.2.2',
                 pirsrRelease: 'latest'
             ],
             '2026.3': [
