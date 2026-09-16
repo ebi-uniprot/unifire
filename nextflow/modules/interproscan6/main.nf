@@ -16,6 +16,7 @@ process runIprscan6 {
 
     script:
     """
+    mkdir results/
     nextflow run ebi-pf-team/interproscan6 \
         --applications HAMAP,PROSITE-profiles,PROSITE-patterns,Pfam,NCBIFAM,SMART,PRINTS,SFLD,CDD,CATH-Gene3D,PIRSF,PANTHER,SUPERFAMILY,CATH-FunFam \
         -r ${iprscanVersion} \
