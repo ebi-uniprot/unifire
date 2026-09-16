@@ -18,6 +18,7 @@ include:
   - template: Jobs/Dependency-Scanning.latest.gitlab-ci.yml
   - component: $CI_SERVER_FQDN/uniprot/aa/ci-components/library-release@master
     inputs:
+      image: maven:3.9.6
       production_branches: "master"
       maven_cli_opts: "-P jenkins"
 
