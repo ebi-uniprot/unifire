@@ -3,6 +3,7 @@ include { downloadRemoteFile as downloadUrml } from './modules/common'
 include { downloadRemoteFile as downloadArba } from './modules/common'
 include { downloadAndUntarRemoteFile as downloadPirsr } from './modules/common'
 include { downloadRemoteFile as downloadPirsrUrml } from './modules/common'
+include { refreshTaxaSqlite } from './modules/taxonomy'
 
 def shouldDownloadFile(path: Path, forceDownloads: boolean) {
     def pathExists = path.isFile()
@@ -89,6 +90,14 @@ workflow fetchData {
         }
     }
 
+    def taxaBasePath = dataPathFile.resolve("taxa")
+    assert taxaBasePath.mkdirs()
+    taxaFilePath = taxaBasePath.resolve("taxa.sqlite")
+
+    if (shouldDownloadFile(taxaFilePath, forceDownloads)) {
+        taxaFilePath = refreshTaxaSqlite(taxaBasePath)
+    }
+
     emit:
     dataPath = dataPathFile
     urmlTemplatesFilePath
@@ -96,4 +105,5 @@ workflow fetchData {
     arbaUrmlFilePath
     pirsrUrmlFilePath
     pirsrDir
+    taxaFilePath
 }

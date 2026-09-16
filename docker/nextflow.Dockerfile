@@ -18,7 +18,6 @@ RUN cd /opt/code && mvn clean dependency:copy-dependencies package -Dmaven.test.
 COPY docker/scripts /opt/scripts/bin
 COPY docker/versions.properties /opt/scripts/bin
 RUN chmod 775 /opt/scripts/bin/*.sh
-RUN /opt/scripts/bin/update-taxonomy-cache.sh
 RUN mkdir /volume
 
 VOLUME /volume
