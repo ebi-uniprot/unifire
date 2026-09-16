@@ -2,8 +2,8 @@ process runPirsrPipeline {
     label "time_verylong"
     label "mem_high"
 
-    container "${params.unifireImage}:${params.unifireVersion}"
-    publishDir "${params.output}", mode: 'copy'
+    container "${unifireImage}:${unifireVersion}"
+    publishDir { "${outputDir}" }, mode: 'copy'
 
     input:
     val chunkSize
@@ -13,12 +13,16 @@ process runPirsrPipeline {
     val fileName
     val inputType
     val outputFormat
+    val unifireImage
+    val unifireVersion
+    val pirsrMemory
+    val outputDir
 
     output:
     path "${fileName}"
 
     script:
-    def memoryOpt = params.pirsrMemory ? "-m ${params.pirsrMemory}" : ""
+    def memoryOpt = pirsrMemory ? "-m ${pirsrMemory}" : ""
     """
     mkdir -p pirsr-pred
     echo "Running PIRSR hmmalign..."

@@ -1,156 +1,58 @@
-include { fetchData } from './nextflow/data.nf'
-include { runIprscan6 } from './nextflow/modules/interproscan6'
-include { generateTaxonomyLineage } from './nextflow/modules/taxonomy'
-include { runUnifirePipeline as runUnirulePipeline } from './nextflow/modules/unifire'
-include { runUnifirePipeline as runArbaPipeline } from './nextflow/modules/unifire'
-include { runPirsrPipeline } from './nextflow/modules/pirsr'
 include { printUsage } from './nextflow/modules/help'
+include { getDefaultParams } from './nextflow/defaults.nf'
+include { getDefaultVersions } from './nextflow/versions.nf'
+include { UNIFIRE } from './nextflow/unifire.nf'
 
 workflow {
     if (params.help) {
-        printUsage()
+        def defParams = getDefaultParams()
+        printUsage(
+            run: defParams.run,
+            data: defParams.data,
+            engine: defParams.engine,
+            versions: getDefaultVersions()
+        )
         exit(0)
     }
 
     // Resolve versioned defaults.
-    // Precedence: explicit CLI arguments > --version mapping > defaultVersion mapping.
-    def versionToUse = (params.version ?: params.defaultVersion).toString()
-    def versionConfig = null
-    if (versionToUse) {
-        versionConfig = params.versions[versionToUse]
-        if (!versionConfig) {
-            log.error("Version '${versionToUse}' not found in versions.config. Available versions: ${params.versions.keySet().join(', ')}")
-            exit(1)
-        }
-    }
-    def uniprotRelease = params.uniprotRelease ?: versionConfig?.uniprotRelease
-    def iprVersion = params.iprVersion ?: versionConfig?.iprVersion
-    def iprscanVersion = params.iprscanVersion ?: versionConfig?.iprscanVersion
-    def pirsrRelease = params.pirsrRelease ?: versionConfig?.pirsrRelease
-
-    printBanner()
-
-    def systems = parseSystems(params.systems)
-    def outputFormat = parseOutputFormat(params.outputFormat)
-    println("Using UniProt release: ${uniprotRelease}, systems: ${systems}")
-    dataPaths = fetchData(params.dataPath, systems, uniprotRelease, pirsrRelease, params.forceDownloads)
-
-    // Define pipeline inputs
-    def inputPath = file(params.input)
-    def iprscanXmlPath = inputPath
-
-    def outputDir = file(params.output)
-    if (outputDir.isFile()) {
-        log.error("'--output <DATA-DIR>' is required and cannot be an existing file.")
+    // Precedence: explicit CLI arguments > --version mapping > defaultKey mapping.
+    def versionTree = getDefaultVersions()
+    def defaultConfig = versionTree.versions[versionTree.defaultKey]
+    if (!defaultConfig) {
+        log.error("Version '${versionTree.defaultKey}' not found in default versions.")
         exit(1)
     }
-    else if (!outputDir.isDirectory()) {
-        assert outputDir.mkdirs()
+    def versionConfig = params.version ? versionTree.versions[params.version.toString()] : defaultConfig
+    if (params.version && !versionConfig) {
+        log.error("Version '${params.version}' not found. Available versions: ${versionTree.versions.keySet().join(', ')}")
+        exit(1)
     }
 
-    def inputType = params.inputType ? parseInputType(params.inputType) : inferInputType(params.input)
-    println("Inferred input type: ${inputType}")
-
-    def chunkSize = parseChunkSize(params.chunkSize)
-
-    if (inputType == "fasta") {
-        // Run InterProScan 6 pipeline
-        println("Running InterProScan 6 pipeline with iprscanVersion=${iprscanVersion}, iprVersion=${iprVersion}")
-        def iprDataPath = dataPaths.dataPath.resolve("iprscan6")
-        assert iprDataPath.mkdirs()
-        iprscanXmlPath = runIprscan6(iprscanVersion, iprVersion, inputPath, iprDataPath)
-        inputType = "InterProScan6"
-    }
-
-    println("Running inference on input type: ${inputType}")
-
-    // Run taxonomy lineage script
-    def taxonomyLineageXmlPath = generateTaxonomyLineage(iprscanXmlPath, dataPaths.taxaFilePath)
-
-    if ("unirule" in systems) {
-        runUnirulePipeline(chunkSize, dataPaths.uniruleUrmlFilePath, taxonomyLineageXmlPath, dataPaths.urmlTemplatesFilePath, "predictions_unirule.out", inputType, outputFormat)
-    }
-
-    if ("arba" in systems) {
-        runArbaPipeline(chunkSize, dataPaths.arbaUrmlFilePath, taxonomyLineageXmlPath, dataPaths.urmlTemplatesFilePath, "predictions_arba.out", inputType, outputFormat)
-    }
-
-    if ("pirsr" in systems) {
-        runPirsrPipeline(chunkSize, taxonomyLineageXmlPath, dataPaths.pirsrUrmlFilePath, dataPaths.pirsrDir, "predictions_unirule-pirsr.out", inputType, outputFormat)
-    }
-}
-
-def printBanner() {
-    log.info(
-        """
-    UniFIRE - UniProt Functional-Annotation Inference Rule Engine
-    Copyright (c) 2026 European Molecular Biology Laboratory
-    """.stripIndent()
+    UNIFIRE(
+        [
+            input: file(params.input),
+            outputDir: file(params.output),
+            inputType: params.inputType,
+            systems: params.systems,
+            outputFormat: params.outputFormat,
+            chunkSize: params.chunkSize
+        ],
+        [
+            dataPath: params.dataPath ? file(params.dataPath) : null,
+            forceDownloads: params.forceDownloads,
+            uniprotRelease: params.uniprotRelease ?: versionConfig.uniprotRelease,
+            pirsrRelease: params.pirsrRelease ?: versionConfig.pirsrRelease,
+            iprscanVersion: params.iprscanVersion ?: versionConfig.iprscanVersion,
+            iprVersion: params.iprVersion ?: versionConfig.iprVersion
+        ],
+        [
+            unifireImage: params.unifireImage,
+            unifireVersion: params.unifireVersion,
+            unifireMemory: params.unifireMemory ?: '',
+            pirsrMemory: params.pirsrMemory ?: '',
+            iprscan6ProfileName: params.iprscan6ProfileName
+        ],
+        versionTree.versions
     )
-}
-
-def parseSystems(systemsParam) {
-    def validSystems = ['unirule', 'arba', 'pirsr']
-    def systems = systemsParam.tokenize(",")
-    def invalidSystems = systems - validSystems
-    if (invalidSystems) {
-        log.error("Invalid system(s): ${invalidSystems}. '--systems' must be a comma-separated list of: ${validSystems.join(', ')}")
-        exit(1)
-    }
-    return systems
-}
-
-def parseInputType(inputTypeParam) {
-    def validInputTypes = ['fasta', 'InterProScan', 'InterProScan6']
-    if (!(inputTypeParam in validInputTypes)) {
-        log.error("Invalid input type: ${inputTypeParam}. '--inputType' must be one of: ${validInputTypes.join(', ')}")
-        exit(1)
-    }
-    return inputTypeParam
-}
-
-def parseChunkSize(chunkSizeParam) {
-    if (chunkSizeParam <= 0) {
-        log.error("Invalid chunk size: ${chunkSizeParam}. '--chunkSize' must be greater than 0.")
-        exit(1)
-    }
-    return chunkSizeParam
-}
-
-def parseOutputFormat(outputFormatParam) {
-    def validFormats = ['TSV', 'XML']
-    if (!(outputFormatParam in validFormats)) {
-        log.error("Invalid output format: ${outputFormatParam}. '--outputFormat' must be one of: ${validFormats.join(', ')}")
-        exit(1)
-    }
-    return outputFormatParam
-}
-
-def inferInputType(inputFile) {
-    def inferredType = null
-    def lowerName = inputFile.toLowerCase()
-
-    if (lowerName.endsWith('.fasta') || lowerName.endsWith('.fa')) {
-        inferredType = 'fasta'
-    }
-    else if (lowerName.endsWith('.xml')) {
-        def file = file(inputFile)
-        def content = file.text
-        // Remove XML declaration and comments, then find the first root-like element
-        def cleaned = content
-            .replaceAll(/<\?xml[^?]*\?>/, '')
-            .replaceAll(/<!--[\s\S]*?-->/, '')
-            .trim()
-        def matcher = cleaned =~ /<([\w-]+)/
-        def rootElement = matcher ? matcher[0][1] : null
-
-        if (rootElement == 'protein-matches') {
-            inferredType = 'InterProScan'
-        }
-        else if (rootElement == 'results') {
-            inferredType = 'InterProScan6'
-        }
-    }
-
-    return inferredType
 }

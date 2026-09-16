@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Checks that params.defaultUnifireVersion in nextflow/conf/defaults.config
+# Checks that engine.unifireVersion in getDefaultParams() (nextflow/defaults.nf)
 # matches the expected UniFIRE version (the Docker image tag derived from a
 # v* git tag, a release/* branch or a snapshot/* branch). Used by the
 # pre-push git hook and by the release jobs in the CI pipelines.
@@ -19,7 +19,7 @@
 #
 set -euo pipefail
 
-CONFIG_REL_PATH="nextflow/conf/defaults.config"
+CONFIG_REL_PATH="nextflow/defaults.nf"
 
 usage() {
     echo "Usage: $0 <expected-version> [<config-file>]" >&2
@@ -29,14 +29,20 @@ usage() {
 }
 
 error_matches() {
-    echo "ERROR: defaultUnifireVersion in ${file} is '${actual}' but expected '${expected}'" >&2
-    echo "Update nextflow/conf/defaults.config so that params.defaultUnifireVersion" >&2
+    echo "ERROR: engine.unifireVersion in getDefaultParams() (${file}) is '${actual}' but expected '${expected}'" >&2
+    echo "Update getDefaultParams() in nextflow/defaults.nf so that engine.unifireVersion" >&2
     echo "matches the tag or branch name, then re-push." >&2
     exit 1
 }
 
 get_value() {
-    sed -n 's/.*defaultUnifireVersion *= *"\([^"]*\)".*/\1/p' "$1" | head -n1
+    sed -n 's/.*unifireVersion *[:=] *['"'"'"]\([^'"'"'"]*\)['"'"'"].*/\1/p' "$1" | head -n1
+}
+
+error_missing() {
+    echo "ERROR: no engine.unifireVersion found in ${file}" >&2
+    echo "Set getDefaultParams().engine.unifireVersion to 'latest' or a version-like string (e.g. '1.2.3', '0.1.0-dev1', '1.0.0-SNAPSHOT')" >&2
+    exit 1
 }
 
 # Maps a git tag or branch ref to the Docker image tag.
@@ -59,11 +65,14 @@ if [ "${1:-}" = "--config" ]; then
     [ $# -eq 2 ] || { echo "ERROR: --config requires exactly one argument" >&2; usage; }
     file="$2"
     actual="$(get_value "$file")"
+    if [ -z "$actual" ]; then
+        error_missing
+    fi
     if [ "$actual" = "latest" ]; then
         exit 0
     fi
     if ! printf '%s' "$actual" | grep -Eq '^v?[0-9A-Za-z][0-9A-Za-z._-]*$'; then
-        echo "ERROR: defaultUnifireVersion in ${file} is '${actual}' but must be 'latest' or a version-like string (e.g. '1.2.3', '0.1.0-dev1', '1.0.0-SNAPSHOT')" >&2
+        echo "ERROR: engine.unifireVersion in ${file} is '${actual}' but must be 'latest' or a version-like string (e.g. '1.2.3', '0.1.0-dev1', '1.0.0-SNAPSHOT')" >&2
         exit 1
     fi
     exit 0
@@ -106,6 +115,9 @@ expected="$1"
 [ $# -eq 2 ] && file="$2"
 
 actual="$(get_value "$file")"
+if [ -z "$actual" ]; then
+    error_missing
+fi
 if [ "$actual" != "$expected" ]; then
     error_matches
 fi
