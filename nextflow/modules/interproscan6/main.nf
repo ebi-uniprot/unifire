@@ -16,23 +16,15 @@ process runIprscan6 {
 
     script:
     """
-    mkdir -p iprscan6-data
-    echo "Copying InterProScan 6 data from data dir to staging..."
-    cp -r $dataDir/* iprscan6-data || true
-    echo "Copy finish"
     nextflow run ebi-pf-team/interproscan6 \
         --applications HAMAP,PROSITE-profiles,PROSITE-patterns,Pfam,NCBIFAM,SMART,PRINTS,SFLD,CDD,CATH-Gene3D,PIRSF,PANTHER,SUPERFAMILY,CATH-FunFam \
         -r ${iprscanVersion} \
         --interpro ${iprVersion} \
         -profile ${params.iprscan6ProfileName} \
-        --datadir iprscan6-data \
+        --datadir $dataDir \
         --input ${inputSequencePath} \
         --formats xml \
         --outdir results
     mv results/*.xml output.xml
-    echo "Copying InterProScan 6 data from staging to data dir..."
-    cp -r iprscan6-data/* $dataDir
-    rm -r iprscan6-data
-    echo "Copy finish"
     """
 }

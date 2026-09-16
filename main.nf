@@ -33,7 +33,7 @@ workflow {
     def systems = parseSystems(params.systems)
     def outputFormat = parseOutputFormat(params.outputFormat)
     println("Using UniProt release: ${uniprotRelease}, systems: ${systems}")
-    dataPaths = fetchData(params.dataPath, systems, uniprotRelease, pirsrRelease)
+    dataPaths = fetchData(params.dataPath, systems, uniprotRelease, pirsrRelease, params.forceDownloads)
 
     // Define pipeline inputs
     def inputPath = file(params.input)
@@ -81,10 +81,12 @@ workflow {
 }
 
 def printBanner() {
-    log.info """
+    log.info(
+        """
     UniFIRE - UniProt Functional-Annotation Inference Rule Engine
     Copyright (c) 2026 European Molecular Biology Laboratory
     """.stripIndent()
+    )
 }
 
 def parseSystems(systemsParam) {
@@ -130,19 +132,22 @@ def inferInputType(inputFile) {
 
     if (lowerName.endsWith('.fasta') || lowerName.endsWith('.fa')) {
         inferredType = 'fasta'
-    } else if (lowerName.endsWith('.xml')) {
+    }
+    else if (lowerName.endsWith('.xml')) {
         def file = file(inputFile)
         def content = file.text
         // Remove XML declaration and comments, then find the first root-like element
-        def cleaned = content.replaceAll(/<\?xml[^?]*\?>/, '')
-                           .replaceAll(/<!--[\s\S]*?-->/, '')
-                           .trim()
+        def cleaned = content
+            .replaceAll(/<\?xml[^?]*\?>/, '')
+            .replaceAll(/<!--[\s\S]*?-->/, '')
+            .trim()
         def matcher = cleaned =~ /<([\w-]+)/
         def rootElement = matcher ? matcher[0][1] : null
 
         if (rootElement == 'protein-matches') {
             inferredType = 'InterProScan'
-        } else if (rootElement == 'results') {
+        }
+        else if (rootElement == 'results') {
             inferredType = 'InterProScan6'
         }
     }
