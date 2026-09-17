@@ -21,7 +21,7 @@ def getDefaultParams() {
             unifireVersion: '3.1.0-SNAPSHOT',
             unifireMemory: '',
             pirsrMemory: '',
-            iprscan6ProfileName: 'standard'
+            iprscan6ProfileNames: []
         ]
     ]
 }

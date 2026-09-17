@@ -135,7 +135,7 @@ The pipeline is composed of the following stages, orchestrated by `nextflow/main
 | `--skipDownloads` | no | `false` | Skip downloading remote rule files (requires valid files already present in `--dataPath`). |
 | `--iprscanVersion` | no | `6.0.2` (from `--version 2026.4`) | InterProScan 6 version to run when the input is FASTA. |
 | `--iprVersion` | no | `110.0` (from `--version 2026.4`) | InterPro version used with InterProScan 6. |
-| `--iprscan6ProfileName` | no | `docker` | Container profile used by the InterProScan 6 sub-workflow: `docker`, `singularity` or `podman`. |
+| `--iprscan6ProfileNames` | no | `standard` | List of container/executor profiles propagated to the InterProScan 6 sub-workflow. Set automatically by the selected `-profile` (e.g. `-profile slurm,singularity` propagates `slurm,singularity`); can be extended via CLI. |
 | `--unifireImage` | no | `dockerhub.ebi.ac.uk/uniprot-public/unifire/nextflow` | Docker image used for UniFIRE rule inference. |
 | `--unifireVersion` | no | `latest` | Tag of the UniFIRE Docker image. |
 | `--unifireMemory` | no | - | Max heap memory (in MB) for UniFIRE rule inference. |
@@ -151,7 +151,7 @@ The pipeline supports three container engines via Nextflow profiles:
 - **Singularity**: `nextflow run nextflow/main.nf -profile singularity ...`
 - **Podman**: `nextflow run nextflow/main.nf -profile podman ...`
 
-The chosen profile is also propagated to the InterProScan 6 sub-workflow through `--iprscan6ProfileName`.
+The chosen profiles are also propagated to the InterProScan 6 sub-workflow through `--iprscan6ProfileNames`. Each `-profile` contributes its own child profile name; multiple profiles accumulate, so `-profile slurm,singularity` results in `-profile slurm,singularity` for InterProScan 6 (earlier behavior let only the last profile apply).
 
 ### Input types
 
