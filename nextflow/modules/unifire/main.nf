@@ -1,7 +1,4 @@
 process runUnifirePipeline {
-    label "time_xlong"
-    label "mem_xhigh"
-
     container "${unifireImage}:${unifireVersion}"
     publishDir { "${outputDir}" }, mode: 'copy'
 
