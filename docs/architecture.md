@@ -46,7 +46,7 @@ All values are optional; `UNIFIRE` merges them strictly against defaults.
 |---------|------|
 | `run`   | `input`, `outputDir`, `inputType`(nullable → inferred), `systems`, `outputFormat`, `chunkSize` |
 | `data`  | `dataPath`, `forceDownloads`, `uniprotRelease`, `pirsrRelease`, `iprscanVersion`, `iprVersion` |
-| `engine`| `unifireImage`, `unifireVersion`, `unifireMemory`, `pirsrMemory`, `iprscan6ProfileName` |
+| `engine`| `unifireImage`, `unifireVersion`, `unifireMemory`, `pirsrMemory`, `iprscan6ProfileNames` |
 
 ### Defaults live in code
 
@@ -83,7 +83,7 @@ workflow {
 ### Why profiles still need params
 
 Executor profiles (e.g. `--docker`, `--test`) can only set values through
-`params` (`params.iprscan6ProfileName`). `main.nf` threads them into the
+`params` (`params.iprscan6ProfileNames`). `main.nf` threads them into the
 `engine` group; profiles never bypass `main.nf`.
 
 ## Inside UNIFIRE
@@ -115,7 +115,7 @@ with keys `run`, `data`, `engine`, `versions`. It no longer accesses `params`.
 ## Config files
 
 - `nextflow.config` keeps only CLI override knobs (`input`, `output`,
-  `version`, memory opts, `iprscan6ProfileName`, `forceDownloads`, `help`).
+  `version`, memory opts, `iprscan6ProfileNames`, `forceDownloads`, `help`).
   All defaults come from `nextflow/defaults.nf` / `versions.nf` in code.
 - Deleted `nextflow/conf/defaults.config`, `nextflow/conf/versions.config`.
 - `--skipDownloads` was removed (dead option). Use `--forceDownloads` to

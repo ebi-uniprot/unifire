@@ -11,7 +11,7 @@ workflow UNIFIRE {
     take:
     run       // map: input, outputDir, inputType, systems, outputFormat, chunkSize
     data      // map: dataPath, forceDownloads, uniprotRelease, pirsrRelease, iprscanVersion, iprVersion
-    engine    // map: unifireImage, unifireVersion, unifireMemory, pirsrMemory, iprscan6ProfileName
+    engine    // map: unifireImage, unifireVersion, unifireMemory, pirsrMemory, iprscan6ProfileNames
 
     main:
     def params = getDefaultParams()
@@ -19,10 +19,14 @@ workflow UNIFIRE {
     // optional fields (e.g. input/outputDir/inputType, null in defaults) validate.
     def defRun = [systems: params.run.systems, outputFormat: params.run.outputFormat, chunkSize: params.run.chunkSize]
     def defData = [dataPath: params.data.dataPath, forceDownloads: params.data.forceDownloads, uniprotRelease: null, pirsrRelease: null, iprscanVersion: null, iprVersion: null]
-    def defEngine = [unifireImage: params.engine.unifireImage, unifireVersion: params.engine.unifireVersion, unifireMemory: '', pirsrMemory: '', iprscan6ProfileName: params.engine.iprscan6ProfileName]
+    def defEngine = [unifireImage: params.engine.unifireImage, unifireVersion: params.engine.unifireVersion, unifireMemory: '', pirsrMemory: '', iprscan6ProfileNames: params.engine.iprscan6ProfileNames]
     def cfgRun = mergeStrict(run, defRun, params.run.keySet(), 'run')
     def cfgData = mergeStrict(data, defData, params.data.keySet(), 'data')
     def cfgEngine = mergeStrict(engine, defEngine, params.engine.keySet(), 'engine')
+    // An empty profile list (no -profile selected) falls back to the default.
+    if (!cfgEngine.iprscan6ProfileNames) {
+        cfgEngine.iprscan6ProfileNames = ['standard']
+    }
 
     printBanner()
 
@@ -82,10 +86,10 @@ workflow UNIFIRE {
 
     if (resolvedInputType == "fasta") {
         // Run InterProScan 6 pipeline
-        println("Running InterProScan 6 pipeline with iprscanVersion=${cfgData.iprscanVersion}, iprVersion=${cfgData.iprVersion}, profile=${cfgEngine.iprscan6ProfileName}")
+        println("Running InterProScan 6 pipeline with iprscanVersion=${cfgData.iprscanVersion}, iprVersion=${cfgData.iprVersion}, profiles=${cfgEngine.iprscan6ProfileNames}")
         def iprDataPath = dataPaths.dataPath.resolve("iprscan6")
         assert iprDataPath.mkdirs()
-        iprscanXmlPath = runIprscan6(cfgData.iprscanVersion, cfgData.iprVersion, inputPath, iprDataPath, cfgEngine.iprscan6ProfileName)
+        iprscanXmlPath = runIprscan6(cfgData.iprscanVersion, cfgData.iprVersion, inputPath, iprDataPath, cfgEngine.iprscan6ProfileNames)
         resolvedInputType = "InterProScan6"
     }
 

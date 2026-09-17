@@ -7,7 +7,7 @@ process runIprscan6 {
     val iprVersion
     path inputSequencePath
     path dataDir
-    val iprscan6ProfileName
+    val iprscan6ProfileNames
 
     output:
     path "output.xml", emit: output
@@ -19,7 +19,7 @@ process runIprscan6 {
     """
     mkdir results/
     nextflow run ebi-pf-team/interproscan6 \
-        -profile ${iprscan6ProfileName} \
+        -profile ${iprscan6ProfileNames.toUnique().join(',')} \
         --applications HAMAP,PROSITE-profiles,PROSITE-patterns,Pfam,NCBIFAM,SMART,PRINTS,SFLD,CDD,CATH-Gene3D,PIRSF,PANTHER,SUPERFAMILY,CATH-FunFam \
         -r ${iprscanVersion} \
         --interpro ${iprVersion} \
