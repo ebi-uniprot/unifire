@@ -94,68 +94,52 @@ Having the full lineage is necessary for the majority of the rules to be execute
 Note: the [Nextflow pipeline](nextflow.md) performs this step automatically; it is only needed when running UniFIRE
 from the [source code](build-from-source.md) with a manually prepared InterProScan input.
 
-## Running InterProScan
-
-Once the multifasta file is ready (cf. previous steps), you can find the matches of all sequences using InterProScan.
-It is advised to download the last version from [https://www.ebi.ac.uk/interpro/download.html](https://www.ebi.ac.uk/interpro/download.html) and keep it up-to-date.
-
-The output format must be XML to be accepted as a valid input for UniFIRE.
-
-The option `-dp` or `--disable-precalc` must be used to be able to get the sequence alignments (necessary if you are interested in the positional features annotations provided by UniRule).
-
-Command:
-
-```bash
-./interproscan.sh -f xml -dp -i multifasta_sequences.fasta --appl "Hamap,ProSiteProfiles,ProSitePatterns,Pfam,NCBIFAM,SMART,PRINTS,SFLD,CDD,Gene3D,PIRSF,PANTHER,SUPERFAMILY"
-```
-
-### Analyses to run
-
-* Hamap
-* ProSiteProfiles
-* ProSitePatterns
-* Pfam
-* NCBIfam
-* SMART
-* PRINTS
-* SFLD
-* CDD
-* Gene3D
-* ProDom
-* PIRSF
-* PANTHER
-* SUPERFAMILY
-* FunFam
-
-It is possible to include/exclude some of the analyses by modifying the `--appl` option in the above command. UniFIRE will still be able to process the data.
-By excluding some of those analyses, some rules might not be triggered as a result.
-
-If you do not wish to install InterProScan, you can use the [online version](https://www.ebi.ac.uk/interpro/search/sequence-search) and then download the results in XML.
-The only limitation is that the online version does not provide the sequence alignments for the matches, making the execution of UniRule positional features impossible (non-positional rules will still be executed).
-
 ## Running InterProScan 6
 
-InterProScan 6 is run automatically by the [Nextflow pipeline](nextflow.md) when the input is a FASTA file. If you prefer to run it separately, the InterProScan 6 Nextflow workflow can be executed directly. See the [InterProScan 6 documentation](https://interproscan6.readthedocs.io/) for full details.
+InterProScan 6 is run automatically by the [Nextflow pipeline](nextflow.md) when the input is a FASTA file. If you prefer to run it separately, you can execute the InterProScan 6 Nextflow workflow directly. See the [InterProScan 6 documentation](https://interproscan6.readthedocs.io/) for full details.
 
-Prerequisites:
+### Prerequisites
+
+Before you begin, install:
+
 - [Nextflow](https://www.nextflow.io/) (at least 26.04)
-- A container engine: **Docker** (default), **Singularity** or **Podman**
+- A container engine: **Docker** (default), **SingularityCE**/**Apptainer** or **Podman**
 
-Command:
+You don't need anything else: Nextflow downloads the workflow from GitHub, and the required InterPro and member database files are downloaded automatically into the `--datadir` on first run.
+
+### Command
 
 ```bash
 nextflow run ebi-pf-team/interproscan6 \
-  --applications HAMAP,PROSITE-profiles,PROSITE-patterns,Pfam,NCBIFAM,SMART,PRINTS,SFLD,CDD,CATH-Gene3D,PIRSF,PANTHER,SUPERFAMILY,CATH-FunFam \
-  -r 6.0.1 \
-  --interpro latest \
+  -r 6.0.2.2 \
   -profile docker \
-  --datadir iprscan6-data \
   --input multifasta_sequences.fasta \
+  --datadir iprscan6-data \
+  --interpro 110.0 \
   --formats xml \
-  --outdir results
+  --outdir results \
+  --no-matches-api
 ```
 
-### Analyses to run
+Notes:
+
+- Pin the workflow version with `-r` (e.g. `6.0.2.2`) and the InterPro release with `--interpro` (e.g. `110.0`) to ensure reproducible results. The un-pinned defaults (`--interpro latest`) are convenient but not reproducible.
+- UniFIRE requires the **XML output**, hence `--formats xml`.
+- `--no-matches-api` disables the InterPro Matches Lookup Service, which returns precalculated matches for already-annotated sequences (these do not include sequence alignments). It is the InterProScan 6 equivalent of the `-dp` / `--disable-precalc` option of classic InterProScan, and is required if you are interested in the positional feature annotations provided by UniRule.
+- The values shown above correspond to the UniFIRE pipeline defaults (`--iprscanVersion 6.0.2.2`, `--iprVersion 110.0`, see the [Nextflow pipeline parameters](nextflow.md#pipeline-parameters)).
+
+### Selecting analyses
+
+By default, InterProScan 6 runs all analyses except the deep-learning-based ones.
+
+You can control which analyses run with:
+
+- `--applications <LIST>`: run only the selected analyses
+- `--skip-applications <LIST>`: exclude the given analyses
+
+`<LIST>` is a comma-separated list of analysis names. Names are case-insensitive, and hyphens and underscores are ignored (e.g. `CATH-Gene3D`, `cathgene3d` and `CATH_GENE3D` are all valid). The two options are mutually exclusive. See the [InterProScan 6 analyses documentation](https://interproscan6.readthedocs.io/stable/analyses/) for the full list.
+
+The UniFIRE Nextflow pipeline runs InterProScan 6 with the following applications:
 
 * HAMAP
 * PROSITE-profiles
@@ -172,9 +156,23 @@ nextflow run ebi-pf-team/interproscan6 \
 * SUPERFAMILY
 * CATH-FunFam
 
-It is possible to include/exclude some of the analyses by modifying the `--applications` option in the above command. UniFIRE will still be able to process the data.
-By excluding some of those analyses, some rules might not be triggered as a result.
+UniFIRE will still be able to process data produced with other analyses included/excluded. However, by excluding some of those analyses, some rules might not be triggered as a result.
+
+If you do not wish to install InterProScan 6, you can use the [online version](https://www.ebi.ac.uk/interpro/search/sequence-search) and then download the results in XML.
+The only limitation is that the online version does not provide the sequence alignments for the matches, making the execution of UniRule positional features impossible (non-positional rules will still be executed).
+
+### Running classic InterProScan (legacy)
+
+UniFIRE also still accepts XML output from the classic (InterProScan 5) workflow, for backward compatibility
+with existing pipelines. This is not recommended for new runs: use InterProScan 6 instead.
+
+Required settings for UniFIRE compatibility:
+
+- Output format must be **XML**.
+- The `-dp` / `--disable-precalc` option must be used to obtain the sequence alignments (necessary for the positional feature annotations provided by UniRule) — equivalent to the `--no-matches-api` option of InterProScan 6.
+
+For downloading, installing and running classic InterProScan, refer to the [legacy InterProScan documentation](https://interproscan-docs.readthedocs.io) and the [ebi-pf-team/interproscan](https://github.com/ebi-pf-team/interproscan) repository.
 
 ## Running UniFIRE on the prepared data
 
-Once you get the InterProScan output (by default, it is the name of the input file, appended with .xml), you can use it as a input for UniFIRE (e.g `--input multifasta_sequences.fasta.xml`) with any of the [three ways to run UniFIRE](../README.md#running-unifire).
+Once you have the InterProScan XML output (e.g. `results/*.xml` from the InterProScan 6 command above), you can use it as input for UniFIRE (e.g `--input results/yourfile.xml`) with any of the [three ways to run UniFIRE](../README.md#running-unifire).
