@@ -32,6 +32,9 @@ def printUsage(opts) {
     InterProScan options (used only when input is FASTA):
       --iprscanVersion VERSION    InterProScan 6 version to run.
       --iprVersion VERSION        InterPro version to use with InterProScan 6.
+      --iprscanApplications LIST  Comma-separated list of InterProScan 6 analyses to run,
+                                  e.g. HAMAP,Pfam. If empty, InterProScan 6 runs all its analyses.
+                                  Default: ${data.iprscanApplications}
 
     Data options:
       --uniprotRelease RELEASE    UniProt release used to download rule files.

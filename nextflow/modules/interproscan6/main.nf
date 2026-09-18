@@ -5,6 +5,7 @@ process runIprscan6 {
     input:
     val iprscanVersion
     val iprVersion
+    val iprscanApplications
     path inputSequencePath
     path dataDir
     val iprscan6ProfileNames
@@ -17,11 +18,12 @@ process runIprscan6 {
 
     script:
     def profileOpt = iprscan6ProfileNames ? "-profile ${iprscan6ProfileNames.toUnique().join(',')}" : ""
+    def applicationsOpt = iprscanApplications ? "--applications ${iprscanApplications}" : ""
     """
     mkdir results/
     nextflow run ebi-pf-team/interproscan6 \
         ${profileOpt} \
-        --applications HAMAP,PROSITE-profiles,PROSITE-patterns,Pfam,NCBIFAM,SMART,PRINTS,SFLD,CDD,CATH-Gene3D,PIRSF,PANTHER,SUPERFAMILY,CATH-FunFam \
+        ${applicationsOpt} \
         -r ${iprscanVersion} \
         --interpro ${iprVersion} \
         --datadir $dataDir \

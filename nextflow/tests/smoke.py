@@ -83,7 +83,7 @@ class SmokeTest(unittest.TestCase):
 
     # Invoking the pipeline ------------------------------------------------
 
-    def run_pipeline(self, input_file=SAMPLE_FASTA, *, systems=None, input_type=None):
+    def run_pipeline(self, input_file=SAMPLE_FASTA, *, systems=None, input_type=None, iprscan_applications=None):
         """Run the pipeline (stubbed) and return the process.
 
         ``proc.output`` contains combined stdout+stderr. ``input_file`` is
@@ -103,6 +103,8 @@ class SmokeTest(unittest.TestCase):
             cli_args += ["--systems", systems]
         if input_type is not None:
             cli_args += ["--inputType", input_type]
+        if iprscan_applications is not None:
+            cli_args += ["--iprscanApplications", iprscan_applications]
         return self._nextflow(*cli_args)
 
     def _nextflow(self, *cli_args):
@@ -163,6 +165,16 @@ class SmokeTest(unittest.TestCase):
         self.assert_run_succeeded(proc)
         self.assert_outputs(PREDICTIONS["unirule"], PREDICTIONS["arba"],
                             PREDICTIONS["pirsr"])
+
+    def test_stub_fasta_custom_iprscan_applications(self):
+        """A custom --iprscanApplications value flows through the FASTA path."""
+        proc = self.run_pipeline(
+            input_file=REPO_ROOT / "samples" / "proteins.fasta",
+            systems="unirule",
+            iprscan_applications="HAMAP,Pfam",
+        )
+        self.assert_run_succeeded(proc)
+        self.assert_outputs(PREDICTIONS["unirule"])
 
     def test_stub_interproscan_xml_unirule_arba(self):
         """InterProScan XML input with explicit input type publishes only unirule+arba."""

@@ -137,9 +137,10 @@ You can control which analyses run with:
 - `--applications <LIST>`: run only the selected analyses
 - `--skip-applications <LIST>`: exclude the given analyses
 
-`<LIST>` is a comma-separated list of analysis names. Names are case-insensitive, and hyphens and underscores are ignored (e.g. `CATH-Gene3D`, `cathgene3d` and `CATH_GENE3D` are all valid). The two options are mutually exclusive. See the [InterProScan 6 analyses documentation](https://interproscan6.readthedocs.io/stable/analyses/) for the full list.
+`<LIST>` is a comma-separated list of analysis names. Names are case-insensitive, and hyphens and underscores are ignored (e.g. `CATH-Gene3D`, `cathgene3d` and `CATH_GENE3D` are all valid). The two options are mutually exclusive. See the [analysis catalogue](https://interproscan6.readthedocs.io/stable/analyses/#analysis-catalogue) for the full list of supported analyses.
 
-The UniFIRE Nextflow pipeline runs InterProScan 6 with the following applications:
+The UniFIRE Nextflow pipeline runs InterProScan 6 with a default set of applications,
+configurable via the `--iprscanApplications` pipeline parameter:
 
 * HAMAP
 * PROSITE-profiles
