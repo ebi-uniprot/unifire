@@ -1,5 +1,5 @@
 def fetchRemoteVersions() {
-    def remoteVersionsUri = 'https://raw.githubusercontent.com/ebi-uniprot/unifire/refs/heads/master/versions.json'
+    def remoteVersionsUri = 'https://raw.githubusercontent.com/ebi-uniprot/unifire/refs/heads/master/nextflow/versions.json'
     def maxAttempts = 2
     def timeoutMillis = 10_000
     return (1..maxAttempts).findResult { attempt ->
