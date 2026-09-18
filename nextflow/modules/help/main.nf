@@ -27,7 +27,11 @@ def printUsage(opts) {
                                   Default: ${run.chunkSize}
 
     Version options:
-      --version VERSION           Predefined version set to use: ${opts.versions.versions.keySet().toSorted().join(', ')}.
+      --version VERSION           Predefined data version to use, e.g. 2026.4.
+                                  Resolved from versions.json: GitHub master merged
+                                  with the bundled nextflow/versions.json.
+      --dataVersions FILE         Use the given versions.json file instead of resolving
+                                  remotely (exclusive override; also used offline).
 
     InterProScan options (used only when input is FASTA):
       --iprscanVersion VERSION    InterProScan 6 version to run.

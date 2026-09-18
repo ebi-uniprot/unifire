@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
+- Runtime data-version resolution for the Nextflow pipeline: `nextflow/versions.nf`
+  fetches `versions.json` from GitHub master and merges the bundled
+  `nextflow/versions.json` on top of it (in-development versions work from a local
+  checkout), falling back to the bundled file when the fetch fails. `--version`
+  selects the version set; `--dataVersions FILE` overrides resolution entirely
+  (offline/CI). Data versions can now be released independently of workflow releases.
 - Enforce that `params.defaultUnifireVersion` in nextflow config matches the version tag
   when a `v*` tag is pushed (shared check script, GitHub Actions and GitLab CI checks,
   local pre-push git hook).

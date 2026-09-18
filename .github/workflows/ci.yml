@@ -94,8 +94,8 @@ jobs:
       - name: Validate unifireVersion
         run: misc/release/check-nextflow-version.sh --config nextflow/defaults.nf
 
-  nextflow-smoke-test:
-    name: Nextflow Smoke Test
+  nextflow-tests:
+    name: Nextflow Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -114,8 +114,11 @@ jobs:
           mkdir -p /tmp/nxf && (cd /tmp/nxf && curl -fsSL https://get.nextflow.io | bash)
           sudo mv /tmp/nxf/nextflow /usr/local/bin/
 
-      - name: Run smoke tests
-        run: python3 nextflow/tests/smoke.py
+      - name: Run tests
+        # Autodiscovers all test*.py under nextflow/tests: the stubbed pipeline
+        # smoke tests (test_smoke.py) and the versions.json sanity checks
+        # (test_versions.py).
+        run: python3 -m unittest discover -s nextflow/tests -v
 
   codeql:
     name: CodeQL Analysis

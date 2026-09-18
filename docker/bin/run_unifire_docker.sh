@@ -46,8 +46,9 @@ function usage() {
     echo "    -o: Path to output folder. All output files with predictions in TSV format will be available in this"
     echo "        folder at the end of the procedure. (Required)"
     echo "    -v: Data version to run, e.g. 2026.4. Selects the bundled UniProt release and InterProScan/PIRSR"
-    echo "        data versions (see nextflow/versions.nf). (Optional), DEFAULT: version defined as defaultKey in"
-    echo "        nextflow/versions.nf. A --version given via UNIFIRE_NXF_ARGS takes precedence over -v."
+    echo "        data versions (see nextflow/versions.json). (Optional), DEFAULT: version defined as 'default' in"
+    echo "        nextflow/versions.json."
+    echo "        A --version given via UNIFIRE_NXF_ARGS takes precedence over -v."
     echo "    -e: Version of the UniFIRE docker image to use, e.g. 3.1.0. Available versions are listed under"
     echo "        https://github.com/ebi-uniprot/unifire/pkgs/container/unifire%2Fnextflow. (Optional), DEFAULT: latest"
     echo "    -w: Path to an empty working directory.  If this option is not given, then a temporary folder will be"
@@ -110,7 +111,7 @@ function determine_docker_version() {
   echo "UniFIRE docker image version to be used: ${docker_version}"
 }
 
-# validate the requested data version against nextflow/versions.nf, so
+# validate the requested data version against nextflow/versions.json, so
 # that an unknown version fails before the docker image is pulled
 function check_data_version() {
   if [ -z "$data_version" ]
@@ -119,9 +120,15 @@ function check_data_version() {
   fi
   local script_dir
   script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+  local versions_file="${script_dir}/../../nextflow/versions.json"
+  if [[ ! -f "${versions_file}" ]]
+  then
+    echo "Error: cannot read ${versions_file} (data version validation needs it)."
+    usage
+  fi
   local versions
-  versions="$(grep -oE "^[[:space:]]*'[^']+':" "${script_dir}/../../nextflow/versions.nf" | cut -d "'" -f 2 | tr '\n' ' ')"
-  if ! grep -qE "^[[:space:]]*'${data_version}':" "${script_dir}/../../nextflow/versions.nf"
+  versions="$(grep -oE '"[0-9][^"]*"[[:space:]]*:[[:space:]]*\{' "${versions_file}" | cut -d '"' -f 2 | tr '\n' ' ')"
+  if ! grep -qE "\"${data_version}\"[[:space:]]*:" "${versions_file}"
   then
     echo "Error: Unknown data version '${data_version}'. Available versions: ${versions}"
     usage

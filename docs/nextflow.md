@@ -81,23 +81,33 @@ The pipeline is composed of the following stages, orchestrated by `main.nf`:
 4. **Rule inference** (`nextflow/modules/unifire/main.nf` and `nextflow/modules/pirsr/main.nf`)  
    Runs UniRule, ARBA and PIRSR inference inside the `ghcr.io/ebi-uniprot/unifire/nextflow` container. PIRSR first runs `hmmalign` and then invokes UniFIRE on the generated alignment XML.
 
-## Pipeline parameters
+## Common parameters
+
+These are the parameters typically used for day-to-day runs.
 
 | Parameter | Required | Default | Description |
 |-----------|----------|---------|-------------|
 | `--input` | yes | - | Path to the input file (multi-FASTA or InterProScan XML). |
 | `--output` | yes | - | Output directory where prediction files are published. |
 | `--dataPath` | no | `.unifire/data` | Directory where rule files, PIRSR data and the taxonomy database are downloaded/cached. |
-| `--inputType` | no | inferred | Input type: `fasta`, `InterProScan` or `InterProScan6`. Inferred from the file extension and XML root element when omitted. |
 | `--systems` | no | `unirule,arba,pirsr` | Comma-separated list of systems to run: `unirule`, `arba`, `pirsr`. |
+| `--inputType` | no | inferred | Input type: `fasta`, `InterProScan` or `InterProScan6`. Inferred from the file extension and XML root element when omitted. |
 | `--outputFormat` | no | `TSV` | Prediction output format: `TSV` or `XML`. |
-| `--chunkSize` | no | `500` | Number of proteins processed per chunk. |
-| `--version` | no | `2026.4` | Predefined version set to use. Determines defaults for `--uniprotRelease`, `--iprVersion` and `--iprscanVersion`. |
-| `--uniprotRelease` | no | `2026_04` (from `--version 2026.4`) | UniProt release used to download rule files. |
-| `--pirsrRelease` | no | `latest` (from `--version 2026.4`) | PIRSR data release used to download PIRSR data files. |
+| `--version` | no | `default` in `nextflow/versions.json` | Predefined version set to use. Determines defaults for `--uniprotRelease`, `--iprVersion` and `--iprscanVersion`. |
+| `--help` | no | `false` | Print usage and exit. |
+
+## Advanced parameters
+
+These parameters have sensible defaults and only need to be set for tuning, offline runs, or custom setups. Version-specific overrides (`--uniprotRelease`, `--pirsrRelease`, `--iprscanVersion`, `--iprVersion`) take precedence over the values resolved from `--version` (see version resolution in `nextflow/versions.nf`).
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| `--dataVersions` | no | - | Path to a `versions.json` file used instead of resolving remotely (exclusive override). Use for offline runs, CI, and developer overrides. |
+| `--uniprotRelease` | no | `2026_04` (from the resolved version) | UniProt release used to download rule files. |
+| `--pirsrRelease` | no | `latest` (from the resolved version) | PIRSR data release used to download PIRSR data files. |
 | `--forceDownloads` | no | `false` | Re-download remote rule and taxonomy data files even if they already exist locally. |
-| `--iprscanVersion` | no | `6.0.2.2` (from `--version 2026.4`) | InterProScan 6 version to run when the input is FASTA. |
-| `--iprVersion` | no | `110.0` (from `--version 2026.4`) | InterPro version used with InterProScan 6. |
+| `--iprscanVersion` | no | `6.0.2.2` (from the resolved version) | InterProScan 6 version to run when the input is FASTA. |
+| `--iprVersion` | no | `110.0` (from the resolved version) | InterPro version used with InterProScan 6. |
 | `--iprscanApplications` | no | `HAMAP,PROSITE-profiles,PROSITE-patterns,Pfam,NCBIFAM,SMART,PRINTS,SFLD,CDD,CATH-Gene3D,PIRSF,PANTHER,SUPERFAMILY,CATH-FunFam` | Comma-separated list of InterProScan 6 analyses to run when the input is FASTA (see the [analysis catalogue](https://interproscan6.readthedocs.io/stable/analyses/#analysis-catalogue) for valid names). If set to empty, InterProScan 6 runs all its analyses. |
 | `--iprscan6ProfileNames` | no | `standard` | List of container/executor profiles propagated to the InterProScan 6 sub-workflow. Set automatically by the selected `-profile` (e.g. `-profile slurm,singularity` propagates `slurm,singularity`); can be extended via CLI. |
 | `--unifireImage` | no | `ghcr.io/ebi-uniprot/unifire/nextflow` | Docker image used for UniFIRE rule inference. |
@@ -105,7 +115,7 @@ The pipeline is composed of the following stages, orchestrated by `main.nf`:
 | `--unifireMemory` | no | - | Max heap memory (in MB) for UniFIRE rule inference. |
 | `--pirsrMemory` | no | - | Max heap memory (in MB) for PIRSR alignment. |
 | `--maxWorkers` | no | - | Maximum number of parallel local workers. |
-| `--help` | no | `false` | Print usage and exit. |
+| `--chunkSize` | no | `500` | Number of proteins processed per chunk. |
 
 ## Container profiles
 
