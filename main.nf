@@ -44,7 +44,8 @@ workflow {
             uniprotRelease: params.uniprotRelease ?: versionConfig.uniprotRelease,
             pirsrRelease: params.pirsrRelease ?: versionConfig.pirsrRelease,
             iprscanVersion: params.iprscanVersion ?: versionConfig.iprscanVersion,
-            iprVersion: params.iprVersion ?: versionConfig.iprVersion
+            iprVersion: params.iprVersion ?: versionConfig.iprVersion,
+            iprscanApplications: params.iprscanApplications
         ],
         [
             unifireImage: params.unifireImage,

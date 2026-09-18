@@ -98,6 +98,7 @@ The pipeline is composed of the following stages, orchestrated by `main.nf`:
 | `--forceDownloads` | no | `false` | Re-download remote rule and taxonomy data files even if they already exist locally. |
 | `--iprscanVersion` | no | `6.0.2.2` (from `--version 2026.4`) | InterProScan 6 version to run when the input is FASTA. |
 | `--iprVersion` | no | `110.0` (from `--version 2026.4`) | InterPro version used with InterProScan 6. |
+| `--iprscanApplications` | no | `HAMAP,PROSITE-profiles,PROSITE-patterns,Pfam,NCBIFAM,SMART,PRINTS,SFLD,CDD,CATH-Gene3D,PIRSF,PANTHER,SUPERFAMILY,CATH-FunFam` | Comma-separated list of InterProScan 6 analyses to run when the input is FASTA (see the [analysis catalogue](https://interproscan6.readthedocs.io/stable/analyses/#analysis-catalogue) for valid names). If set to empty, InterProScan 6 runs all its analyses. |
 | `--iprscan6ProfileNames` | no | `standard` | List of container/executor profiles propagated to the InterProScan 6 sub-workflow. Set automatically by the selected `-profile` (e.g. `-profile slurm,singularity` propagates `slurm,singularity`); can be extended via CLI. |
 | `--unifireImage` | no | `ghcr.io/ebi-uniprot/unifire/nextflow` | Docker image used for UniFIRE rule inference. |
 | `--unifireVersion` | no | value of `engine.unifireVersion` in [nextflow/defaults.nf](../nextflow/defaults.nf) | Tag of the UniFIRE Docker image. |

@@ -45,7 +45,7 @@ All values are optional; `UNIFIRE` merges them strictly against defaults.
 | Group   | Keys |
 |---------|------|
 | `run`   | `input`, `outputDir`, `inputType`(nullable → inferred), `systems`, `outputFormat`, `chunkSize` |
-| `data`  | `dataPath`, `forceDownloads`, `uniprotRelease`, `pirsrRelease`, `iprscanVersion`, `iprVersion` |
+| `data`  | `dataPath`, `forceDownloads`, `uniprotRelease`, `pirsrRelease`, `iprscanVersion`, `iprVersion`, `iprscanApplications` |
 | `engine`| `unifireImage`, `unifireVersion`, `unifireMemory`, `pirsrMemory`, `iprscan6ProfileNames` |
 
 ### Defaults live in code

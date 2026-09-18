@@ -10,7 +10,7 @@ include { getDefaultParams } from './defaults.nf'
 workflow UNIFIRE {
     take:
     run       // map: input, outputDir, inputType, systems, outputFormat, chunkSize
-    data      // map: dataPath, forceDownloads, uniprotRelease, pirsrRelease, iprscanVersion, iprVersion
+    data      // map: dataPath, forceDownloads, uniprotRelease, pirsrRelease, iprscanVersion, iprVersion, iprscanApplications
     engine    // map: unifireImage, unifireVersion, unifireMemory, pirsrMemory, iprscan6ProfileNames
 
     main:
@@ -18,7 +18,7 @@ workflow UNIFIRE {
     // Defaults per group; allowed keys come from the full default key sets so
     // optional fields (e.g. input/outputDir/inputType, null in defaults) validate.
     def defRun = [systems: params.run.systems, outputFormat: params.run.outputFormat, chunkSize: params.run.chunkSize]
-    def defData = [dataPath: params.data.dataPath, forceDownloads: params.data.forceDownloads, uniprotRelease: null, pirsrRelease: null, iprscanVersion: null, iprVersion: null]
+    def defData = [dataPath: params.data.dataPath, forceDownloads: params.data.forceDownloads, uniprotRelease: null, pirsrRelease: null, iprscanVersion: null, iprVersion: null, iprscanApplications: params.data.iprscanApplications]
     def defEngine = [unifireImage: params.engine.unifireImage, unifireVersion: params.engine.unifireVersion, unifireMemory: '', pirsrMemory: '', iprscan6ProfileNames: params.engine.iprscan6ProfileNames]
     def cfgRun = mergeStrict(run, defRun, params.run.keySet(), 'run')
     def cfgData = mergeStrict(data, defData, params.data.keySet(), 'data')
@@ -87,7 +87,7 @@ workflow UNIFIRE {
         println("Running InterProScan 6 pipeline with iprscanVersion=${cfgData.iprscanVersion}, iprVersion=${cfgData.iprVersion}, profiles=${cfgEngine.iprscan6ProfileNames}")
         def iprDataPath = dataPaths.dataPath.resolve("iprscan6")
         assert iprDataPath.mkdirs()
-        iprscanXmlPath = runIprscan6(cfgData.iprscanVersion, cfgData.iprVersion, inputPath, iprDataPath, cfgEngine.iprscan6ProfileNames)
+        iprscanXmlPath = runIprscan6(cfgData.iprscanVersion, cfgData.iprVersion, cfgData.iprscanApplications, inputPath, iprDataPath, cfgEngine.iprscan6ProfileNames)
         resolvedInputType = "InterProScan6"
     }
 
