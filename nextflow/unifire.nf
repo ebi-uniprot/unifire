@@ -23,10 +23,8 @@ workflow UNIFIRE {
     def cfgRun = mergeStrict(run, defRun, params.run.keySet(), 'run')
     def cfgData = mergeStrict(data, defData, params.data.keySet(), 'data')
     def cfgEngine = mergeStrict(engine, defEngine, params.engine.keySet(), 'engine')
-    // An empty profile list (no -profile selected) falls back to the default.
-    if (!cfgEngine.iprscan6ProfileNames) {
-        cfgEngine.iprscan6ProfileNames = ['standard']
-    }
+    // An empty iprscan6ProfileNames list is valid: the nested InterProScan6
+    // run then uses its base configuration (local executor, no containers).
 
     printBanner()
 

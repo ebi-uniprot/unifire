@@ -16,6 +16,11 @@
 #    limitations under the License.
 ############################################################################
 
+# Legacy-compatible wrapper around the UniFIRE Nextflow image
+# (ghcr.io/ebi-uniprot/unifire/nextflow). The image runs the UniFIRE
+# Nextflow pipeline inside the container; this script only prepares the
+# working directory, runs the image and collects the prediction files.
+
 set -e
 set -u
 
@@ -23,13 +28,14 @@ infile=""
 filetype="fasta" # either fasta or iprscanxml
 outdir=""
 workdir=""
+datadir=""
 cleanworkdir=0
 container_software="docker"
 docker_version=""
 predictionfiles="predictions_unirule.out predictions_arba.out predictions_unirule-pirsr.out"
 
 function usage() {
-    echo "usage: $0 -i <INPUT_FILE> -o <OUTPUT_FOLDER> [-t <FILE_TYPE>] [-v <VERSION>] [-w <WORKING_FOLDER] [-c]"
+    echo "usage: $0 -i <INPUT_FILE> -o <OUTPUT_FOLDER> [-t <FILE_TYPE>] [-v <VERSION>] [-w <WORKING_FOLDER] [-d <DATA_FOLDER>] [-c]"
     echo "          [-s docker|singularity|podman]"
     echo "    -i: Path to input file (Required). Can be either multi-FASTA file (default) or InterProScan xml file (see -t option)."
     echo "    -t: Input file type. (Optional), DEFAULT: fasta"
@@ -38,10 +44,14 @@ function usage() {
     echo "        iprscanxml: InterProScan file in xml format. Each protein should have at least one xref element with 'name' attribute containing OX=<taxid>"
     echo "    -o: Path to output folder. All output files with predictions in TSV format will be available in this"
     echo "        folder at the end of the procedure. (Required)"
-    echo "    -v: Version of the docker image to use, e.g. 2020.2. Available versions are listed under"
-    echo "        https://gitlab.ebi.ac.uk/uniprot-public/unifire/container_registry. (Optional), DEFAULT: ${docker_version}"
+    echo "    -v: Version of the docker image to use, e.g. 3.1.0. Available versions are listed under"
+    echo "        https://github.com/ebi-uniprot/unifire/pkgs/container/unifire%2Fnextflow. (Optional), DEFAULT: engine"
+    echo "        version (unifireVersion) defined in nextflow/defaults.nf"
     echo "    -w: Path to an empty working directory.  If this option is not given, then a temporary folder will be"
     echo "        created and used to store intermediate files. (Optional)"
+    echo "    -d: Path to a data directory used to cache downloaded data (URML rules, PIRSR data, taxonomy and"
+    echo "        InterProScan data). If set, the directory is mounted into the container and the data persists"
+    echo "        between runs. If not given, data is downloaded into the container and discarded afterwards. (Optional)"
     echo "    -c: Clean up temporary files. If set, then all temporary files will be cleaned up at the end of the"
     echo "        procedure. If no working directory is provided through option -w then the temporary files are cleaned"
     echo "        up by default"
@@ -50,10 +60,14 @@ function usage() {
     echo "        docker: Use Docker to run UniFIRE Docker image"
     echo "        singularity: Use Singularity to run UniFIRE Docker image"
     echo "        podman: Use Podman to run UniFIRE Docker image"
+    echo ""
+    echo "    Environment:"
+    echo "        UNIFIRE_NXF_ARGS: additional options passed to the UniFIRE Nextflow pipeline inside the"
+    echo "        container, e.g. UNIFIRE_NXF_ARGS=\"--systems unirule,arba\" (default: all systems)."
     exit 1
 }
 
-while getopts "i:t:o:w:c:v:s:" optionName
+while getopts "i:t:o:w:c:v:s:d:" optionName
 do
   case "${optionName}" in
     i) infile=${OPTARG};;
@@ -61,8 +75,9 @@ do
     o) outdir=${OPTARG};;
     w) workdir=${OPTARG};;
     v) docker_version=${OPTARG};;
-    c) cleanworkdir=1;;
     s) container_software=${OPTARG};;
+    d) datadir=${OPTARG};;
+    c) cleanworkdir=1;;
   esac
 done
 
@@ -81,11 +96,13 @@ then
     usage
 fi
 
-# determine docker image version, if provided as a CLI option, use that, otherwise read from properties file
+# determine docker image version, if provided as a CLI option, use that,
+# otherwise read the engine version (unifireVersion) from nextflow/defaults.nf
 function determine_docker_image_version() {
-  if [ -z "$docker_version" ]; then
+  if [ -z "$docker_version" ]
+  then
     SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-    docker_version="$(grep -E "^UNIFIRE_DOCKER_IMAGE_VERSION=" "${SCRIPT_DIR}"/../versions.properties | cut -d '=' -f 2)"
+    docker_version="$(grep -oE "unifireVersion:[[:space:]]*'[^']+'" "${SCRIPT_DIR}/../../nextflow/defaults.nf" | tail -1 | cut -d "'" -f 2)"
   fi
   echo "UniFIRE docker version to be used: ${docker_version}"
 }
@@ -123,7 +140,6 @@ function check_outdir() {
     fi
 }
 
-
 # workdir
 function check_workdir() {
     usemktmp=0
@@ -145,13 +161,13 @@ function check_workdir() {
       fi
       set -e
     fi
-    
+
     if [[ ${usemktmp} == 0 ]] && [[ ! -z "$(ls -A ${workdir})" ]]
     then
       usemktmp=1
       echo "Given working directory ${workdir} is not empty. Creating temporary directory instead."
     fi
-    
+
     if [[ ${usemktmp} == 1 ]]
     then
       workdir=`mktemp -d`
@@ -160,31 +176,70 @@ function check_workdir() {
     fi
 }
 
+# datadir (optional persistent data cache mounted into the container)
+function check_datadir() {
+    if [[ ${datadir} == "" ]]
+    then
+      return
+    fi
+    if [[ ! -d ${datadir} ]]
+    then
+      echo "Given data directory ${datadir} does not exist. Trying to create it ..."
+      mkdir -p ${datadir}
+      if [[ $? != 0 ]]
+      then
+        echo "Failed to create data directory ${datadir}."
+        usage
+      fi
+    fi
+    datadir="$(cd ${datadir} && pwd)"
+    echo "Using ${datadir} as persistent data directory inside the container."
+}
+
 # Run the docker image on $the prepared {workdir}
 function run_docker_image() {
     # Perform the copy based on file type
-    # unifire-workflow.sh script expects the input files to be named exactly as below
+    # the entrypoint of the image expects the input files to be named exactly as below
     if [[ "$filetype" == "fasta" ]]; then
         cp -v ${infile} ${workdir}/proteins.fasta
     elif [[ "$filetype" == "iprscanxml" ]]; then
         cp -v ${infile} ${workdir}/proteins-ipr.xml
     fi
 
+    local image="ghcr.io/ebi-uniprot/unifire/nextflow:${docker_version}"
+    # Optional persistent data cache, mounted to /data inside the container
+    local datamount=""
+    if [[ ${datadir} != "" ]]
+    then
+      datamount="--mount type=bind,source=${datadir},target=/data --env UNIFIRE_DATA_PATH=/data"
+    fi
+
     if [ ${container_software} == "docker" ]
     then
       docker run \
+          --env UNIFIRE_NXF_ARGS \
+          ${datamount} \
           --mount type=bind,source=${workdir},target=/volume \
-          dockerhub.ebi.ac.uk/uniprot-public/unifire:${docker_version}
+          ${image}
     elif [ ${container_software} == "singularity" ]
     then
+      local singularity_bind=""
+      if [[ ${datadir} != "" ]]
+      then
+        singularity_bind="--bind ${datadir}:/data --env UNIFIRE_DATA_PATH=/data"
+      fi
       singularity run \
+          --env UNIFIRE_NXF_ARGS \
+          ${singularity_bind} \
           --bind ${workdir}:/volume \
-          docker://dockerhub.ebi.ac.uk/uniprot-public/unifire:${docker_version}
+          docker://${image}
     elif [ ${container_software} == "podman" ]
     then
       podman run \
+          --env UNIFIRE_NXF_ARGS \
+          ${datamount} \
           --mount type=bind,source=${workdir},target=/volume \
-          docker://dockerhub.ebi.ac.uk/uniprot-public/unifire:${docker_version}
+          ${image}
     fi
 }
 
@@ -192,8 +247,13 @@ function run_docker_image() {
 function move_output_files() {
     for predictionfile in ${predictionfiles}
     do
-      echo Copying prediction file ${predictionfile} to ${outdir}
-      cp -p ${workdir}/${predictionfile} ${outdir}/
+      if [[ -f ${workdir}/${predictionfile} ]]
+      then
+        echo Copying prediction file ${predictionfile} to ${outdir}
+        cp -p ${workdir}/${predictionfile} ${outdir}/
+      else
+        echo "Warning: prediction file ${predictionfile} not found in ${workdir} (was the corresponding system skipped or the run aborted?)"
+      fi
     done
 }
 
@@ -213,6 +273,9 @@ function cleanup_workdir() {
       rm -f ${workdir}/proteins_lineage-ipr.xml
       rm -f ${workdir}/seq/*.fasta
       rm -f ${workdir}/aln/*.aln
+      rm -rf ${workdir}/nxf-work
+      rm -rf ${workdir}/.nextflow
+      rm -f ${workdir}/.nextflow.log*
       if [[ -d ${workdir}/aln ]];
       then
         rmdir ${workdir}/aln
@@ -229,6 +292,7 @@ determine_docker_image_version
 check_infile
 check_outdir
 check_workdir
+check_datadir
 run_docker_image
 move_output_files
 cleanup_workdir

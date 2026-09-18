@@ -116,7 +116,7 @@ The pipeline is composed of the following stages, orchestrated by `nextflow/main
    Enriches the InterProScan XML with full NCBI taxonomy lineages using the bundled `updateIPRScanWithTaxonomicLineage.py` script.
 
 4. **Rule inference** (`nextflow/modules/unifire/main.nf` and `nextflow/modules/pirsr/main.nf`)  
-   Runs UniRule, ARBA and PIRSR inference inside the `dockerhub.ebi.ac.uk/uniprot-public/unifire/nextflow` container. PIRSR first runs `hmmalign` and then invokes UniFIRE on the generated alignment XML.
+   Runs UniRule, ARBA and PIRSR inference inside the `ghcr.io/ebi-uniprot/unifire/nextflow` container. PIRSR first runs `hmmalign` and then invokes UniFIRE on the generated alignment XML.
 
 ### Pipeline parameters
 
@@ -136,7 +136,7 @@ The pipeline is composed of the following stages, orchestrated by `nextflow/main
 | `--iprscanVersion` | no | `6.0.2` (from `--version 2026.4`) | InterProScan 6 version to run when the input is FASTA. |
 | `--iprVersion` | no | `110.0` (from `--version 2026.4`) | InterPro version used with InterProScan 6. |
 | `--iprscan6ProfileNames` | no | `standard` | List of container/executor profiles propagated to the InterProScan 6 sub-workflow. Set automatically by the selected `-profile` (e.g. `-profile slurm,singularity` propagates `slurm,singularity`); can be extended via CLI. |
-| `--unifireImage` | no | `dockerhub.ebi.ac.uk/uniprot-public/unifire/nextflow` | Docker image used for UniFIRE rule inference. |
+| `--unifireImage` | no | `ghcr.io/ebi-uniprot/unifire/nextflow` | Docker image used for UniFIRE rule inference. |
 | `--unifireVersion` | no | `latest` | Tag of the UniFIRE Docker image. |
 | `--unifireMemory` | no | - | Max heap memory (in MB) for UniFIRE rule inference. |
 | `--pirsrMemory` | no | - | Max heap memory (in MB) for PIRSR alignment. |
@@ -193,37 +193,19 @@ The run name is printed when the pipeline starts. You can list previous runs wit
 
 ***
 
-## 2. Using the Docker image (legacy)
+## 2. Using the Docker image
 
-> **Note:** The Docker image workflow is considered legacy. The [Nextflow pipeline](#1-using-the-nextflow-pipeline) is the recommended way to run UniFIRE.
+> **Note:** The Docker image workflow is only to support backward compatibility with legacy workflows. The [Nextflow pipeline](#1-using-the-nextflow-pipeline) is the recommended way to run UniFIRE.
 
-There are two Docker image variants provided to suit different user needs and environments::
-
-**1. Full image**  
-This image includes all required data and dependencies, notably the InterProScan tool and its substantial datasets, which account for most of its size.
-
- - Size: Large (~60 GB)
-
- - Input: Accepts either a FASTA file (to run InterProScan automatically) or a precomputed InterProScan XML file.
-
- - Benefit: Provides a complete, "all-in-one" workflow with zero manual dependency setup.
-
-**2. Lite image**  
-This image excludes InterProScan, resulting in a significantly smaller size.
-
- - Size: Much smaller (~4 GB)
-
- - Input: Accepts only a precomputed InterProScan XML file.
-
- - Benefit: Recommended for users who already have InterProScan XML inputs or prefer to run InterProScan separately. 
-   It saves significant download time and image storage space.
-
-The Lite image is identified by the -lite suffix in its tag (e.g., unifire:<version>-lite).
+The image accepts either a FASTA file (InterProScan is then run inside the container) or a precomputed
+InterProScan XML file. Additional pipeline options (e.g. `--systems`, `--version`) can be passed via the
+`UNIFIRE_NXF_ARGS` environment variable.
 ### Prerequisites
 
 #### Hardware
 
-A machine with 24 GB or more is recommended. Please allow enough free disk space based on the image type being used (full/lite).
+A machine with 24 GB or more is recommended. Please allow enough free disk space for the downloaded rule, taxonomy
+and InterProScan data (several tens of GB when running from a FASTA input).
 
 > **Note:** Starting from UniFIRE version 2025.3, minimum memory requirement has increased to about 24 GB, because of the large increase >in the number of ARBA rules.
 
@@ -284,10 +266,14 @@ usage: ./docker/bin/run_unifire_docker.sh -i <INPUT_FILE> -o <OUTPUT_FOLDER> [-t
         iprscanxml: InterProScan file in xml format. Each protein should have at least one xref element with 'name' attribute containing OX=<taxid>
     -o: Path to output folder. All output files with predictions in TSV format will be available in this
         folder at the end of the procedure. (Required)
-    -v: Version of the docker image to use, e.g. 2020.2. Available versions are listed under
-        https://gitlab.ebi.ac.uk/uniprot-public/unifire/container_registry. (Optional), DEFAULT: version defined in version.properties
+    -v: Version of the docker image to use, e.g. 3.1.0. Available versions are listed under
+        https://github.com/ebi-uniprot/unifire/pkgs/container/unifire%2Fnextflow. (Optional), DEFAULT: engine
+        version (unifireVersion) defined in nextflow/defaults.nf
     -w: Path to an empty working directory.  If this option is not given, then a temporary folder will be
         created and used to store intermediate files. (Optional)
+    -d: Path to a data directory used to cache downloaded data (URML rules, PIRSR data, taxonomy and
+        InterProScan data). If set, the directory is mounted into the container and the data persists
+        between runs. If not given, data is downloaded into the container and discarded afterwards. (Optional)
     -c: Clean up temporary files. If set, then all temporary files will be cleaned up at the end of the
         procedure. If no working directory is provided through option -w then the temporary files are cleaned
         up by default
@@ -300,32 +286,22 @@ usage: ./docker/bin/run_unifire_docker.sh -i <INPUT_FILE> -o <OUTPUT_FOLDER> [-t
 
 **B) Using the container command directly:**
 
-Directly run the UniFIRE Docker image entrypoint script, with any provided arguments.
+The image looks for the input files in `/volume` and runs the Nextflow pipeline; additional pipeline
+options are passed via the `UNIFIRE_NXF_ARGS` environment variable.
 ```
-Usage: unifire-workflow.sh [options]
-Options:
-  -i FILE       Input FASTA or InterProScan XML file (required)
-  -t TYPE       Input type: options are fasta or iprscanxml (required)
-                Default to fasta if input file name ends with '.fasta' or '.fa', and to iprscanxml if it ends with '.xml'.
-                When none of -i and -t are provided, the script will look for following file names in the output directory:
-                - proteins-ipr.xml: if exists, then it is used as input and type is set to iprscanxml.
-                - proteins.fasta:   if exists, then it is used as input and type is set to fasta.
-  -s SYSTEM     AA system to run predictions for: options [unirule,arba,pirsr] (default is all systems).
-                Multiple systems can be selected using comma to separate them (e.g., -s unirule,arba).
-  -n N          Proteins chunk size (default: 500)
-  -o DIR        Output directory (required) - default is "/volume"
-  -h            Show this help
+Usage (inside the container, e.g. appended to `docker run ... ghcr.io/ebi-uniprot/unifire/nextflow:<version>`):
 
-Images:
-  Full image: includes InterProScan. Accepts FASTA (will run InterProScan) or InterProScan XML.
-  Lite image: does NOT include InterProScan. Accepts only InterProScan XML as input.
+  The image looks for the following input files in /volume:
+  - proteins-ipr.xml: if it exists, it is used as input and the input type is set to InterProScan.
+  - proteins.fasta:   if it exists, it is used as input and the input type is set to fasta.
 
-Examples:
-  unifire-workflow.sh -i proteins.fasta -t fasta -n 500 -o /volume
-  unifire-workflow.sh -i proteins-ipr.xml -t iprscanxml -s unirule,arba -n 1000 -o /volume
-  unifire-workflow.sh (without options) - will look for default files in the /volume output directory and run all systems.
+  Pipeline options can be set via the UNIFIRE_NXF_ARGS environment variable, e.g.:
+  --systems unirule,arba,pirsr   AA systems to run predictions for (default: all systems).
+  --version 2026.4               UniProt/InterProScan release bundle to use.
+  --outputFormat TSV|XML         Prediction output format (default: TSV).
+  --chunkSize N                  Proteins chunk size (default: 500).
 
-Note that input and output directories must be mounted in the container.
+Input and output directories must be mounted at /volume in the container.
 ```
 
 ### Example
@@ -351,7 +327,7 @@ predictions_arba.out
 _Alternatively, to run directly with docker, you can use the following command:_
 
 ```bash
-docker run --rm --mount type=bind,source=$(pwd)/samples,target=/volume dockerhub.ebi.ac.uk/uniprot-public/unifire:<version> -i /volume/proteins.fasta -o /volume
+docker run --rm --mount type=bind,source=$(pwd)/samples,target=/volume --env UNIFIRE_NXF_ARGS="--systems unirule,arba" ghcr.io/ebi-uniprot/unifire/nextflow:<version>
 ```
 
 ### 2) InterProScan input file:
@@ -375,7 +351,7 @@ predictions_arba.out
 _Alternatively, to run directly with docker (using lite version), you can use the following command:_
 
 ```bash
-docker run --rm --mount type=bind,source=$(pwd)/samples,target=/volume dockerhub.ebi.ac.uk/uniprot-public/unifire:<version>-lite -i /volume/input_ipr.xml -t iprscanxml -o /volume
+docker run --rm --mount type=bind,source=$(pwd)/samples,target=/volume ghcr.io/ebi-uniprot/unifire/nextflow:<version>
 ```
 
 ### Runtime
