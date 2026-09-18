@@ -120,34 +120,6 @@ nextflow-smoke-test:
     - export UNIFIRE_IMAGE_TAG=$(grep -E "^UNIFIRE_DOCKER_IMAGE_VERSION=" "${IMAGE_TAG_FILE}" | cut -d '=' -f 2)
     - echo "UniFire image tag will be = ${UNIFIRE_IMAGE_TAG}"
 
-.build_docker_image_template:
-  stage: build_docker_image
-  extends: .docker_image
-  script:
-    - CONTAINER_IMAGE=${CI_REGISTRY_IMAGE}:${UNIFIRE_IMAGE_TAG}
-    - export IMAGE_NAME=${CONTAINER_IMAGE}${IMAGE_SUFFIX}
-    - echo "Building image ${IMAGE_NAME}"
-    - docker build --target ${DOCKER_TARGET} --tag ${IMAGE_NAME} --no-cache docker
-    - docker image ls
-    - docker push ${IMAGE_NAME}
-    - docker rmi ${IMAGE_NAME}
-    - docker logout "$CI_REGISTRY"
-  rules:
-    - if: $CI_COMMIT_BRANCH == "pre_release" && $CI_COMMIT_TITLE =~ /^Merge branch '.*' into 'pre_release'$/
-      when: on_success
-
-build_docker_image_lite:
-  extends: .build_docker_image_template
-  variables:
-    DOCKER_TARGET: lite
-    IMAGE_SUFFIX: -lite
-
-build_docker_image_full:
-  extends: .build_docker_image_template
-  variables:
-    DOCKER_TARGET: full
-    IMAGE_SUFFIX: ""
-
 build_push_nextflow_docker_image:
   stage: build_docker_image
   image: docker:24.0.5-git
