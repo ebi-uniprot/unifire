@@ -32,11 +32,12 @@ datadir=""
 cleanworkdir=0
 container_software="docker"
 docker_version=""
+data_version=""
 predictionfiles="predictions_unirule.out predictions_arba.out predictions_unirule-pirsr.out"
 
 function usage() {
-    echo "usage: $0 -i <INPUT_FILE> -o <OUTPUT_FOLDER> [-t <FILE_TYPE>] [-v <VERSION>] [-w <WORKING_FOLDER] [-d <DATA_FOLDER>] [-c]"
-    echo "          [-s docker|singularity|podman]"
+    echo "usage: $0 -i <INPUT_FILE> -o <OUTPUT_FOLDER> [-t <FILE_TYPE>] [-v <DATA_VERSION>] [-e <IMAGE_VERSION>]"
+    echo "          [-w <WORKING_FOLDER] [-d <DATA_FOLDER>] [-c] [-s docker|singularity|podman]"
     echo "    -i: Path to input file (Required). Can be either multi-FASTA file (default) or InterProScan xml file (see -t option)."
     echo "    -t: Input file type. (Optional), DEFAULT: fasta"
     echo "        Allowed values:"
@@ -44,9 +45,11 @@ function usage() {
     echo "        iprscanxml: InterProScan file in xml format. Each protein should have at least one xref element with 'name' attribute containing OX=<taxid>"
     echo "    -o: Path to output folder. All output files with predictions in TSV format will be available in this"
     echo "        folder at the end of the procedure. (Required)"
-    echo "    -v: Version of the docker image to use, e.g. 3.1.0. Available versions are listed under"
-    echo "        https://github.com/ebi-uniprot/unifire/pkgs/container/unifire%2Fnextflow. (Optional), DEFAULT: engine"
-    echo "        version (unifireVersion) defined in nextflow/defaults.nf"
+    echo "    -v: Data version to run, e.g. 2026.4. Selects the bundled UniProt release and InterProScan/PIRSR"
+    echo "        data versions (see nextflow/versions.nf). (Optional), DEFAULT: version defined as defaultKey in"
+    echo "        nextflow/versions.nf. A --version given via UNIFIRE_NXF_ARGS takes precedence over -v."
+    echo "    -e: Version of the UniFIRE docker image to use, e.g. 3.1.0. Available versions are listed under"
+    echo "        https://github.com/ebi-uniprot/unifire/pkgs/container/unifire%2Fnextflow. (Optional), DEFAULT: latest"
     echo "    -w: Path to an empty working directory.  If this option is not given, then a temporary folder will be"
     echo "        created and used to store intermediate files. (Optional)"
     echo "    -d: Path to a data directory used to cache downloaded data (URML rules, PIRSR data, taxonomy and"
@@ -67,16 +70,17 @@ function usage() {
     exit 1
 }
 
-while getopts "i:t:o:w:c:v:s:d:" optionName
+while getopts "i:t:o:w:c:v:s:d:e:" optionName
 do
   case "${optionName}" in
     i) infile=${OPTARG};;
     t) filetype="$OPTARG" ;;
     o) outdir=${OPTARG};;
     w) workdir=${OPTARG};;
-    v) docker_version=${OPTARG};;
+    v) data_version=${OPTARG};;
     s) container_software=${OPTARG};;
     d) datadir=${OPTARG};;
+    e) docker_version=${OPTARG};;
     c) cleanworkdir=1;;
   esac
 done
@@ -96,15 +100,33 @@ then
     usage
 fi
 
-# determine docker image version, if provided as a CLI option, use that,
-# otherwise read the engine version (unifireVersion) from nextflow/defaults.nf
-function determine_docker_image_version() {
+# determine the docker image version, if provided as a CLI option, use that,
+# otherwise use the latest release version
+function determine_docker_version() {
   if [ -z "$docker_version" ]
   then
-    SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-    docker_version="$(grep -oE "unifireVersion:[[:space:]]*'[^']+'" "${SCRIPT_DIR}/../../nextflow/defaults.nf" | tail -1 | cut -d "'" -f 2)"
+    docker_version="latest"
   fi
-  echo "UniFIRE docker version to be used: ${docker_version}"
+  echo "UniFIRE docker image version to be used: ${docker_version}"
+}
+
+# validate the requested data version against nextflow/versions.nf, so
+# that an unknown version fails before the docker image is pulled
+function check_data_version() {
+  if [ -z "$data_version" ]
+  then
+    return
+  fi
+  local script_dir
+  script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+  local versions
+  versions="$(grep -oE "^[[:space:]]*'[^']+':" "${script_dir}/../../nextflow/versions.nf" | cut -d "'" -f 2 | tr '\n' ' ')"
+  if ! grep -qE "^[[:space:]]*'${data_version}':" "${script_dir}/../../nextflow/versions.nf"
+  then
+    echo "Error: Unknown data version '${data_version}'. Available versions: ${versions}"
+    usage
+  fi
+  echo "UniFIRE data version to be used: ${data_version}"
 }
 
 # infile
@@ -288,11 +310,18 @@ function cleanup_workdir() {
 }
 
 # main
-determine_docker_image_version
+determine_docker_version
+check_data_version
 check_infile
 check_outdir
 check_workdir
 check_datadir
+if [ -n "$data_version" ]
+then
+  # -v maps to the pipeline's --version; a user-provided UNIFIRE_NXF_ARGS is
+  # appended afterwards so it can override the version if needed
+  export UNIFIRE_NXF_ARGS="--version ${data_version} ${UNIFIRE_NXF_ARGS:-}"
+fi
 run_docker_image
 move_output_files
 cleanup_workdir

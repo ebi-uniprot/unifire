@@ -141,7 +141,10 @@ build_push_nextflow_docker_image:
     - docker build --file ${NEXTFLOW_DOCKERFILE} --tag ${IMAGE_NAME} --no-cache .
     - docker image ls
     - docker push ${IMAGE_NAME}
-    - docker rmi ${IMAGE_NAME}
+    # Track the latest release with a moving "latest" tag
+    - docker tag ${IMAGE_NAME} ${NEXTFLOW_IMAGE_NAME}:latest
+    - docker push ${NEXTFLOW_IMAGE_NAME}:latest
+    - docker rmi ${IMAGE_NAME} ${NEXTFLOW_IMAGE_NAME}:latest
     - docker logout "$CI_REGISTRY"
   rules:
     - if: $CI_COMMIT_TAG =~ /^v/

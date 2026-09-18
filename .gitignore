@@ -28,5 +28,6 @@ work/
 .nextflow/
 .nextflow.*
 data/
+datadir/
 
 .flattened-pom.xml
