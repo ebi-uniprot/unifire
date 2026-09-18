@@ -27,6 +27,7 @@ process runIprscan6 {
         --datadir $dataDir \
         --input ${inputSequencePath} \
         --formats xml \
+        --no-matches-api \
         --outdir results
     mv results/*.xml output.xml
     """
