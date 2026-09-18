@@ -32,6 +32,8 @@
 ############################################################################
 
 import argparse
+import os
+from pathlib import Path
 
 from ete4 import NCBITaxa
 
@@ -46,6 +48,11 @@ def main():
         help="Path to the NCBI taxonomy SQLite database file.",
     )
     args = parser.parse_args()
+
+    # ete4 does not create its data directory on first use and fails to
+    # download the taxdump into it, so make sure it exists.
+    ete_data_dir = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share")) / "ete"
+    ete_data_dir.mkdir(parents=True, exist_ok=True)
 
     ncbi = NCBITaxa(dbfile=args.sqlite_path)
     ncbi.update_taxonomy_database()

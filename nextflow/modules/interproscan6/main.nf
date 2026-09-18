@@ -16,10 +16,11 @@ process runIprscan6 {
     task.ext.when == null || task.ext.when
 
     script:
+    def profileOpt = iprscan6ProfileNames ? "-profile ${iprscan6ProfileNames.toUnique().join(',')}" : ""
     """
     mkdir results/
     nextflow run ebi-pf-team/interproscan6 \
-        -profile ${iprscan6ProfileNames.toUnique().join(',')} \
+        ${profileOpt} \
         --applications HAMAP,PROSITE-profiles,PROSITE-patterns,Pfam,NCBIFAM,SMART,PRINTS,SFLD,CDD,CATH-Gene3D,PIRSF,PANTHER,SUPERFAMILY,CATH-FunFam \
         -r ${iprscanVersion} \
         --interpro ${iprVersion} \
