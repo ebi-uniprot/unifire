@@ -45,8 +45,8 @@ docker container registry and extracted on the local machine.
 **A) Using the wrapper script:**
 
 ```
-usage: ./docker/bin/run_unifire_docker.sh -i <INPUT_FILE> -o <OUTPUT_FOLDER> [-t <FILE_TYPE>] [-v <VERSION>] [-w <WORKING_FOLDER] [-c]
-          [-s docker|singularity|podman]
+usage: ./docker/bin/run_unifire_docker.sh -i <INPUT_FILE> -o <OUTPUT_FOLDER> [-t <FILE_TYPE>] [-v <DATA_VERSION>] [-e <IMAGE_VERSION>]
+          [-w <WORKING_FOLDER] [-d <DATA_FOLDER>] [-c] [-s docker|singularity|podman]
     -i: Path to input file (Required). Can be either multi-FASTA file (default) or InterProScan xml file (see -t option).
     -t: Input file type. (Optional), DEFAULT: fasta
         Allowed values:
@@ -54,9 +54,11 @@ usage: ./docker/bin/run_unifire_docker.sh -i <INPUT_FILE> -o <OUTPUT_FOLDER> [-t
         iprscanxml: InterProScan file in xml format. Each protein should have at least one xref element with 'name' attribute containing OX=<taxid>
     -o: Path to output folder. All output files with predictions in TSV format will be available in this
         folder at the end of the procedure. (Required)
-    -v: Version of the docker image to use, e.g. 3.1.0. Available versions are listed under
-        https://github.com/ebi-uniprot/unifire/pkgs/container/unifire%2Fnextflow. (Optional), DEFAULT: engine
-        version (unifireVersion) defined in nextflow/defaults.nf
+    -v: Data version to run, e.g. 2026.4. Selects the bundled UniProt release and InterProScan/PIRSR
+        data versions (see nextflow/versions.nf). (Optional), DEFAULT: version defined as defaultKey in
+        nextflow/versions.nf. A --version given via UNIFIRE_NXF_ARGS takes precedence over -v.
+    -e: Version of the UniFIRE docker image to use, e.g. 3.1.0. Available versions are listed under
+        https://github.com/ebi-uniprot/unifire/pkgs/container/unifire%2Fnextflow. (Optional), DEFAULT: latest
     -w: Path to an empty working directory.  If this option is not given, then a temporary folder will be
         created and used to store intermediate files. (Optional)
     -d: Path to a data directory used to cache downloaded data (URML rules, PIRSR data, taxonomy and
@@ -70,6 +72,10 @@ usage: ./docker/bin/run_unifire_docker.sh -i <INPUT_FILE> -o <OUTPUT_FOLDER> [-t
         docker: Use Docker to run UniFIRE Docker image
         singularity: Use Singularity to run UniFIRE Docker image
         podman: Use Podman to run UniFIRE Docker image
+
+    Environment:
+        UNIFIRE_NXF_ARGS: additional options passed to the UniFIRE Nextflow pipeline inside the
+        container, e.g. UNIFIRE_NXF_ARGS="--systems unirule,arba" (default: all systems).
 ```
 
 **B) Using the container command directly:**
