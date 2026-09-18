@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Smoke tests for the UniFIRE Nextflow pipeline.
+"""Unit tests for the UniFIRE Nextflow pipeline.
 
 Runs the pipeline end-to-end with ``-stub-run`` and the ``test`` profile
 (see ``nextflow/conf/profiles/test.config``): every process is replaced by
@@ -9,8 +9,8 @@ Invalid option combinations must fail fast with a clear error message.
 Each test runs Nextflow in its own scratch directory, so runs never share
 work directories or Nextflow state.
 
-Usage:
-    python3 nextflow/tests/smoke.py
+Usage: autodiscovered via ``python3 -m unittest discover -s nextflow/tests``
+(or run directly: ``python3 nextflow/tests/test_smoke.py``).
 """
 
 import os
@@ -66,6 +66,14 @@ FAIL_FAST_CASES = {
     "nonexistent-input": dict(
         input_file="nonexistent.fasta",
         expected_message="Input file does not exist",
+    ),
+    "bad-data-version": dict(
+        invalid_options=["--version", "bogus"],
+        expected_message="Version 'bogus' not found",
+    ),
+    "nonexistent-data-versions": dict(
+        invalid_options=["--dataVersions", "nonexistent-versions.json"],
+        expected_message="'--dataVersions' file does not exist",
     ),
 }
 
@@ -235,6 +243,14 @@ class SmokeTest(unittest.TestCase):
     def test_bad_chunk_size_fail_fast(self):
         """A non-positive --chunkSize value is rejected."""
         self._assert_fail_fast("bad-chunk-size")
+
+    def test_bad_data_version_fail_fast(self):
+        """An unknown --version is rejected with the available version list."""
+        self._assert_fail_fast("bad-data-version")
+
+    def test_nonexistent_data_versions_fail_fast(self):
+        """A missing --dataVersions file is rejected."""
+        self._assert_fail_fast("nonexistent-data-versions")
 
     def test_nonexistent_input_fail_fast(self):
         """An --input path that does not exist is rejected."""

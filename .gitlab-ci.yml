@@ -92,19 +92,22 @@ nextflow-version-check:
     - sh misc/release/check-nextflow-version.sh --config nextflow/defaults.nf
   rules: *trigger_rules
 
-nextflow-smoke-test:
+nextflow-tests:
   stage: test
   image: eclipse-temurin:17-jre-alpine
   before_script:
     - apk add --no-cache bash curl python3 libc6-compat
-    # The installer writes a 'nextflow' launcher file into the current
-    # directory, which collides with the project's nextflow/ directory.
+    # The nextflow installer writes a 'nextflow' launcher file into the
+    # current directory, which collides with the project's nextflow/ directory.
     - mkdir -p /opt/nxf && (cd /opt/nxf && curl -fsSL https://get.nextflow.io | bash)
     - mv /opt/nxf/nextflow /usr/local/bin/
     - nextflow -version
     - python3 --version
   script:
-    - python3 nextflow/tests/smoke.py
+    # Autodiscovers all test*.py under nextflow/tests: the stubbed pipeline
+    # smoke tests (test_smoke.py) and the versions.json sanity checks
+    # (test_versions.py).
+    - python3 -m unittest discover -s ${CI_PROJECT_DIR}/nextflow/tests -v
   rules: *trigger_rules
 
 .docker_image:

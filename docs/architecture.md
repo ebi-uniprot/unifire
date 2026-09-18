@@ -10,6 +10,7 @@ boundary:
 - **Subworkflow** — `nextflow/data.nf` (`fetchData`)
 - **Processes** — `nextflow/modules/**/main.nf`
 - **Defaults (code)** — `nextflow/defaults.nf`, `nextflow/versions.nf`
+- **Data versions** — `nextflow/versions.json` (bundled copy; remote source of truth on GitHub master)
 - **Configuration** — `nextflow.config`, `nextflow/conf/*.config`
 
 ## The params boundary
@@ -32,9 +33,9 @@ fetchData / runIprscan6 / generateTaxonomyLineage / runUnifirePipeline / runPirs
 
 1. Short-circuits `--help` by calling `printUsage(...)` with the default
    option groups.
-2. Resolves the versioned defaults with precedence
-   `explicit CLI arg > --version mapping > getDefaultVersionKey() mapping`
-   into concrete `uniprotRelease`, `pirsrRelease`, `iprscanVersion`, `iprVersion`.
+2. Resolves the data versions with `resolveDataVersions()` (see below) into
+   concrete `uniprotRelease`, `pirsrRelease`, `iprscanVersion`, `iprVersion`
+   with precedence `explicit CLI argument > --version mapping > default`.
 3. Builds four option groups (see below) and invokes `UNIFIRE` positionally.
 
 ## UNIFIRE's `take:` contract
@@ -52,10 +53,19 @@ All values are optional; `UNIFIRE` merges them strictly against defaults.
 
 `nextflow/defaults.nf` exposes `getDefaultParams()` — a single nested dict of
 the `run` / `data` / `engine` defaults. `nextflow/versions.nf` exposes
-`getDefaultVersions()` — a single nested dict containing `defaultKey` and the
-`versions` key→release map, consumed by `main.nf` for `--version` resolution
-(callers embedding `UNIFIRE` either do the same lookup or pin explicit
-per-field values in `data`).
+`resolveDataVersions(versionKey, dataVersionsPath)`, which resolves the data
+versions (decoupled from workflow releases):
+
+1. If `--dataVersions FILE` is given, that file is the exclusive source
+   (no remote fetch). Use it for CI, offline runs, and developer overrides.
+2. Otherwise, fetch `versions.json` from GitHub **master** and merge the
+   bundled `$projectDir/versions.json` **on top of it**: local-only (e.g.
+   in-development) versions become available, and local entries win on
+   conflicts. Master's `default` key wins for unrequested versions.
+3. If the fetch fails, the bundled file alone is used.
+
+The requested version (`--version`, else the tree's `default`) is validated
+against the merged tree; unknown versions fail fast with the available list.
 
 Merging (`mergeStrict` in `nextflow/unifire.nf`) is strict: unknown keys fail
 fast with the valid key list (exit 1), and `null`-valued user keys fall back
@@ -110,12 +120,15 @@ required because `publishDir` cannot see inputs eagerly).
 ## Help text
 
 `modules/help/main.nf` exposes `def printUsage(opts)` where `opts` is a map
-with keys `run`, `data`, `engine`, `versions`. It no longer accesses `params`.
+with keys `run`, `data`, `engine`. It no longer accesses `params` and no
+longer enumerates data versions (those are resolved at runtime from
+`versions.json`).
 
 ## Config files
 
 - `nextflow.config` keeps only CLI override knobs (`input`, `output`,
-  `version`, memory opts, `iprscan6ProfileNames`, `forceDownloads`, `help`).
+  `version`, `dataVersions`, memory opts, `iprscan6ProfileNames`,
+  `forceDownloads`, `help`).
   All defaults come from `nextflow/defaults.nf` / `versions.nf` in code.
 - Deleted `nextflow/conf/defaults.config`, `nextflow/conf/versions.config`.
 - `--skipDownloads` was removed (dead option). Use `--forceDownloads` to

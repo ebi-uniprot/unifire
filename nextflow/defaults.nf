@@ -10,6 +10,7 @@ def getDefaultParams() {
         ],
         data: [
             dataPath: '.unifire/data',
+            dataVersions: null,
             forceDownloads: false,
             uniprotRelease: null,
             pirsrRelease: null,

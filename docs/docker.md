@@ -55,8 +55,8 @@ usage: ./docker/bin/run_unifire_docker.sh -i <INPUT_FILE> -o <OUTPUT_FOLDER> [-t
     -o: Path to output folder. All output files with predictions in TSV format will be available in this
         folder at the end of the procedure. (Required)
     -v: Data version to run, e.g. 2026.4. Selects the bundled UniProt release and InterProScan/PIRSR
-        data versions (see nextflow/versions.nf). (Optional), DEFAULT: version defined as defaultKey in
-        nextflow/versions.nf. A --version given via UNIFIRE_NXF_ARGS takes precedence over -v.
+        data versions (see nextflow/versions.json). (Optional), DEFAULT: version defined as 'default' in
+        nextflow/versions.json (resolved remotely from GitHub master, merged with the bundled file). A --version given via UNIFIRE_NXF_ARGS takes precedence over -v.
     -e: Version of the UniFIRE docker image to use, e.g. 3.1.0. Available versions are listed under
         https://github.com/ebi-uniprot/unifire/pkgs/container/unifire%2Fnextflow. (Optional), DEFAULT: latest
     -w: Path to an empty working directory.  If this option is not given, then a temporary folder will be

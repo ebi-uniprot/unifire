@@ -41,7 +41,7 @@ python -m unittest discover misc/taxonomy/tests   # taxonomy scripts tests
 ```
 
 - Tests: JUnit 5 (jupiter), Mockito, Hamcrest; Surefire + Failsafe; JaCoCo coverage.
-- Nextflow pipeline smoke tests: `nextflow/tests/smoke.py` (run in the `ghcr.io/ebi-uniprot/unifire/nextflow` container; also exercised via CI `nextflow-smoke-test`).
+- Nextflow pipeline tests (stubbed smoke tests): `nextflow/tests/test_smoke.py` (run in the `ghcr.io/ebi-uniprot/unifire/nextflow` container; also exercised via CI `nextflow-tests`, which autodiscovers all `nextflow/tests/test*.py`).
 - Maven profile `jenkins` is EBI-only proxy config; do not use locally.
 
 ## Critical Conventions
@@ -56,7 +56,7 @@ This is verified by the `pre-push` git hook (`.githooks`, wired via `core.hooksP
 ### Nextflow strict params boundary
 - All `params` reading happens ONLY in `main.nf` (and profile config files).
 - Everything downstream is typed: the `UNIFIRE(run, data, engine)` workflow receives strict merges of option maps; processes get values via `val` inputs, not `params`.
-- Defaults live as code in `nextflow/defaults.nf` / `nextflow/versions.nf`. Keep this architecture when extending the pipeline (see `docs/architecture.md`).
+- Defaults live as code in `nextflow/defaults.nf`; data versions are resolved at runtime by `nextflow/versions.nf` (GitHub master merged with the bundled `nextflow/versions.json`), so they can be released independently of workflow releases. Keep this architecture when extending the pipeline (see `docs/architecture.md`).
 
 ### Java code
 - Java 17; package root `uk.ac.ebi.uniprot.urml.*` (PIRSR group under `org.proteininformationresource.pirsr`).
@@ -73,7 +73,7 @@ This is verified by the `pre-push` git hook (`.githooks`, wired via `core.hooksP
 
 Both GitLab CI (`.gitlab-ci.yml`) and GitHub Actions (`.github/workflows/ci.yml`) run:
 - `build` (`mvn install`), `test` (`mvn clean verify`), `python-test`
-- `nextflow-version-check`, `nextflow-smoke-test`
+- `nextflow-version-check`, `nextflow-tests`
 - Docker image build/push jobs (on `v*` / `release/*` / `snapshot/*` refs); Snapshots are pushed with `<version>-SNAPSHOT` tags, never `latest`.
 
 ## Documentation Map

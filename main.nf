@@ -1,6 +1,6 @@
 include { printUsage } from './nextflow/modules/help'
 include { getDefaultParams } from './nextflow/defaults.nf'
-include { getDefaultVersions } from './nextflow/versions.nf'
+include { resolveDataVersions } from './nextflow/versions.nf'
 include { UNIFIRE } from './nextflow/unifire.nf'
 
 workflow {
@@ -9,25 +9,16 @@ workflow {
         printUsage(
             run: defParams.run,
             data: defParams.data,
-            engine: defParams.engine,
-            versions: getDefaultVersions()
+            engine: defParams.engine
         )
         exit(0)
     }
 
-    // Resolve versioned defaults.
-    // Precedence: explicit CLI arguments > --version mapping > defaultKey mapping.
-    def versionTree = getDefaultVersions()
-    def defaultConfig = versionTree.versions[versionTree.defaultKey]
-    if (!defaultConfig) {
-        log.error("Version '${versionTree.defaultKey}' not found in default versions.")
-        exit(1)
-    }
-    def versionConfig = params.version ? versionTree.versions[params.version.toString()] : defaultConfig
-    if (params.version && !versionConfig) {
-        log.error("Version '${params.version}' not found. Available versions: ${versionTree.versions.keySet().join(', ')}")
-        exit(1)
-    }
+    // Resolve the data versions. Source precedence: explicit --dataVersions file,
+    // else GitHub master merged with the bundled nextflow/versions.json, else the
+    // bundled file alone. Individual releases can still be overridden via
+    // explicit CLI arguments, which always win over the resolved values.
+    def versionConfig = resolveDataVersions(params.version?.toString(), params.dataVersions)
 
     UNIFIRE(
         [
