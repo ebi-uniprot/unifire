@@ -25,7 +25,7 @@ set -e
 set -u
 
 infile=""
-filetype="fasta" # either fasta or iprscanxml
+filetype="iprscanxml" # only InterProScan XML input is supported by this script
 outdir=""
 workdir=""
 datadir=""
@@ -38,10 +38,12 @@ predictionfiles="predictions_unirule.out predictions_arba.out predictions_unirul
 function usage() {
     echo "usage: $0 -i <INPUT_FILE> -o <OUTPUT_FOLDER> [-t <FILE_TYPE>] [-v <DATA_VERSION>] [-e <IMAGE_VERSION>]"
     echo "          [-w <WORKING_FOLDER] [-d <DATA_FOLDER>] [-c] [-s docker|singularity|podman]"
-    echo "    -i: Path to input file (Required). Can be either multi-FASTA file (default) or InterProScan xml file (see -t option)."
-    echo "    -t: Input file type. (Optional), DEFAULT: fasta"
+    echo "    -i: Path to input file (Required). InterProScan xml file (see -t option)."
+    echo "        Note: FASTA input is not supported by this script anymore; for FASTA input, run the UniFIRE"
+    echo "        Nextflow pipeline directly instead (recommended, see docs/nextflow.md), which runs InterProScan 6"
+    echo "        with its native docker/singularity profiles."
+    echo "    -t: Input file type. (Optional), DEFAULT: iprscanxml"
     echo "        Allowed values:"
-    echo "        fasta: multi-FASTA file with headers in UniProt FASTA header format, containing at least OX=<taxid>"
     echo "        iprscanxml: InterProScan file in xml format. Each protein should have at least one xref element with 'name' attribute containing OX=<taxid>"
     echo "    -o: Path to output folder. All output files with predictions in TSV format will be available in this"
     echo "        folder at the end of the procedure. (Required)"
@@ -144,9 +146,16 @@ function check_infile() {
       usage
     fi
 
-   # Validate the file type
-   if [[ "$filetype" != "fasta" && "$filetype" != "iprscanxml" ]]; then
-       echo "Error: Invalid file type. Valid options are 'fasta' or 'iprscanxml'."
+   # Validate the file type: only InterProScan XML input is supported. FASTA
+   # input requires InterProScan 6 to run, which the supported wrapper route
+   # cannot provide; users with FASTA input must use the Nextflow pipeline.
+   if [[ "$filetype" == "fasta" ]]; then
+       echo "Error: FASTA input is not supported by this script (InterProScan 6 would have to run inside the image)."
+       echo "Use the UniFIRE Nextflow pipeline directly instead (-profile docker or singularity, see docs/nextflow.md),"
+       echo "or pass precomputed InterProScan XML (-t iprscanxml)."
+       usage
+   elif [[ "$filetype" != "iprscanxml" ]]; then
+       echo "Error: Invalid file type. Valid option is 'iprscanxml'."
        usage
    fi
 }

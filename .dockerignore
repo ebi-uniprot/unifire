@@ -1,0 +1,19 @@
+# Local artifacts never needed in the docker build context or image
+.git/
+.datadir/
+datadir/
+samples/
+test-data/
+outdir/
+models/
+docs/
+media/
+nextflow.Dockerfile*
+misc/release/
+.nextflow/
+.nextflow.log*
+nxf-work/
+
+# Maven build outputs and test sources (rebuilt inside the builder stage)
+**/target/
+**/src/test/
