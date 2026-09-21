@@ -17,7 +17,14 @@ process runIprscan6 {
     task.ext.when == null || task.ext.when
 
     script:
-    def profileOpt = iprscan6ProfileNames ? "-profile ${iprscan6ProfileNames.toUnique().join(',')}" : ""
+    // The profile names are a List when extended from the configuration, but a
+    // plain String when set via CLI (--iprscan6ProfileNames foo); normalise
+    // before joining, since String has no toUnique().
+    def profileNameInput = (iprscan6ProfileNames instanceof Collection)
+        ? iprscan6ProfileNames
+        : (iprscan6ProfileNames ? [iprscan6ProfileNames.toString()] : [])
+    def profileNames = profileNameInput.findAll { it }
+    def profileOpt = profileNames ? "-profile ${profileNames.toUnique().join(',')}" : ""
     def applicationsOpt = iprscanApplications ? "--applications ${iprscanApplications}" : ""
     """
     mkdir results/

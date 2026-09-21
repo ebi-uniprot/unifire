@@ -2,9 +2,10 @@
 
 > **Note:** The Docker image workflow is only to support backward compatibility with legacy workflows. The [Nextflow pipeline](nextflow.md) is the recommended way to run UniFIRE.
 
-The image accepts either a FASTA file (InterProScan is then run inside the container) or a precomputed
-InterProScan XML file. Additional pipeline options (e.g. `--systems`, `--version`) can be passed via the
-`UNIFIRE_NXF_ARGS` environment variable.
+The script `run_unifire_docker.sh` only accepts precomputed InterProScan XML files. For FASTA
+input, run the [Nextflow pipeline](nextflow.md) directly (recommended), where InterProScan 6 runs
+with its native docker/singularity profiles; additional pipeline options (e.g. `--systems`,
+`--version` for the image) can be passed via the `UNIFIRE_NXF_ARGS` environment variable.
 
 ## Prerequisites
 
@@ -25,13 +26,10 @@ A recent version of Docker is necessary to start the UniFIRE docker image as a n
 
 ## Data preparation
 
-The only input data you need to provide are either:
-
-1. protein sequence data in multi-FASTA format, or
-2. a precomputed InterProScan XML file,
-
-for which functional predictions should be created. The required FASTA header format and the xref
-requirement for InterProScan XML files are described in [Input data preparation](input-data.md).
+The only input data you need to provide for predictions is a precomputed InterProScan XML file
+(with the xref requirement described in [Input data preparation](input-data.md)). If you only have
+FASTA files, use the [Nextflow pipeline](nextflow.md) (recommended), which runs InterProScan 6
+natively with its docker/singularity profiles.
 
 ## Usage
 
@@ -47,10 +45,12 @@ docker container registry and extracted on the local machine.
 ```
 usage: ./docker/bin/run_unifire_docker.sh -i <INPUT_FILE> -o <OUTPUT_FOLDER> [-t <FILE_TYPE>] [-v <DATA_VERSION>] [-e <IMAGE_VERSION>]
           [-w <WORKING_FOLDER] [-d <DATA_FOLDER>] [-c] [-s docker|singularity|podman]
-    -i: Path to input file (Required). Can be either multi-FASTA file (default) or InterProScan xml file (see -t option).
-    -t: Input file type. (Optional), DEFAULT: fasta
+    -i: Path to input file (Required). InterProScan xml file (see -t option).
+        Note: FASTA input is not supported by this script anymore; for FASTA input, run the UniFIRE
+        Nextflow pipeline directly instead (recommended, see docs/nextflow.md), which runs InterProScan 6
+        with its native docker/singularity profiles.
+    -t: Input file type. (Optional), DEFAULT: iprscanxml
         Allowed values:
-        fasta: multi-FASTA file with headers in UniProt FASTA header format, containing at least OX=<taxid>
         iprscanxml: InterProScan file in xml format. Each protein should have at least one xref element with 'name' attribute containing OX=<taxid>
     -o: Path to output folder. All output files with predictions in TSV format will be available in this
         folder at the end of the procedure. (Required)
@@ -89,6 +89,9 @@ Usage (inside the container, e.g. appended to `docker run ... ghcr.io/ebi-unipro
   - proteins-ipr.xml: if it exists, it is used as input and the input type is set to InterProScan.
   - proteins.fasta:   if it exists, it is used as input and the input type is set to fasta.
 
+  (Note: unlike the wrapper script, the container command run directly still supports FASTA
+  input with InterProScan 6 running inside the image; the wrapper only accepts InterProScan XML.)
+
   Pipeline options can be set via the UNIFIRE_NXF_ARGS environment variable, e.g.:
   --systems unirule,arba,pirsr   AA systems to run predictions for (default: all systems).
   --version 2026.4               UniProt/InterProScan release bundle to use.
@@ -100,31 +103,7 @@ Input and output directories must be mounted at /volume in the container.
 
 ## Example
 
-### 1) Fasta input file:
-
-This is a simple example, which shows how to use the UniFIRE Docker image to run the whole UniFIRE workflow on some
-sample protein data.
-
-```bash
-./docker/bin/run_unifire_docker.sh -i samples/proteins.fasta -o .
-```
-This command will use as input the file samples/proteins.fasta which is in multi-FASTA format with the header in
-the format as described above. It will run the whole UniFIRE workflow to predict functional annotations from UniRule
-and ARBA rules. The resulting functional predictions will be written into these files in the current working
-directory:
-```
-predictions_unirule.out
-predictions_unirule-pirsr.out
-predictions_arba.out
-```
-
-_Alternatively, to run directly with docker, you can use the following command:_
-
-```bash
-docker run --rm --mount type=bind,source=$(pwd)/samples,target=/volume --env UNIFIRE_NXF_ARGS="--systems unirule,arba" ghcr.io/ebi-uniprot/unifire/nextflow:<version>
-```
-
-### 2) InterProScan input file:
+### InterProScan input file:
 
 This is a simple example, which shows how to use the UniFIRE Docker image to run UniFIRE workflow on some
 sample interproscan xml data.
@@ -176,7 +155,7 @@ export SINGULARITY_LOCALCACHEDIR=/path/to/localcache/folder
 
 Run the Docker image with Singularity:
 ```
-./docker/bin/run_unifire_docker.sh -i samples/proteins.fasta -o . -s singularity
+./docker/bin/run_unifire_docker.sh -i samples/input_ipr.xml -t iprscanxml -o . -s singularity
 ```
 
 ### Podman
@@ -193,7 +172,7 @@ export TMPDIR=/path/to/tmp/folder
 
 Run the Docker image with Podman:
 ```
-./docker/bin/run_unifire_docker.sh -i samples/proteins.fasta -o . -s podman
+./docker/bin/run_unifire_docker.sh -i samples/input_ipr.xml -t iprscanxml -o . -s podman
 ```
 
 For both cases, Singularity and Podman, the resulting output folder will be located in ${run_folder} with the filenames
