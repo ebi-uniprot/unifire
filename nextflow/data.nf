@@ -59,7 +59,7 @@ workflow fetchData {
         assert dataPathFile.mkdirs()
     }
 
-    if (uniruleEnabled || arbaEnabled) {
+    if (uniruleEnabled) {
         if (shouldDownloadFile(urmlTemplatesFilePath, forceDownloads)) {
             def urmlTemplatesUri = "ftp://ftp.ebi.ac.uk/pub/contrib/UniProt/UniFIRE/rules/unirule-templates-${uniprotRelease}.xml"
             urmlTemplatesFilePath = downloadUrmlTemplates(urmlTemplatesUri, urmlReleasePath, "unirule-templates.xml")
