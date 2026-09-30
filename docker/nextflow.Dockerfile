@@ -113,7 +113,7 @@ COPY --from=builder /opt/misc/taxonomy /opt/misc/taxonomy
 COPY main.nf /opt/unifire/main.nf
 COPY nextflow /opt/unifire/nextflow
 
-# Helper scripts (including the run_unifire_nextflow.sh CMD entrypoint)
+# Helper scripts (including the unifire-workflow.sh CMD entrypoint)
 COPY docker/scripts /opt/scripts/bin
 RUN chmod 775 /opt/scripts/bin/*.sh /opt/scripts/bin/*.py
 
@@ -123,4 +123,4 @@ RUN mkdir /volume
 VOLUME /volume
 
 WORKDIR /volume
-CMD ["/opt/scripts/bin/run_unifire_nextflow.sh"]
+CMD ["/opt/scripts/bin/unifire-workflow.sh"]
