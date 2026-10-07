@@ -116,6 +116,7 @@ COPY nextflow /opt/unifire/nextflow
 # Helper scripts (including the unifire-workflow.sh CMD entrypoint)
 COPY docker/scripts /opt/scripts/bin
 RUN chmod 775 /opt/scripts/bin/*.sh /opt/scripts/bin/*.py
+RUN mv /opt/scripts/bin/unifire-workflow-nextflow.sh /opt/scripts/bin/unifire-workflow.sh
 
 ENV PATH=$PATH:/opt/code
 
