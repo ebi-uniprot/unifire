@@ -126,7 +126,7 @@ workflow UNIFIRE {
             parsedChunkSize,
             dataPaths.arbaUrmlFilePath,
             taxonomyLineageXmlPath,
-            dataPaths.urmlTemplatesFilePath,
+            [],
             "predictions_arba.out",
             resolvedInputType,
             parsedOutputFormat,

@@ -20,8 +20,9 @@ process runUnifirePipeline {
 
     script:
     def memoryOpt = unifireMemory ? "-m ${unifireMemory}" : ""
+    def templatesOpt = urmlTemplatesXmlFilePath ? "-t ${urmlTemplatesXmlFilePath}" : ""
     """
-    /opt/code/distribution/bin/unifire.sh -n ${chunkSize} -r ${urmlRulesXmlFilePath} -i ${iprscanXmlFilePath} -t ${urmlTemplatesXmlFilePath} -s ${inputType} -o ${fileName} -f ${outputFormat} ${memoryOpt}
+    /opt/code/distribution/bin/unifire.sh -n ${chunkSize} -r ${urmlRulesXmlFilePath} -i ${iprscanXmlFilePath} ${templatesOpt} -s ${inputType} -o ${fileName} -f ${outputFormat} ${memoryOpt}
     """
 
     stub:
