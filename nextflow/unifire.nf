@@ -66,6 +66,10 @@ workflow UNIFIRE {
         log.error("Could not infer input type from '${inputPath}'. '--input <FILE>' must be a multi-FASTA file (.fasta, .fa) or an InterProScan XML file (root element 'protein-matches' or 'results'), or specify '--inputType' explicitly (fasta, InterProScan, InterProScan6).")
         exit(1)
     }
+    else if (!(resolvedInputType in validInputTypes())) {
+        log.error("Invalid input type inferred from '${inputPath}': '${resolvedInputType}'. Supported input types: ${validInputTypes().join(', ')}.")
+        exit(1)
+    }
     println("Inferred input type: ${resolvedInputType}")
 
     println("Using UniProt release: ${cfgData.uniprotRelease}, systems: ${parsedSystems}")
@@ -181,10 +185,13 @@ def parseSystems(systemsParam) {
     return systems
 }
 
+def validInputTypes() {
+    ['fasta', 'InterProScan', 'InterProScan6']
+}
+
 def parseInputType(inputTypeParam) {
-    def validInputTypes = ['fasta', 'InterProScan', 'InterProScan6']
-    if (!(inputTypeParam in validInputTypes)) {
-        log.error("Invalid input type: ${inputTypeParam}. '--inputType' must be one of: ${validInputTypes.join(', ')}")
+    if (!(inputTypeParam in validInputTypes())) {
+        log.error("Invalid input type: ${inputTypeParam}. '--inputType' must be one of: ${validInputTypes().join(', ')}")
         exit(1)
     }
     return inputTypeParam
@@ -209,29 +216,39 @@ def parseOutputFormat(outputFormatParam) {
 }
 
 def inferInputType(inputPath) {
-    def inferredType = null
     def lowerName = inputPath.toString().toLowerCase()
 
     if (lowerName.endsWith('.fasta') || lowerName.endsWith('.fa')) {
-        inferredType = 'fasta'
-    }
-    else if (lowerName.endsWith('.xml')) {
-        def content = inputPath.text
-        // Remove XML declaration and comments, then find the first root-like element
-        def cleaned = content
-            .replaceAll(/<\?xml[^?]*\?>/, '')
-            .replaceAll(/<!--[\s\S]*?-->/, '')
-            .trim()
-        def matcher = cleaned =~ /<([\w-]+)/
-        def rootElement = matcher ? matcher[0][1] : null
-
-        if (rootElement == 'protein-matches') {
-            inferredType = 'InterProScan'
-        }
-        else if (rootElement == 'results') {
-            inferredType = 'InterProScan6'
-        }
+        return 'fasta'
     }
 
-    return inferredType
+    else if (!lowerName.endsWith('.xml')) {
+        return null
+    }
+
+    // Stream the XML instead of reading the whole (potentially huge) file
+    def rootToType = ['protein-matches': 'InterProScan', 'results': 'InterProScan6']
+    def eventReader = null
+    try {
+        def factory = javax.xml.stream.XMLInputFactory.newInstance()
+        factory.setProperty(javax.xml.stream.XMLInputFactory.SUPPORT_DTD, false)
+        factory.setProperty(javax.xml.stream.XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false)
+
+        def xmlEventReader = factory.createXMLEventReader(inputPath.newInputStream())
+        def eventFilter = { event -> event.isStartElement() } as javax.xml.stream.EventFilter
+        eventReader = factory.createFilteredReader(xmlEventReader, eventFilter)
+        if (!eventReader.hasNext()) {
+            eventReader.close()
+            return null
+        }
+        def rootElement = eventReader.nextEvent().asStartElement().name.localPart
+        def inferredType = rootToType[rootElement] ?: null
+        eventReader.close()
+        return inferredType
+    }
+    catch (Exception e) {
+        eventReader?.close()
+        log.warn("Could not parse XML root element of '${inputPath}': ${e.message}")
+        return null
+    }
 }

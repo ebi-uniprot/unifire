@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
+- Fail-fast validation of the inferred input type in the Nextflow pipeline: a type
+  inferred from the XML root element that is not one of the supported input types
+  (`fasta`, `InterProScan`, `InterProScan6`) now exits with a clear error instead of
+  being passed through to rule inference.
 - Runtime data-version resolution for the Nextflow pipeline: `nextflow/versions.nf`
   fetches `versions.json` from GitHub master and merges the bundled
   `nextflow/versions.json` on top of it (in-development versions work from a local
@@ -23,6 +27,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `release/1.0.0` publish `nextflow:1.0.0` (never `latest`), enforced like `v*` tags.
 
 ### Changed
+- Input-type inference in the Nextflow pipeline now streams only the XML prolog
+  (up to the root element) via StAX instead of loading the whole InterProScan XML
+  file into memory.
 - Accept `--iprscan6ProfileNames` given as a comma-separated CLI string (e.g. `--iprscan6ProfileNames docker`),
   alongside the configuration-provided list, in the InterProScan 6 sub-workflow (a plain String has no `toUnique()`).
 - Rebuild `docker/nextflow.Dockerfile` as a multi-stage image: the JDK/Maven/compiler toolchain

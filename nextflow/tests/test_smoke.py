@@ -154,6 +154,18 @@ class SmokeTest(unittest.TestCase):
         )
         self.assertIn(expected_message, proc.output)
 
+    def assert_output_line(self, proc, line):
+        """Assert an exact output line.
+
+        Substring assertions (assertIn) cannot distinguish input-type values
+        where one is a prefix of another ('InterProScan' vs 'InterProScan6').
+        """
+        self.assertTrue(
+            any(l.strip() == line for l in proc.output.splitlines()),
+            f"expected line '{line}' not found\n"
+            f"--- Nextflow output ---\n{proc.output}",
+        )
+
     # Static checks ---------------------------------------------------------
 
     def test_help_exits_zero_and_prints_usage(self):
@@ -171,6 +183,7 @@ class SmokeTest(unittest.TestCase):
             systems="unirule,arba,pirsr",
         )
         self.assert_run_succeeded(proc)
+        self.assert_output_line(proc, "Running inference on input type: InterProScan6")
         self.assert_outputs(PREDICTIONS["unirule"], PREDICTIONS["arba"],
                             PREDICTIONS["pirsr"])
 
@@ -192,6 +205,7 @@ class SmokeTest(unittest.TestCase):
             input_type="InterProScan",
         )
         self.assert_run_succeeded(proc)
+        self.assert_output_line(proc, "Running inference on input type: InterProScan")
         self.assert_outputs(PREDICTIONS["unirule"], PREDICTIONS["arba"])
 
     def test_stub_interproscan6_xml_infer_input_type(self):
@@ -201,6 +215,8 @@ class SmokeTest(unittest.TestCase):
             systems="unirule",
         )
         self.assert_run_succeeded(proc)
+        self.assert_output_line(proc, "Inferred input type: InterProScan6")
+        self.assert_output_line(proc, "Running inference on input type: InterProScan6")
         self.assert_outputs(PREDICTIONS["unirule"])
 
     def test_stub_single_system_isolation(self):
@@ -210,7 +226,29 @@ class SmokeTest(unittest.TestCase):
             systems="unirule",
         )
         self.assert_run_succeeded(proc)
+        self.assert_output_line(proc, "Inferred input type: InterProScan")
+        self.assert_output_line(proc, "Running inference on input type: InterProScan")
         self.assert_outputs(PREDICTIONS["unirule"])
+
+    def test_stub_explicit_input_types_accepted(self):
+        """Each valid --inputType value is accepted and used for inference."""
+        # (input type, final type used for inference, matching input fixture):
+        # fasta goes through the InterProScan 6 run first, hence the final type.
+        cases = [
+            ("fasta", "InterProScan6", REPO_ROOT / "samples" / "proteins.fasta"),
+            ("InterProScan", "InterProScan", REPO_ROOT / "test-data" / "proteins-ipr.xml"),
+            ("InterProScan6", "InterProScan6", REPO_ROOT / "test-data" / "proteins-ipr6.xml"),
+        ]
+        for input_type, final_type, input_file in cases:
+            with self.subTest(input_type=input_type):
+                proc = self.run_pipeline(
+                    input_file=input_file,
+                    systems="unirule",
+                    input_type=input_type,
+                )
+                self.assert_run_succeeded(proc)
+                self.assert_output_line(proc, f"Running inference on input type: {final_type}")
+                self.assert_outputs(PREDICTIONS["unirule"])
 
     # Fail-fast checks ----------------------------------------------------------
 
