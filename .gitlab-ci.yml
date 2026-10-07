@@ -145,12 +145,6 @@ build_docker_image_lite:
     DOCKER_TARGET: lite
     IMAGE_SUFFIX: -lite
 
-build_docker_image_full:
-  extends: .build_docker_image_template
-  variables:
-    DOCKER_TARGET: full
-    IMAGE_SUFFIX: ""
-
 build_push_nextflow_docker_image:
   stage: build_docker_image
   image: docker:24.0.5-git
