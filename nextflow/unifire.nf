@@ -11,7 +11,7 @@ workflow UNIFIRE {
     take:
     run       // map: input, outputDir, inputType, systems, outputFormat, chunkSize
     data      // map: dataPath, forceDownloads, uniprotRelease, pirsrRelease, iprscanVersion, iprVersion, iprscanApplications
-    engine    // map: unifireImage, unifireVersion, unifireMemory, pirsrMemory, iprscan6ProfileNames
+    engine    // map: iprscan6ProfileNames
 
     main:
     def params = getDefaultParams()
@@ -19,7 +19,7 @@ workflow UNIFIRE {
     // optional fields (e.g. input/outputDir/inputType, null in defaults) validate.
     def defRun = [systems: params.run.systems, outputFormat: params.run.outputFormat, chunkSize: params.run.chunkSize]
     def defData = [dataPath: params.data.dataPath, forceDownloads: params.data.forceDownloads, uniprotRelease: null, pirsrRelease: null, iprscanVersion: null, iprVersion: null, iprscanApplications: params.data.iprscanApplications]
-    def defEngine = [unifireImage: params.engine.unifireImage, unifireVersion: params.engine.unifireVersion, unifireMemory: '', pirsrMemory: '', iprscan6ProfileNames: params.engine.iprscan6ProfileNames]
+    def defEngine = [iprscan6ProfileNames: params.engine.iprscan6ProfileNames]
     def cfgRun = mergeStrict(run, defRun, params.run.keySet(), 'run')
     def cfgData = mergeStrict(data, defData, params.data.keySet(), 'data')
     def cfgEngine = mergeStrict(engine, defEngine, params.engine.keySet(), 'engine')
@@ -79,9 +79,7 @@ workflow UNIFIRE {
         parsedSystems,
         cfgData.uniprotRelease,
         cfgData.pirsrRelease,
-        cfgData.forceDownloads,
-        cfgEngine.unifireImage,
-        cfgEngine.unifireVersion
+        cfgData.forceDownloads
     )
 
     def iprscanXmlPath = inputPath
@@ -100,9 +98,7 @@ workflow UNIFIRE {
     // Run taxonomy lineage script
     def taxonomyLineageXmlPath = generateTaxonomyLineage(
         iprscanXmlPath,
-        dataPaths.taxaFilePath,
-        cfgEngine.unifireImage,
-        cfgEngine.unifireVersion
+        dataPaths.taxaFilePath
     )
 
     if ("unirule" in parsedSystems) {
@@ -114,9 +110,6 @@ workflow UNIFIRE {
             "predictions_unirule.out",
             resolvedInputType,
             parsedOutputFormat,
-            cfgEngine.unifireImage,
-            cfgEngine.unifireVersion,
-            cfgEngine.unifireMemory,
             outputDir
         )
     }
@@ -130,9 +123,6 @@ workflow UNIFIRE {
             "predictions_arba.out",
             resolvedInputType,
             parsedOutputFormat,
-            cfgEngine.unifireImage,
-            cfgEngine.unifireVersion,
-            cfgEngine.unifireMemory,
             outputDir
         )
     }
@@ -146,9 +136,6 @@ workflow UNIFIRE {
             "predictions_unirule-pirsr.out",
             resolvedInputType,
             parsedOutputFormat,
-            cfgEngine.unifireImage,
-            cfgEngine.unifireVersion,
-            cfgEngine.pirsrMemory,
             outputDir
         )
     }

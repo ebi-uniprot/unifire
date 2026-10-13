@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 #
-# Checks that engine.unifireVersion in getDefaultParams() (nextflow/defaults.nf)
-# matches the expected UniFIRE version (the Docker image tag derived from a
-# v* git tag, a release/* branch or a snapshot/* branch). Used by the
-# pre-push git hook and by the release jobs in the CI pipelines.
+# Checks that the container tag of the 'unifire_container' process label
+# (nextflow/conf/profiles/base.config) matches the expected UniFIRE version
+# (the Docker image tag derived from a v* git tag, a release/* branch or a
+# snapshot/* branch). Used by the pre-push git hook and by the release jobs
+# in the CI pipelines.
 #
 # Usage: check-nextflow-version.sh <expected-version> [<config-file>]
 #        check-nextflow-version.sh --config <config-file>
@@ -19,7 +20,7 @@
 #
 set -euo pipefail
 
-CONFIG_REL_PATH="nextflow/defaults.nf"
+CONFIG_REL_PATH="nextflow/conf/profiles/base.config"
 
 usage() {
     echo "Usage: $0 <expected-version> [<config-file>]" >&2
@@ -29,19 +30,21 @@ usage() {
 }
 
 error_matches() {
-    echo "ERROR: engine.unifireVersion in getDefaultParams() (${file}) is '${actual}' but expected '${expected}'" >&2
-    echo "Update getDefaultParams() in nextflow/defaults.nf so that engine.unifireVersion" >&2
+    echo "ERROR: the container tag of the 'unifire_container' label in ${file} is '${actual}' but expected '${expected}'" >&2
+    echo "Update the 'withLabel: unifire_container' container value in ${file} so it" >&2
     echo "matches the tag or branch name, then re-push." >&2
     exit 1
 }
 
 get_value() {
-    sed -n 's/.*unifireVersion *[:=] *['"'"'"]\([^'"'"'"]*\)['"'"'"].*/\1/p' "$1" | head -n1
+    local full
+    full=$(sed -n "s/.*withLabel: *['\"]unifire_container['\"] *{ *container *= *['\"]\([^'\"]*\)['\"].*/\1/p" "$1" | head -n1)
+    printf '%s' "${full##*:}"
 }
 
 error_missing() {
-    echo "ERROR: no engine.unifireVersion found in ${file}" >&2
-    echo "Set getDefaultParams().engine.unifireVersion to 'latest' or a version-like string (e.g. '1.2.3', '0.1.0-dev1', '1.0.0-SNAPSHOT')" >&2
+    echo "ERROR: no 'unifire_container' label container found in ${file}" >&2
+    echo "Set withLabel: 'unifire_container' { container = 'image:tag' } with a version-like tag (e.g. '1.2.3', '0.1.0-dev1', '1.0.0-SNAPSHOT')" >&2
     exit 1
 }
 
@@ -72,7 +75,7 @@ if [ "${1:-}" = "--config" ]; then
         exit 0
     fi
     if ! printf '%s' "$actual" | grep -Eq '^v?[0-9A-Za-z][0-9A-Za-z._-]*$'; then
-        echo "ERROR: engine.unifireVersion in ${file} is '${actual}' but must be 'latest' or a version-like string (e.g. '1.2.3', '0.1.0-dev1', '1.0.0-SNAPSHOT')" >&2
+        echo "ERROR: the 'unifire_container' container tag in ${file} is '${actual}' but must be 'latest' or a version-like string (e.g. '1.2.3', '0.1.0-dev1', '1.0.0-SNAPSHOT')" >&2
         exit 1
     fi
     exit 0

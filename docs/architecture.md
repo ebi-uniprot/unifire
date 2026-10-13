@@ -47,7 +47,7 @@ All values are optional; `UNIFIRE` merges them strictly against defaults.
 |---------|------|
 | `run`   | `input`, `outputDir`, `inputType`(nullable → inferred), `systems`, `outputFormat`, `chunkSize` |
 | `data`  | `dataPath`, `forceDownloads`, `uniprotRelease`, `pirsrRelease`, `iprscanVersion`, `iprVersion`, `iprscanApplications` |
-| `engine`| `unifireImage`, `unifireVersion`, `unifireMemory`, `pirsrMemory`, `iprscan6ProfileNames` |
+| `engine`| `iprscan6ProfileNames` |
 
 ### Defaults live in code
 
@@ -111,11 +111,14 @@ emits the resolved file paths.
 
 ## Threading values into processes
 
-Processes never read `params`; container images, memory options, publish
-directories, and CLI profiles they need come in as `val` inputs passed down
-from `UNIFIRE` (e.g. `container "${unifireImage}:${unifireVersion}"`,
-`publishDir { "${outputDir}" }` — note the `{ }` for lazy evaluation,
-required because `publishDir` cannot see inputs eagerly).
+Processes never read `params`; the container image is set in
+`nextflow/conf/profiles/base.config` via a process label
+(`withLabel: 'unifire_container' { container = ... }`, applied to every process
+labeled `unifire_container`), while process memory is governed by the resource
+labels / `withName` blocks in the profile configs, and publish directories and
+CLI profiles they need come in as `val` inputs passed down
+from `UNIFIRE` (e.g. `publishDir { "${outputDir}" }` — note the `{ }` for lazy
+evaluation, required because `publishDir` cannot see inputs eagerly).
 
 ## Help text
 
@@ -127,7 +130,7 @@ longer enumerates data versions (those are resolved at runtime from
 ## Config files
 
 - `nextflow.config` keeps only CLI override knobs (`input`, `output`,
-  `version`, `dataVersions`, memory opts, `iprscan6ProfileNames`,
+  `version`, `dataVersions`, `iprscan6ProfileNames`,
   `forceDownloads`, `help`).
   All defaults come from `nextflow/defaults.nf` / `versions.nf` in code.
 - Deleted `nextflow/conf/defaults.config`, `nextflow/conf/versions.config`.

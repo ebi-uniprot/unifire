@@ -45,15 +45,7 @@ def printUsage(opts) {
       --pirsrRelease RELEASE      PIRSR data release used to download PIRSR data files.
       --forceDownloads            Re-download remote rule and taxonomy data files even if they already exist locally.
 
-    Container options:
-      --unifireImage IMAGE        Docker image used for UniFIRE rule inference.
-                                  Default: ${engine.unifireImage}
-      --unifireVersion VERSION    Tag of the UniFIRE Docker image.
-                                  Default: ${engine.unifireVersion}
-
     Resource options:
-      --unifireMemory MB          Max heap memory for UniFIRE rule inference.
-      --pirsrMemory MB            Max heap memory for PIRSR alignment.
       --maxWorkers N              Maximum number of parallel workers.
 
     Other options:

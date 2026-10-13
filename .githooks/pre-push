@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 #
 # Pre-push hook: verifies that for every v* tag, release/* branch or
-# snapshot/* branch being pushed, the value of engine.unifireVersion
-# committed at that ref matches the tag/branch-derived Docker image tag (via
-# the shared --tag mode of the check script) before pushing.
+# snapshot/* branch being pushed, the container tag of the 'unifire_container'
+# process label committed at that ref matches the tag/branch-derived Docker
+# image tag (via the shared --tag mode of the check script) before pushing.
 #
 # Enable by running:
 #   git config core.hooksPath .githooks
@@ -11,7 +11,7 @@
 set -euo pipefail
 
 ZERO_SHA="0000000000000000000000000000000000000000"
-CONFIG_REL_PATH="nextflow/defaults.nf"
+CONFIG_REL_PATH="nextflow/conf/profiles/base.config"
 # Git runs hooks with the working directory set to the repo root, but the
 # check script may not be committed in the local clone; resolve it relative
 # to this hook's location instead.
@@ -41,8 +41,7 @@ while read -r _local_ref _local_sha remote_ref _remote_sha; do
     ref_commit="$(git rev-parse "${remote_ref}^{commit}")"
     config_blob="$(mktemp)"
     if ! git show "${ref_commit}:${CONFIG_REL_PATH}" > "$config_blob" 2>/dev/null; then
-        echo "ERROR: ref '${remote_ref}' does not contain '${CONFIG_REL_PATH}'" >&2
-        rm -f "$config_blob"
+        echo "ERROR: ref '${remote_ref}' does not contain '${CONFIG_REL_PATH}'" >&2        rm -f "$config_blob"
         fail=1
         continue
     fi

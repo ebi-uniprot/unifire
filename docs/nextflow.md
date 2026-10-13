@@ -110,10 +110,6 @@ These parameters have sensible defaults and only need to be set for tuning, offl
 | `--iprVersion` | no | `110.0` (from the resolved version) | InterPro version used with InterProScan 6. |
 | `--iprscanApplications` | no | `HAMAP,PROSITE-profiles,PROSITE-patterns,Pfam,NCBIFAM,SMART,PRINTS,SFLD,CDD,CATH-Gene3D,PIRSF,PANTHER,SUPERFAMILY,CATH-FunFam` | Comma-separated list of InterProScan 6 analyses to run when the input is FASTA (see the [analysis catalogue](https://interproscan6.readthedocs.io/stable/analyses/#analysis-catalogue) for valid names). If set to empty, InterProScan 6 runs all its analyses. |
 | `--iprscan6ProfileNames` | no | `standard` | List of container/executor profiles propagated to the InterProScan 6 sub-workflow. Set automatically by the selected `-profile` (e.g. `-profile slurm,singularity` propagates `slurm,singularity`); can be extended via CLI. |
-| `--unifireImage` | no | `ghcr.io/ebi-uniprot/unifire/nextflow` | Docker image used for UniFIRE rule inference. |
-| `--unifireVersion` | no | value of `engine.unifireVersion` in [nextflow/defaults.nf](../nextflow/defaults.nf) | Tag of the UniFIRE Docker image. |
-| `--unifireMemory` | no | - | Max heap memory (in MB) for UniFIRE rule inference. |
-| `--pirsrMemory` | no | - | Max heap memory (in MB) for PIRSR alignment. |
 | `--maxWorkers` | no | - | Maximum number of parallel local workers. |
 | `--chunkSize` | no | `500` | Number of proteins processed per chunk. |
 

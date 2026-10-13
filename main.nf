@@ -39,10 +39,6 @@ workflow {
             iprscanApplications: params.iprscanApplications
         ],
         [
-            unifireImage: params.unifireImage,
-            unifireVersion: params.unifireVersion,
-            unifireMemory: params.unifireMemory ?: '',
-            pirsrMemory: params.pirsrMemory ?: '',
             iprscan6ProfileNames: params.iprscan6ProfileNames
         ]
     )

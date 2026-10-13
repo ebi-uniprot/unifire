@@ -91,8 +91,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Validate unifireVersion
-        run: misc/release/check-nextflow-version.sh --config nextflow/defaults.nf
+      - name: Validate unifire_container tag
+        run: misc/release/check-nextflow-version.sh --config nextflow/conf/profiles/base.config
 
   nextflow-tests:
     name: Nextflow Tests
@@ -213,10 +213,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check nextflow engine.unifireVersion matches tag or release branch
+      - name: Check nextflow unifire_container tag matches tag or release branch
         run: |
           EXPECTED=$(misc/release/check-nextflow-version.sh --tag "${GITHUB_REF}" --print)
-          echo "Expecting engine.unifireVersion = ${EXPECTED}"
+          echo "Expecting unifire_container tag = ${EXPECTED}"
           misc/release/check-nextflow-version.sh --tag "${GITHUB_REF}"
 
       - name: Set up Docker Buildx
@@ -255,10 +255,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check nextflow engine.unifireVersion matches snapshot branch
+      - name: Check nextflow unifire_container tag matches snapshot branch
         run: |
           EXPECTED=$(misc/release/check-nextflow-version.sh --tag "${GITHUB_REF}" --print)
-          echo "Expecting engine.unifireVersion = ${EXPECTED}"
+          echo "Expecting unifire_container tag = ${EXPECTED}"
           misc/release/check-nextflow-version.sh --tag "${GITHUB_REF}"
 
       - name: Set up Docker Buildx

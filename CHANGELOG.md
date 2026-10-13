@@ -38,6 +38,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   ~3.3 GB (~55% reduction), plus a new root `.dockerignore` that excludes build outputs and local
   data from the build context. Runtime dependencies (`git`, `hmmer`, `ncbi-data`) are retained.
 - Replace Null positions by "" in output TSV file
+- The UniFIRE Nextflow container image/tag is now set in
+  `nextflow/conf/profiles/base.config` via the `unifire_container` process label instead
+  of being threaded as a pipeline parameter; the `--unifireImage`/`--unifireVersion` CLI
+  parameters (and their engine map entries) are gone. The release version-invariant
+  check reads the container tag from that label.
+- Removed the `--unifireMemory`/`--pirsrMemory` CLI options: rule-inference scripts no
+  longer take a JVM `-m` max-heap override, and process memory is governed by the
+  Nextflow resource labels/`withName` blocks in the profile configs only.
 
 ### Removed
 - `run_unifire_docker.sh` no longer accepts FASTA input (the wrapper would have to run InterProScan 6

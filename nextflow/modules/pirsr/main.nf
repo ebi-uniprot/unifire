@@ -1,8 +1,7 @@
 process runPirsrPipeline {
     label "time_xlong"
     label "mem_high"
-
-    container "${unifireImage}:${unifireVersion}"
+    label 'unifire_container'
     publishDir { "${outputDir}" }, mode: 'copy'
 
     input:
@@ -13,16 +12,12 @@ process runPirsrPipeline {
     val fileName
     val inputType
     val outputFormat
-    val unifireImage
-    val unifireVersion
-    val pirsrMemory
     val outputDir
 
     output:
     path "${fileName}"
 
     script:
-    def memoryOpt = pirsrMemory ? "-m ${pirsrMemory}" : ""
     """
     mkdir -p pirsr-pred
     echo "Running PIRSR hmmalign..."
@@ -30,7 +25,7 @@ process runPirsrPipeline {
     mv pirsr-pred/*.xml pirsr-pred.xml
 
     echo "Running rules inference on PIRSR..."
-    /opt/code/distribution/bin/unifire.sh -n ${chunkSize} -r ${pirsrUrmlXmlFilePath} -i pirsr-pred.xml -s XML -t ${pirsrDir}/pirsr_data/PIRSR_templates.xml -o ${fileName} -f ${outputFormat} ${memoryOpt}
+    /opt/code/distribution/bin/unifire.sh -n ${chunkSize} -r ${pirsrUrmlXmlFilePath} -i pirsr-pred.xml -s XML -t ${pirsrDir}/pirsr_data/PIRSR_templates.xml -o ${fileName} -f ${outputFormat}
 
     ls -lah
     """

@@ -19,10 +19,6 @@ def getDefaultParams() {
             iprscanApplications: 'HAMAP,PROSITE-profiles,PROSITE-patterns,Pfam,NCBIFAM,SMART,PRINTS,SFLD,CDD,CATH-Gene3D,PIRSF,PANTHER,SUPERFAMILY,CATH-FunFam'
         ],
         engine: [
-            unifireImage: 'ghcr.io/ebi-uniprot/unifire/nextflow',
-            unifireVersion: '3.1.0-SNAPSHOT',
-            unifireMemory: '',
-            pirsrMemory: '',
             iprscan6ProfileNames: []
         ]
     ]

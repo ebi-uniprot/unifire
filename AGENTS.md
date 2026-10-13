@@ -47,11 +47,11 @@ python -m unittest discover misc/taxonomy/tests   # taxonomy scripts tests
 ## Critical Conventions
 
 ### Version invariant (enforced — do not break)
-`engine.unifireVersion` in `nextflow/defaults.nf` MUST match the release ref:
+The container tag of the `unifire_container` process label in `nextflow/conf/profiles/base.config` MUST match the release ref:
 - `v*` tags and `release/*` branches → exact version
 - `snapshot/*` branches → `<version>-SNAPSHOT`
 
-This is verified by the `pre-push` git hook (`.githooks`, wired via `core.hooksPath`), CI (`nextflow-version-check`), and `misc/release/check-nextflow-version.sh`. If you change the version, update `nextflow/defaults.nf` and the pipeline Docker image build (`docker/versions.properties` as applicable). See `docs/release.md` for the full procedure.
+This is verified by the `pre-push` git hook (`.githooks`, wired via `core.hooksPath`), CI (`nextflow-version-check`), and `misc/release/check-nextflow-version.sh`. If you change the version, update the `unifire_container` container value in `nextflow/conf/profiles/base.config` and the pipeline Docker image build (`docker/versions.properties` as applicable). See `docs/release.md` for the full procedure.
 
 ### Nextflow strict params boundary
 - All `params` reading happens ONLY in `main.nf` (and profile config files).

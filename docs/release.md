@@ -12,8 +12,10 @@ library release; `latest` is never updated.
 
 ## The version invariant
 
-To keep the pipeline self-consistent, the committed value of `engine.unifireVersion` in
-[getDefaultParams()](../nextflow/defaults.nf) must equal the image tag derived from the
+To keep the pipeline self-consistent, the committed container tag of the
+`unifire_container` process label in
+[nextflow/conf/profiles/base.config](../nextflow/conf/profiles/base.config) must equal
+the image tag derived from the
 pushed ref (`<version>` for `v*` tags and `release/*` branches,
 `<version>-SNAPSHOT` for `snapshot/*` branches). On `master` the value stays at its
 current value (`latest` or the last released version) unless a release or snapshot build
@@ -23,7 +25,7 @@ The invariant is enforced at three levels, all using
 [misc/release/check-nextflow-version.sh](../misc/release/check-nextflow-version.sh):
 
 1. **Local git hook** - a `pre-push` hook refuses to push a `v*` tag or a `release/*` /
-   `snapshot/*` branch whose commit does not carry the matching `engine.unifireVersion`.
+   `snapshot/*` branch whose commit does not carry the matching container tag.
    Enable it once per clone:
 
     ```bash
@@ -42,8 +44,8 @@ The invariant is enforced at three levels, all using
 
 ## Release procedure
 
-1. Update `nextflow/defaults.nf`: set `unifireVersion: "<major>.<minor>.<patch>"` in
-   `getDefaultParams().engine`.
+1. Update `nextflow/conf/profiles/base.config`: set the `withLabel: 'unifire_container'`
+   container to `"ghcr.io/ebi-uniprot/unifire/nextflow:<major>.<minor>.<patch>"`.
 2. Commit and tag the release commit: `git tag v<version>` (or push the branch
    `release/v<version>` / `release/<version>` pointing at that commit).
 3. Push the branch; the pre-push hook verifies the match.
@@ -51,12 +53,12 @@ The invariant is enforced at three levels, all using
    allowed production branch (`master` by default); release branches must therefore have
    their tip at master HEAD for the library release to pass its validation.
 5. The `latest` Docker tag is no longer published by the CI pipelines; pin the intended
-   version (or override `--unifireVersion` at runtime) instead.
+   version instead.
 
 ## Snapshot procedure (e.g. `snapshot/v0.1.0` or `snapshot/0.1.0`)
 
-1. Update `nextflow/defaults.nf`: set `unifireVersion: "<major>.<minor>.<patch>-SNAPSHOT"` in
-   `getDefaultParams().engine`.
+1. Update `nextflow/conf/profiles/base.config`: set the `withLabel: 'unifire_container'`
+   container to `"ghcr.io/ebi-uniprot/unifire/nextflow:<major>.<minor>.<patch>-SNAPSHOT"`.
 2. Commit on the `snapshot/v<version>` (or `snapshot/<version>`) branch.
 3. Push the branch; the snapshot Docker job publishes `<version>-SNAPSHOT` and the
    GitLab library job publishes Maven version `<version>-SNAPSHOT`.

@@ -1,13 +1,10 @@
 process refreshTaxaSqlite {
     label "time_short"
     label "mem_medium"
-
-    container "${unifireImage}:${unifireVersion}"
+    label 'unifire_container'
 
     input:
     path taxaDataDir
-    val unifireImage
-    val unifireVersion
 
     output:
     path "${taxaDataDir}/taxa.sqlite"
@@ -26,14 +23,11 @@ process refreshTaxaSqlite {
 process generateTaxonomyLineage {
     label "time_xlong"
     label "mem_high"
-
-    container "${unifireImage}:${unifireVersion}"
+    label 'unifire_container'
 
     input:
     path iprscanXmlPath
     path taxaFilePath
-    val unifireImage
-    val unifireVersion
 
     output:
     path "taxonomy-lineage.xml"

@@ -1,5 +1,5 @@
 process runUnifirePipeline {
-    container "${unifireImage}:${unifireVersion}"
+    label 'unifire_container'
     publishDir { "${outputDir}" }, mode: 'copy'
 
     input:
@@ -10,19 +10,15 @@ process runUnifirePipeline {
     val fileName
     val inputType
     val outputFormat
-    val unifireImage
-    val unifireVersion
-    val unifireMemory
     val outputDir
 
     output:
     path "${fileName}"
 
     script:
-    def memoryOpt = unifireMemory ? "-m ${unifireMemory}" : ""
     def templatesOpt = urmlTemplatesXmlFilePath ? "-t ${urmlTemplatesXmlFilePath}" : ""
     """
-    /opt/code/distribution/bin/unifire.sh -n ${chunkSize} -r ${urmlRulesXmlFilePath} -i ${iprscanXmlFilePath} ${templatesOpt} -s ${inputType} -o ${fileName} -f ${outputFormat} ${memoryOpt}
+    /opt/code/distribution/bin/unifire.sh -n ${chunkSize} -r ${urmlRulesXmlFilePath} -i ${iprscanXmlFilePath} ${templatesOpt} -s ${inputType} -o ${fileName} -f ${outputFormat}
     """
 
     stub:

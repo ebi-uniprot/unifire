@@ -17,8 +17,6 @@ workflow fetchData {
     uniprotRelease
     pirsrRelease
     forceDownloads
-    unifireImage
-    unifireVersion
 
     main:
     def dataPathFile = file(dataPath)
@@ -97,7 +95,7 @@ workflow fetchData {
     taxaFilePath = taxaBasePath.resolve("taxa.sqlite")
 
     if (shouldDownloadFile(taxaFilePath, forceDownloads)) {
-        taxaFilePath = refreshTaxaSqlite(taxaBasePath, unifireImage, unifireVersion)
+        taxaFilePath = refreshTaxaSqlite(taxaBasePath)
     }
 
     emit:
