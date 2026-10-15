@@ -1,4 +1,4 @@
-process runUnifirePipeline {
+process RUN_UNIFIRE_PIPELINE {
     label 'unifire_container'
     publishDir { "${outputDir}" }, mode: 'copy'
 

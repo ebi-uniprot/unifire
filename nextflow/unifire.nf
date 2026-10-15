@@ -1,9 +1,9 @@
 include { fetchData } from './data.nf'
-include { runIprscan6 } from './modules/interproscan6'
-include { generateTaxonomyLineage } from './modules/taxonomy'
-include { runUnifirePipeline as runUnirulePipeline } from './modules/unifire'
-include { runUnifirePipeline as runArbaPipeline } from './modules/unifire'
-include { runPirsrPipeline } from './modules/pirsr'
+include { RUN_IPRSCAN6 } from './modules/interproscan6'
+include { GENERATE_TAXONOMY_LINEAGE } from './modules/taxonomy'
+include { RUN_UNIFIRE_PIPELINE as RUN_UNIRULE_PIPELINE } from './modules/unifire'
+include { RUN_UNIFIRE_PIPELINE as RUN_ARBA_PIPELINE } from './modules/unifire'
+include { RUN_PIRSR_PIPELINE } from './modules/pirsr'
 
 include { getDefaultParams } from './defaults.nf'
 
@@ -89,20 +89,20 @@ workflow UNIFIRE {
         println("Running InterProScan 6 pipeline with iprscanVersion=${cfgData.iprscanVersion}, iprVersion=${cfgData.iprVersion}, profiles=${cfgEngine.iprscan6ProfileNames}")
         def iprDataPath = dataPaths.dataPath.resolve("iprscan6")
         assert iprDataPath.mkdirs()
-        iprscanXmlPath = runIprscan6(cfgData.iprscanVersion, cfgData.iprVersion, cfgData.iprscanApplications, inputPath, iprDataPath, cfgEngine.iprscan6ProfileNames)
+        iprscanXmlPath = RUN_IPRSCAN6(cfgData.iprscanVersion, cfgData.iprVersion, cfgData.iprscanApplications, inputPath, iprDataPath, cfgEngine.iprscan6ProfileNames)
         resolvedInputType = "InterProScan6"
     }
 
     println("Running inference on input type: ${resolvedInputType}")
 
     // Run taxonomy lineage script
-    def taxonomyLineageXmlPath = generateTaxonomyLineage(
+    def taxonomyLineageXmlPath = GENERATE_TAXONOMY_LINEAGE(
         iprscanXmlPath,
         dataPaths.taxaFilePath
     )
 
     if ("unirule" in parsedSystems) {
-        runUnirulePipeline(
+        RUN_UNIRULE_PIPELINE(
             parsedChunkSize,
             dataPaths.uniruleUrmlFilePath,
             taxonomyLineageXmlPath,
@@ -115,7 +115,7 @@ workflow UNIFIRE {
     }
 
     if ("arba" in parsedSystems) {
-        runArbaPipeline(
+        RUN_ARBA_PIPELINE(
             parsedChunkSize,
             dataPaths.arbaUrmlFilePath,
             taxonomyLineageXmlPath,
@@ -128,7 +128,7 @@ workflow UNIFIRE {
     }
 
     if ("pirsr" in parsedSystems) {
-        runPirsrPipeline(
+        RUN_PIRSR_PIPELINE(
             parsedChunkSize,
             taxonomyLineageXmlPath,
             dataPaths.pirsrUrmlFilePath,

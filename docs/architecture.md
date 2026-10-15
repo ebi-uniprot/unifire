@@ -26,7 +26,7 @@ main.nf  (reads params only, builds grouped option maps)
         ↓
 UNIFIRE(run, data, engine, versions)  — all inputs via `take:`
         ↓
-fetchData / runIprscan6 / generateTaxonomyLineage / runUnifirePipeline / runPirsrPipeline
+fetchData / RUN_IPRSCAN6 / GENERATE_TAXONOMY_LINEAGE / RUN_UNIRULE_PIPELINE / RUN_ARBA_PIPELINE / RUN_PIRSR_PIPELINE
 ```
 
 ### What main.nf does

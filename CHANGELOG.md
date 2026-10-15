@@ -27,6 +27,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `release/1.0.0` publish `nextflow:1.0.0` (never `latest`), enforced like `v*` tags.
 
 ### Changed
+- Rename all Nextflow processes to UPPER_SNAKE_CASE (e.g. `runUnirulePipeline` →
+  `RUN_UNIRULE_PIPELINE`): the declared processes in `nextflow/modules/` and the include
+  aliases in `nextflow/data.nf` / `nextflow/unifire.nf`, updating `withName:` selectors in
+  `nextflow/conf/profiles/`. This also fixes the selectors referencing a non-existent
+  `rulePirsrPipeline` process; `RUN_PIRSR_PIPELINE` is now styled correctly.
 - Input-type inference in the Nextflow pipeline now streams only the XML prolog
   (up to the root element) via StAX instead of loading the whole InterProScan XML
   file into memory.

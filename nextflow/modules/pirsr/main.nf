@@ -1,4 +1,4 @@
-process runPirsrPipeline {
+process RUN_PIRSR_PIPELINE {
     label "time_xlong"
     label "mem_high"
     label 'unifire_container'

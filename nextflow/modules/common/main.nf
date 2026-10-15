@@ -1,4 +1,4 @@
-process downloadRemoteFile {
+process DOWNLOAD_REMOTE_FILE {
     label "time_short"
     label "mem_low"
 
@@ -27,7 +27,7 @@ process downloadRemoteFile {
     """
 }
 
-process downloadAndUntarRemoteFile {
+process DOWNLOAD_AND_UNTAR_REMOTE_FILE {
     label "time_short"
     label "mem_low"
 

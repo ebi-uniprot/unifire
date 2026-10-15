@@ -1,9 +1,9 @@
-include { downloadRemoteFile as downloadUrmlTemplates } from './modules/common'
-include { downloadRemoteFile as downloadUrml } from './modules/common'
-include { downloadRemoteFile as downloadArba } from './modules/common'
-include { downloadAndUntarRemoteFile as downloadPirsr } from './modules/common'
-include { downloadRemoteFile as downloadPirsrUrml } from './modules/common'
-include { refreshTaxaSqlite } from './modules/taxonomy'
+include { DOWNLOAD_REMOTE_FILE as DOWNLOAD_URML_TEMPLATES } from './modules/common'
+include { DOWNLOAD_REMOTE_FILE as DOWNLOAD_URML } from './modules/common'
+include { DOWNLOAD_REMOTE_FILE as DOWNLOAD_ARBA } from './modules/common'
+include { DOWNLOAD_AND_UNTAR_REMOTE_FILE as DOWNLOAD_PIRSR } from './modules/common'
+include { DOWNLOAD_REMOTE_FILE as DOWNLOAD_PIRSR_URML } from './modules/common'
+include { REFRESH_TAXA_SQLITE } from './modules/taxonomy'
 
 def shouldDownloadFile(path: Path, forceDownloads: boolean) {
     def pathExists = path.isFile()
@@ -60,33 +60,31 @@ workflow fetchData {
     if (uniruleEnabled) {
         if (shouldDownloadFile(urmlTemplatesFilePath, forceDownloads)) {
             def urmlTemplatesUri = "ftp://ftp.ebi.ac.uk/pub/contrib/UniProt/UniFIRE/rules/unirule-templates-${uniprotRelease}.xml"
-            urmlTemplatesFilePath = downloadUrmlTemplates(urmlTemplatesUri, urmlReleasePath, "unirule-templates.xml")
+            urmlTemplatesFilePath = DOWNLOAD_URML_TEMPLATES(urmlTemplatesUri, urmlReleasePath, "unirule-templates.xml")
         }
-    }
 
-    if (uniruleEnabled) {
         if (shouldDownloadFile(uniruleUrmlFilePath, forceDownloads)) {
             def uri = "ftp://ftp.ebi.ac.uk/pub/contrib/UniProt/UniFIRE/rules/unirule-urml-${uniprotRelease}.xml"
-            uniruleUrmlFilePath = downloadUrml(uri, urmlReleasePath, "unirule-urml.xml")
+            uniruleUrmlFilePath = DOWNLOAD_URML(uri, urmlReleasePath, "unirule-urml.xml")
         }
     }
 
     if (arbaEnabled) {
         if (shouldDownloadFile(arbaUrmlFilePath, forceDownloads)) {
             def uri = "ftp://ftp.ebi.ac.uk/pub/contrib/UniProt/UniFIRE/rules/arba-urml-${uniprotRelease}.xml"
-            arbaUrmlFilePath = downloadArba(uri, urmlReleasePath, "arba-urml.xml")
+            arbaUrmlFilePath = DOWNLOAD_ARBA(uri, urmlReleasePath, "arba-urml.xml")
         }
     }
 
     if (pirsrEnabled) {
         if (shouldDownloadFile(pirsrUrmlFilePath, forceDownloads)) {
             def urmlUri = "ftp://ftp.ebi.ac.uk/pub/contrib/UniProt/UniFIRE/rules/unirule.pirsr-urml-${uniprotRelease}.xml"
-            pirsrUrmlFilePath = downloadPirsrUrml(urmlUri, urmlReleasePath, "unirule.pirsr-urml.xml")
+            pirsrUrmlFilePath = DOWNLOAD_PIRSR_URML(urmlUri, urmlReleasePath, "unirule.pirsr-urml.xml")
         }
 
         if (forceDownloads || pirsrDir.isEmpty()) {
             def uri = "https://proteininformationresource.org/pirsr/pirsr_data_${pirsrRelease}.tar.gz"
-            pirsrDir = downloadPirsr(uri, pirsrReleasePath)
+            pirsrDir = DOWNLOAD_PIRSR(uri, pirsrReleasePath)
         }
     }
 
@@ -95,7 +93,7 @@ workflow fetchData {
     taxaFilePath = taxaBasePath.resolve("taxa.sqlite")
 
     if (shouldDownloadFile(taxaFilePath, forceDownloads)) {
-        taxaFilePath = refreshTaxaSqlite(taxaBasePath)
+        taxaFilePath = REFRESH_TAXA_SQLITE(taxaBasePath)
     }
 
     emit:

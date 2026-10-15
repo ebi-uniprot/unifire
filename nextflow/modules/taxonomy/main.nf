@@ -1,4 +1,4 @@
-process refreshTaxaSqlite {
+process REFRESH_TAXA_SQLITE {
     label "time_short"
     label "mem_medium"
     label 'unifire_container'
@@ -20,7 +20,7 @@ process refreshTaxaSqlite {
     """
 }
 
-process generateTaxonomyLineage {
+process GENERATE_TAXONOMY_LINEAGE {
     label "time_xlong"
     label "mem_high"
     label 'unifire_container'

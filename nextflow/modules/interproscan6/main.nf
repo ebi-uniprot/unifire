@@ -1,4 +1,4 @@
-process runIprscan6 {
+process RUN_IPRSCAN6 {
     label "time_xlong"
     label "mem_high"
 
