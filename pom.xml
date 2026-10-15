@@ -325,9 +325,6 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>flatten-maven-plugin</artifactId>
                     <version>1.6.0</version>
-                    <configuration>
-                        <flattenMode>resolveCiFriendliesOnly</flattenMode>
-                    </configuration>
                     <executions>
                         <execution>
                             <id>flatten</id>
