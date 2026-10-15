@@ -7,54 +7,36 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
-- Fail-fast validation of the inferred input type in the Nextflow pipeline: a type
-  inferred from the XML root element that is not one of the supported input types
-  (`fasta`, `InterProScan`, `InterProScan6`) now exits with a clear error instead of
-  being passed through to rule inference.
-- Runtime data-version resolution for the Nextflow pipeline: `nextflow/versions.nf`
-  fetches `versions.json` from GitHub master and merges the bundled
-  `nextflow/versions.json` on top of it (in-development versions work from a local
-  checkout),   falling back to the bundled file when the fetch fails. `--version`
-  selects the version set; `--dataVersions FILE` overrides resolution entirely
-  (offline/CI). Data versions can now be released independently of workflow releases.
-- Enforce that `params.defaultUnifireVersion` in nextflow config matches the version tag
-  when a `v*` tag is pushed (shared check script, GitHub Actions and GitLab CI checks,
-  local pre-push git hook).
-- Publish pre-release Docker images from `snapshot/*` branches: the image is published as
-  `<version>-SNAPSHOT`, aligned with the Java versioning of the GitLab library release,
-  with the same enforcement chain (never `latest`).
-- Support production-style Docker releases from `release/*` branches: `release/v1.0.0` and
-  `release/1.0.0` publish `nextflow:1.0.0` (never `latest`), enforced like `v*` tags.
+- New Nextflow-based UniFIRE pipeline as the recommended way to run UniFIRE:
+  `nextflow run ebi-uniprot/unifire -r v<version>` runs the rule-execution
+  workflows unirule, arba and pirsr on multi-FASTA input (running InterProScan 6
+  automatically) or on precomputed InterProScan XML. Rule data is downloaded only
+  for the enabled systems and the taxonomy cache is refreshed at run time. The
+  pipeline can be exercised with `-stub-run` and ships profiles for docker,
+  singularity, podman, apptainer, and batch schedulers (slurm, lsf, awsbatch,
+  googlebatch).
+- New documentation set under `docs/` (pipeline usage, architecture,
+  build-from-source, Docker, input data), replacing the former README walkthrough.
+- Self-contained runner script (`docker/scripts/unifire-workflow-nextflow.sh`)
+  that runs the pipeline inside the `unifire/nextflow` image on `/volume` inputs,
+  preserving the legacy `unifire` image contract.
+- Predefined data versions selected with `--version`, resolved at run time from
+  upstream (`--dataVersions FILE` overrides this, e.g. offline); rule-data
+  versions update independently of pipeline releases.
 
 ### Changed
-- Rename all Nextflow processes to UPPER_SNAKE_CASE (e.g. `runUnirulePipeline` →
-  `RUN_UNIRULE_PIPELINE`): the declared processes in `nextflow/modules/` and the include
-  aliases in `nextflow/data.nf` / `nextflow/unifire.nf`, updating `withName:` selectors in
-  `nextflow/conf/profiles/`. This also fixes the selectors referencing a non-existent
-  `rulePirsrPipeline` process; `RUN_PIRSR_PIPELINE` is now styled correctly.
-- Input-type inference in the Nextflow pipeline now streams only the XML prolog
-  (up to the root element) via StAX instead of loading the whole InterProScan XML
-  file into memory.
-- Accept `--iprscan6ProfileNames` given as a comma-separated CLI string (e.g. `--iprscan6ProfileNames docker`),
-  alongside the configuration-provided list, in the InterProScan 6 sub-workflow (a plain String has no `toUnique()`).
-- Rebuild `docker/nextflow.Dockerfile` as a multi-stage image: the JDK/Maven/compiler toolchain
-  and Python dependencies (ete4, lxml) are installed in a builder stage, and the runtime stage
-  ships only a JRE plus the pipeline runtime dependencies. The image measures ~1.5 GB, down from
-  ~3.3 GB (~55% reduction), plus a new root `.dockerignore` that excludes build outputs and local
-  data from the build context. Runtime dependencies (`git`, `hmmer`, `ncbi-data`) are retained.
+- Input-type inference is now streaming with much lower memory usage, and
+  unsupported input types are rejected with a clear error up front.
+- Per-process resource budgets by default: 12 GB for unirule/pirsr and
+  32 GB for arba rule inference; tunable via the profile configs.
+- Rebuilt the `unifire/nextflow` Docker image as a multi-stage build:
+  ~1.5 GB instead of ~3.3 GB, faster to pull.
+- Rename all Nextflow processes to UPPER_SNAKE_CASE (e.g.
+  `RUN_UNIRULE_PIPELINE`); relevant if you override process configuration.
+- `--iprscan6ProfileNames` accepts a comma-separated CLI string.
 - Replace Null positions by "" in output TSV file
-- The UniFIRE Nextflow container image/tag is now set in
-  `nextflow/conf/profiles/base.config` via the `unifire_container` process label instead
-  of being threaded as a pipeline parameter; the `--unifireImage`/`--unifireVersion` CLI
-  parameters (and their engine map entries) are gone. The release version-invariant
-  check reads the container tag from that label.
-- Removed the `--unifireMemory`/`--pirsrMemory` CLI options: rule-inference scripts no
-  longer take a JVM `-m` max-heap override, and process memory is governed by the
-  Nextflow resource labels/`withName` blocks in the profile configs only.
 
 ### Removed
-- `run_unifire_docker.sh` no longer accepts FASTA input (the wrapper would have to run InterProScan 6
-  inside the image, which is not practical since all of InterProScan's dependencies would need to be
-  installed there). FASTA input is supported by the [Nextflow pipeline](docs/nextflow.md) (recommended),
-  where InterProScan 6 runs with its native docker/singularity profiles; the wrapper only accepts
-  precomputed InterProScan XML input (`-t iprscanxml`, now the default).
+- `run_unifire_docker.sh` no longer accepts FASTA input. Use the Nextflow
+  pipeline for FASTA, or pass precomputed InterProScan XML (`-t iprscanxml`,
+  now the default) to the wrapper.
