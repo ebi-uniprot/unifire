@@ -21,24 +21,13 @@ pushed ref (`<version>` for `v*` tags and `release/*` branches,
 current value (`latest` or the last released version) unless a release or snapshot build
 is intended.
 
-The invariant is enforced at three levels, all using
+The invariant is enforced at two levels, both using
 [misc/release/check-nextflow-version.sh](../misc/release/check-nextflow-version.sh):
 
-1. **Local git hook** - a `pre-push` hook refuses to push a `v*` tag or a `release/*` /
-   `snapshot/*` branch whose commit does not carry the matching container tag.
-   Enable it once per clone:
-
-    ```bash
-    git config core.hooksPath .githooks
-    ```
-
-   Note: hooks are a convenience and can be bypassed (`git push --no-verify`); the CI
-   checks below are the authoritative enforcement.
-
-2. **CI pipelines** - the GitHub and GitLab Docker jobs on `v*` tags and `release/*` /
+1. **CI pipelines** - the GitHub and GitLab Docker jobs on `v*` tags and `release/*` /
    `snapshot/*` branches fail before building if the check fails.
 
-3. **`nextflow-version-check` job** - a lightweight CI job on every push/MR pipeline
+2. **`nextflow-version-check` job** - a lightweight CI job on every push/MR pipeline
    validates that the committed value is either `latest` or a version-like string.
    It does not assert any specific version format.
 
@@ -48,7 +37,7 @@ The invariant is enforced at three levels, all using
    container to `"ghcr.io/ebi-uniprot/unifire/nextflow:<major>.<minor>.<patch>"`.
 2. Commit and tag the release commit: `git tag v<version>` (or push the branch
    `release/v<version>` / `release/<version>` pointing at that commit).
-3. Push the branch; the pre-push hook verifies the match.
+3. Push the branch/tag; the CI jobs verify the match.
 4. GitLab library releases additionally require the pushed commit to be the HEAD of an
    allowed production branch (`master` by default); release branches must therefore have
    their tip at master HEAD for the library release to pass its validation.

@@ -3,7 +3,7 @@
 # Checks that the container tag of the 'unifire_container' process label
 # (nextflow/conf/profiles/base.config) matches the expected UniFIRE version
 # (the Docker image tag derived from a v* git tag, a release/* branch or a
-# snapshot/* branch). Used by the pre-push git hook and by the release jobs
+# snapshot/* branch). Used by the release jobs in the CI pipelines.
 # in the CI pipelines.
 #
 # Usage: check-nextflow-version.sh <expected-version> [<config-file>]
