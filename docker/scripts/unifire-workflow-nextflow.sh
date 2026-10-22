@@ -46,18 +46,15 @@ DATA_PATH="${UNIFIRE_DATA_PATH:-/opt/unifire/data}"
 if [[ -f "${IPR_XML_INPUT}" ]]
 then
     input="${IPR_XML_INPUT}"
-    input_type="InterProScan"
 elif [[ -f "${FASTA_INPUT}" ]]
 then
     input="${FASTA_INPUT}"
-    input_type="fasta"
 else
     echo "ERROR: no input file found in ${VOLUME}." >&2
     echo "Expected ${FASTA_INPUT} (multi-FASTA) or ${IPR_XML_INPUT} (InterProScan XML)." >&2
     exit 1
 fi
 
-echo "UniFIRE input file: ${input} (type: ${input_type})"
 echo "UniFIRE data directory: ${DATA_PATH}"
 
 cd "${VOLUME}"
@@ -66,7 +63,6 @@ cd "${VOLUME}"
 exec nextflow run /opt/unifire/main.nf \
     -profile local \
     --input "${input}" \
-    --inputType "${input_type}" \
     --output "${VOLUME}" \
     --dataPath "${DATA_PATH}" \
     -work-dir "${VOLUME}/nxf-work" \
