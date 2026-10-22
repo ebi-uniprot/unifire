@@ -235,11 +235,14 @@ jobs:
         run: |
           TAG=$(misc/release/check-nextflow-version.sh --tag "${GITHUB_REF}" --print)
           IMAGE=${IMAGE_NAME}:${TAG}
+          LATEST=${IMAGE_NAME}:latest
           echo "Building image ${IMAGE}"
           docker build --file docker/nextflow.Dockerfile --tag ${IMAGE} --no-cache .
           docker image ls
+          docker tag ${IMAGE} ${LATEST}
           docker push ${IMAGE}
-          docker rmi ${IMAGE}
+          docker push ${LATEST}
+          docker rmi ${IMAGE} ${LATEST}
 
   build-push-snapshot-nextflow-docker-image:
     name: Build and Push Nextflow Docker Image (snapshot)
