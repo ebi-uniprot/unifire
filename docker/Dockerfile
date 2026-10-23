@@ -38,9 +38,3 @@ VOLUME /volume
 # --- Lite image (no InterProScan) ---
 FROM base AS lite
 ENTRYPOINT ["/opt/scripts/bin/unifire-workflow.sh"]
-
-# --- Full image with InterProScan ---
-FROM base AS full
-RUN /opt/scripts/bin/download-interproscan.sh
-
-ENTRYPOINT ["/opt/scripts/bin/unifire-workflow.sh"]
