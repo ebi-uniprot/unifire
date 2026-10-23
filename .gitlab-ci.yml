@@ -136,7 +136,7 @@ nextflow-tests:
     - docker rmi ${IMAGE_NAME}
     - docker logout "$CI_REGISTRY"
   rules:
-    - if: $CI_COMMIT_BRANCH == "pre_release" && $CI_COMMIT_TITLE =~ /^Merge branch '.*' into 'pre_release'$/
+    - if: $CI_COMMIT_BRANCH == "pre_release"
       when: on_success
 
 build_docker_image_lite:
