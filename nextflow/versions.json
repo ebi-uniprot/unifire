@@ -1,0 +1,17 @@
+{
+  "default": "2026.4",
+  "versions": {
+    "2026.4": {
+      "uniprotRelease": "2026_04",
+      "iprVersion": "110.0",
+      "iprscanVersion": "6.0.2.2",
+      "pirsrRelease": "latest"
+    },
+    "2026.3": {
+      "uniprotRelease": "2026_03",
+      "iprVersion": "109.0",
+      "iprscanVersion": "6.0.1",
+      "pirsrRelease": "latest"
+    }
+  }
+}

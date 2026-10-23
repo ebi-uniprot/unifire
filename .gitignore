@@ -24,3 +24,10 @@
 .venv
 
 __pycache__/
+work/
+.nextflow/
+.nextflow.*
+data/
+datadir/
+
+.flattened-pom.xml
